@@ -1,0 +1,570 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+	
+	<script type="text/javascript">
+
+	window.uexOnload = function(type){
+		if(type == 0){  
+			uexEasemob.cbLogin=cbLogin;
+			uexEasemob.cbRegisterUser=cbRegisterUser;
+			uexEasemob.onNewMessage=onNewMessage;
+			uexEasemob.cbGetMessageById=cbGetMessageById;
+			uexEasemob.cbGetConversationByName=cbGetConversationByName;
+			uexEasemob.onAckMessage=onAckMessage;
+			uexEasemob.onDeliveryMessage=onDeliveryMessage;
+			uexEasemob.onContactAdded=onContactAdded;
+			uexEasemob.onContactDeleted=onContactDeleted;
+			uexEasemob.onContactInvited=onContactInvited;
+			uexEasemob.onContactAgreed=onContactAgreed;
+			uexEasemob.onContactRefused=onContactRefused;
+			uexEasemob.onConnected=onConnected;
+			uexEasemob.onDisconnected=onDisconnected;
+			uexEasemob.onInvitationAccpted=onInvitationAccpted;
+			uexEasemob.onInvitationDeclined=onInvitationDeclined;
+			uexEasemob.onUserRemoved=onUserRemoved;
+			uexEasemob.onGroupDestroy=onGroupDestroy;
+			uexEasemob.onApplicationReceived=onApplicationReceived;
+			uexEasemob.onApplicationAccept=onApplicationAccept;
+			uexEasemob.onInvitationReceived=onInvitationReceived;
+			uexEasemob.onApplicationDeclined=onApplicationDeclined;
+			uexEasemob.cbGetMessageHistory=cbGetMessageHistory;
+			uexEasemob.cbGetUnreadMsgCount=cbGetUnreadMsgCount;
+			uexEasemob.cbGetMsgCount=cbGetMsgCount;
+			uexEasemob.cbGetContactUserNames=cbGetContactUserNames;
+			uexEasemob.cbGetBlackListUsernames=cbGetBlackListUsernames;
+			uexEasemob.cbGetGroupsFromServer=cbGetGroupsFromServer;
+			uexEasemob.cbGetAllPublicGroupsFromServer=cbGetAllPublicGroupsFromServer;
+			uexEasemob.cbGetGroup=cbGetGroup;
+			uexEasemob.cbGetBlockedUsers=cbGetBlockedUsers;
+			uexEasemob.onCallReceive=onCallReceive;
+			uexEasemob.onCallStateChanged=onCallStateChanged;
+			uexEasemob.onCmdMessageReceive=onCmdMessageReceive;
+
+		}
+	}
+
+	function initEasemob(){
+		uexEasemob.initEasemob('');
+	}
+
+	function login(){
+		uexEasemob.login('{"username":"ylt","password":"123456"}');
+	}
+
+	function cbLogin(info){
+		alert("cbLogin "+info);
+	}
+
+	function logout(){
+		uexEasemob.logout('');
+	}
+
+	function registerUser(){
+		uexEasemob.registerUser('{"username":"ylt2","password":"123456"}');
+	}
+
+	function cbRegisterUser(info){
+		alert("cbRegisterUser "+info);
+	}
+
+	function onNewMessage(info){
+		alert("onNewMessage "+info);
+	}
+
+	function getMessageById(){
+		uexEasemob.getMessageById('');
+	}
+
+	function cbGetMessageById(info){
+		alert(info);
+	}
+
+	function getConversationByName(){
+		uexEasemob.getConversationByName('');
+	}
+
+	function cbGetConversationByName(info){
+		alert(info);
+	}
+
+	function onAckMessage(info){
+		alert("onAckMessage "+info);
+	}
+
+	function onDeliveryMessage(info){
+		alert("onDeliveryMessage "+info);
+	}
+
+	function onContactAdded(info){
+		alert(info);
+	}
+
+	function onContactDeleted(info){
+		alert(info);
+	}
+
+	function onContactInvited(info){
+		alert(info);
+	}
+
+	function onContactAgreed(info){
+		alert(info);
+	}
+
+	function onContactRefused(info){
+		alert(info);
+	}
+
+	function onConnected(info){
+		alert("onConnected ");
+	}
+
+	function onDisconnected(info){
+		alert("onDisconnected "+info);
+	}
+
+	function onInvitationAccpted(info){
+		alert(info);
+	}
+
+	function onInvitationDeclined(info){
+		alert(info);
+	}
+
+	function onUserRemoved(info){
+		alert(info);
+	}
+
+	function onGroupDestroy(info){
+		alert(info);
+	}
+
+	function onApplicationReceived(info){
+		alert(info);
+	}
+
+	function onApplicationAccept(info){
+		alert(info);
+	}
+
+	function onInvitationReceived(info){
+		alert(info);
+	}
+
+	function onApplicationDeclined(info){
+		alert(info);
+	}
+
+	function sendText(){
+		uexEasemob.sendText('{"username":"ylt1","chatType":"1","content":"send from js..."}');
+	}
+
+	function sendVoice(){
+		uexEasemob.sendVoice('{"username":"ylt1","chatType":"1","filePath":"/sdcard/voice.mp3","length":"3"}');
+	}
+
+	function sendPicture(){
+		uexEasemob.sendPicture('{"username":"ylt1","chatType":"1","filePath":"/sdcard/pic.jpg"}');
+	}
+
+	function sendLocationMsg(){
+		uexEasemob.sendLocationMsg('{"username":"ylt1","chatType":"1","locationAddress":"麦当劳","latitude":"30.51667","longitude":"114.31667"}');
+	}
+
+	function sendFile(){
+		uexEasemob.sendFile('{"username":"ylt1","chatType":"1","filePath":"/sdcard/pic.jpg"}');
+	}
+
+	function getMessageHistory(){
+		uexEasemob.getMessageHistory('{"username":"ylt1","chatType":"1","startMsgId":"0","pagesize":"0"}');
+	}
+
+	function cbGetMessageHistory(info){
+		alert(info);
+	}
+
+	function getUnreadMsgCount(){
+		uexEasemob.getUnreadMsgCount('{"username":"ylt1"}');
+	}
+
+	function cbGetUnreadMsgCount(info){
+		alert(info);
+	}
+
+	function resetUnreadMsgCount(){
+		uexEasemob.resetUnreadMsgCount('');
+	}
+
+	function resetAllUnreadMsgCount(){
+		uexEasemob.resetAllUnreadMsgCount('');
+	}
+
+	function getMsgCount(){
+		uexEasemob.getMsgCount('{"username":"ylt1"}');
+	}
+
+	function cbGetMsgCount(info){
+		alert(info);
+	}
+
+	function clearConversation(){
+		uexEasemob.clearConversation('{"username":"ylt1"}');
+	}
+
+	function deleteConversation(){
+		uexEasemob.deleteConversation('{"username":"ylt1"}');
+	}
+
+	function removeMessage(){
+		uexEasemob.removeMessage('{"username":"ylt1","msgID":""}');
+	}
+
+	function deleteAllConversation(){
+		uexEasemob.deleteAllConversation('');
+	}
+
+	function setNotifyBySoundAndVibrate(){
+		uexEasemob.setNotifyBySoundAndVibrate('{"soundEnable":"0"}');
+	}
+
+	function getContactUserNames(){
+		uexEasemob.getContactUserNames('');
+	}
+
+	function cbGetContactUserNames(info){
+		alert(info);
+	}
+
+	function addContact(){
+		uexEasemob.addContact('{"toAddUsername":"ylt1","reason":"reason ...."}');
+	}
+
+	function deleteContact(){
+		uexEasemob.deleteContact('{"username":"ylt1"}');
+	}
+
+	function acceptInvitation(){
+		uexEasemob.acceptInvitation('{"username":"ylt1"}');
+	}
+
+	function refuseInvitation(){
+		uexEasemob.refuseInvitation('{"username":"ylt1"}');
+	}
+
+	function getBlackListUsernames(){
+		uexEasemob.getBlackListUsernames('');
+	}
+
+	function cbGetBlackListUsernames(info){
+		alert(info);
+	}
+
+	function addUserToBlackList(){
+		uexEasemob.addUserToBlackList('{"username":"ylt1"}');
+	}
+
+	function deleteUserFromBlackList(){
+		uexEasemob.deleteUserFromBlackList('{"username":"ylt1"}');
+	}
+
+	function createPrivateGroup(){
+		uexEasemob.createPrivateGroup('{"groupName":"yltGroup","desc":"test group","allowInvite":"true"}');
+	}
+
+	function createPublicGroup(){
+		uexEasemob.createPublicGroup('{"groupName":"yltGroup","desc":"test group","needApprovalRequired":"true"}');
+	}
+
+	function addUsersToGroup(){
+		uexEasemob.addUsersToGroup('{"isGroupOwner":"true","groupId":"1426832511577","newmembers":["ylt1","ylt3"]}');
+	}
+
+	function removeUserFromGroup(){
+		uexEasemob.removeUserFromGroup('{"groupId":"1426832511577","username":"ylt1"}');
+	}
+
+	function joinGroup(){
+		uexEasemob.joinGroup('{"groupId":"1426832511577"}');
+	}
+
+	function exitFromGroup(){
+		uexEasemob.exitFromGroup('{"groupId":"1426832511577"}');
+	}
+
+	function exitAndDeleteGroup(){
+		uexEasemob.exitAndDeleteGroup('{"groupId":"1426832511577"}');
+	}
+
+	function getGroupsFromServer(){
+		uexEasemob.getGroupsFromServer('{"loadCache":"false"}');
+	}
+
+	function cbGetGroupsFromServer(info){
+		alert(info);
+	}
+
+	function getAllPublicGroupsFromServer(){
+		uexEasemob.getAllPublicGroupsFromServer('');
+	}
+
+	function cbGetAllPublicGroupsFromServer(info){
+		alert(info);
+	}
+
+	function getGroup(){
+		uexEasemob.getGroup('{"groupId":"1426832511577","loadCache":"false"}');
+	}
+
+	function cbGetGroup(info){
+		alert(info);
+	}
+
+	function blockGroupMessage(){
+		uexEasemob.blockGroupMessage('{"groupId":"1426832511577"}');
+	}
+
+	function unblockGroupMessage(){
+		uexEasemob.unblockGroupMessage('{"groupId":"1426832511577"}');
+	}
+
+	function changeGroupName(){
+		uexEasemob.changeGroupName('{"groupId":"1426832511577","changedGroupName":"grouponNameNew"}');
+	}
+
+	function setReceiveNotNoifyGroup(){
+		uexEasemob.setReceiveNotNoifyGroup('');
+	}
+
+	function blockUser(){
+		uexEasemob.blockUser('{"groupId":"1426832511577","username":"ylt1"}');
+	}
+
+	function unblockUser(){
+		uexEasemob.unblockUser('{"groupId":"1426832511577","username":"ylt1"}');
+	}
+
+	function getBlockedUsers(){
+		uexEasemob.getBlockedUsers('{"groupId":"1426832511577"}');
+	}
+
+	function cbGetBlockedUsers(info){
+		alert(info);
+	}
+
+	function importMessage(){
+		uexEasemob.importMessage('');
+	}
+
+	function onCallReceive(info){
+		alert(info);
+	}
+
+	function onCallStateChanged(info){
+		alert(info);
+	}
+
+	function makeVoiceCall(){
+		uexEasemob.makeVoiceCall('{"username":"ylt1"}');
+	}
+
+	function answerCall(){
+		uexEasemob.answerCall('');
+	}
+
+	function rejectCall(){
+		uexEasemob.rejectCall('');
+	}
+
+	function endCall(){
+		uexEasemob.endCall('');
+	}
+
+	function sendCmdMessage(){
+		uexEasemob.sendCmdMessage('{}');
+	}
+
+	function onCmdMessageReceive(info){
+		alert("onCmdMessageReceive "+info);
+	}
+
+	function updateCurrentUserNick(){
+		uexEasemob.updateCurrentUserNick('');
+	}
+
+</script>
+</head>
+
+<body>
+	<div class="tit">uexDemo对象</div>
+	<div class="conbor">
+		<div class="consj">
+
+			<span>1.initEasemob</span>
+			<input class='btn' type='button' value='调用接口' onclick='initEasemob()'>
+
+			<span>2.login</span>
+			<input class='btn' type='button' value='调用接口' onclick='login()'>
+
+			<span>3.logout</span>
+			<input class='btn' type='button' value='调用接口' onclick='logout()'>
+
+			<span>4.registerUser</span>
+			<input class='btn' type='button' value='调用接口' onclick='registerUser()'>
+
+			<span>5.getMessageById</span>
+			<input class='btn' type='button' value='调用接口' onclick='getMessageById()'>
+
+			<span>6.getConversationByName</span>
+			<input class='btn' type='button' value='调用接口' onclick='getConversationByName()'>
+
+			<span>7.sendText</span>
+			<input class='btn' type='button' value='调用接口' onclick='sendText()'>
+
+			<span>8.sendVoice</span>
+			<input class='btn' type='button' value='调用接口' onclick='sendVoice()'>
+
+			<span>9.sendPicture</span>
+			<input class='btn' type='button' value='调用接口' onclick='sendPicture()'>
+
+			<span>10.sendLocationMsg</span>
+			<input class='btn' type='button' value='调用接口' onclick='sendLocationMsg()'>
+
+			<span>11.sendFile</span>
+			<input class='btn' type='button' value='调用接口' onclick='sendFile()'>
+
+			<span>12.getMessageHistory</span>
+			<input class='btn' type='button' value='调用接口' onclick='getMessageHistory()'>
+
+			<span>13.getUnreadMsgCount</span>
+			<input class='btn' type='button' value='调用接口' onclick='getUnreadMsgCount()'>
+
+			<span>14.resetUnreadMsgCount</span>
+			<input class='btn' type='button' value='调用接口' onclick='resetUnreadMsgCount()'>
+
+			<span>15.resetAllUnreadMsgCount</span>
+			<input class='btn' type='button' value='调用接口' onclick='resetAllUnreadMsgCount()'>
+
+			<span>16.getMsgCount</span>
+			<input class='btn' type='button' value='调用接口' onclick='getMsgCount()'>
+
+			<span>17.clearConversation</span>
+			<input class='btn' type='button' value='调用接口' onclick='clearConversation()'>
+
+			<span>18.deleteConversation</span>
+			<input class='btn' type='button' value='调用接口' onclick='deleteConversation()'>
+
+			<span>19.removeMessage</span>
+			<input class='btn' type='button' value='调用接口' onclick='removeMessage()'>
+
+			<span>20.deleteAllConversation</span>
+			<input class='btn' type='button' value='调用接口' onclick='deleteAllConversation()'>
+
+			<span>21.setNotifyBySoundAndVibrate</span>
+			<input class='btn' type='button' value='调用接口' onclick='setNotifyBySoundAndVibrate()'>
+
+			<span>22.getContactUserNames</span>
+			<input class='btn' type='button' value='调用接口' onclick='getContactUserNames()'>
+
+			<span>23.addContact</span>
+			<input class='btn' type='button' value='调用接口' onclick='addContact()'>
+
+			<span>24.deleteContact</span>
+			<input class='btn' type='button' value='调用接口' onclick='deleteContact()'>
+
+			<span>25.acceptInvitation</span>
+			<input class='btn' type='button' value='调用接口' onclick='acceptInvitation()'>
+
+			<span>26.refuseInvitation</span>
+			<input class='btn' type='button' value='调用接口' onclick='refuseInvitation()'>
+
+			<span>27.getBlackListUsernames</span>
+			<input class='btn' type='button' value='调用接口' onclick='getBlackListUsernames()'>
+
+			<span>28.addUserToBlackList</span>
+			<input class='btn' type='button' value='调用接口' onclick='addUserToBlackList()'>
+
+			<span>29.deleteUserFromBlackList</span>
+			<input class='btn' type='button' value='调用接口' onclick='deleteUserFromBlackList()'>
+
+			<span>30.createPrivateGroup</span>
+			<input class='btn' type='button' value='调用接口' onclick='createPrivateGroup()'>
+
+			<span>31.createPublicGroup</span>
+			<input class='btn' type='button' value='调用接口' onclick='createPublicGroup()'>
+
+			<span>32.addUsersToGroup</span>
+			<input class='btn' type='button' value='调用接口' onclick='addUsersToGroup()'>
+
+			<span>33.removeUserFromGroup</span>
+			<input class='btn' type='button' value='调用接口' onclick='removeUserFromGroup()'>
+
+			<span>34.joinGroup</span>
+			<input class='btn' type='button' value='调用接口' onclick='joinGroup()'>
+
+			<span>35.exitFromGroup</span>
+			<input class='btn' type='button' value='调用接口' onclick='exitFromGroup()'>
+
+			<span>36.exitAndDeleteGroup</span>
+			<input class='btn' type='button' value='调用接口' onclick='exitAndDeleteGroup()'>
+
+			<span>37.getGroupsFromServer</span>
+			<input class='btn' type='button' value='调用接口' onclick='getGroupsFromServer()'>
+
+			<span>38.getAllPublicGroupsFromServer</span>
+			<input class='btn' type='button' value='调用接口' onclick='getAllPublicGroupsFromServer()'>
+
+			<span>39.getGroup</span>
+			<input class='btn' type='button' value='调用接口' onclick='getGroup()'>
+
+			<span>40.blockGroupMessage</span>
+			<input class='btn' type='button' value='调用接口' onclick='blockGroupMessage()'>
+
+			<span>41.unblockGroupMessage</span>
+			<input class='btn' type='button' value='调用接口' onclick='unblockGroupMessage()'>
+
+			<span>42.changeGroupName</span>
+			<input class='btn' type='button' value='调用接口' onclick='changeGroupName()'>
+
+			<span>43.setReceiveNotNoifyGroup</span>
+			<input class='btn' type='button' value='调用接口' onclick='setReceiveNotNoifyGroup()'>
+
+			<span>44.blockUser</span>
+			<input class='btn' type='button' value='调用接口' onclick='blockUser()'>
+
+			<span>45.unblockUser</span>
+			<input class='btn' type='button' value='调用接口' onclick='unblockUser()'>
+
+			<span>46.getBlockedUsers</span>
+			<input class='btn' type='button' value='调用接口' onclick='getBlockedUsers()'>
+
+			<span>47.importMessage</span>
+			<input class='btn' type='button' value='调用接口' onclick='importMessage()'>
+
+			<span>48.makeVoiceCall</span>
+			<input class='btn' type='button' value='调用接口' onclick='makeVoiceCall()'>
+
+			<span>49.answerCall</span>
+			<input class='btn' type='button' value='调用接口' onclick='answerCall()'>
+
+			<span>50.rejectCall</span>
+			<input class='btn' type='button' value='调用接口' onclick='rejectCall()'>
+
+			<span>51.endCall</span>
+			<input class='btn' type='button' value='调用接口' onclick='endCall()'>
+
+			<span>52.sendCmdMessage</span>
+			<input class='btn' type='button' value='调用接口' onclick='sendCmdMessage()'>
+
+			<span>53.updateCurrentUserNick</span>
+			<input class='btn' type='button' value='调用接口' onclick='updateCurrentUserNick()'>
+
+
+		</div>
+	</div>
+</body>
+</html>
