@@ -51,12 +51,16 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.SendInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallReceiveOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallStateOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CmdMsgOutputVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.ConversationResultVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupOptVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupResultVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupsOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MessageVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MsgResultVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.ResultVO;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -150,7 +154,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         EMChat.getInstance().init(mContext.getApplicationContext());
         ListenersRegister register=new ListenersRegister();
-        register.registerListeners(mContext.getApplicationContext());
+        register.registerListeners(mContext.getApplicationContext(),mGson);
         register.setCallback(this);
     }
 
@@ -290,9 +294,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
 
-    public void onNewMessage(MessageVO messageVO){
+    public void onNewMessage(String result){
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_NEW_MESSAGE + "){"
-                + JSConst.ON_NEW_MESSAGE + "('" + mGson.toJson(messageVO) + "');}";
+                + JSConst.ON_NEW_MESSAGE + "('" + result + "');}";
         onCallback(js);
     }
 
@@ -471,7 +475,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        MessageVO inputVO=mGson.fromJson(params[0],new TypeToken<MessageVO>(){}.getType());
+        MessageVO inputVO=mGson.fromJson(params[0], new TypeToken<MessageVO>() {
+        }.getType());
         if (TextUtils.isEmpty(inputVO.getUsername())){
             errorCallback(0, 0, "error params!");
             return;
@@ -487,8 +492,19 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     public void getConversationByNameMSG(MessageVO messageVO){
         EMConversation conversation=EMChatManager.getInstance().getConversation(messageVO.getUsername());
+        ConversationResultVO resultVO=new ConversationResultVO();
+        resultVO.setIsGroup(conversation.getIsGroup() ? "1" : "0");
+        resultVO.setChatter(conversation.getUserName());
+        List<EMMessage> emMessages=conversation.getAllMessages();
+        List<MsgResultVO> msgResultVOs=new ArrayList<MsgResultVO>();
+        if (emMessages!=null){
+            for (EMMessage emMessage : emMessages) {
+                msgResultVOs.add(ListenersRegister.convertEMMessage(emMessage));
+            }
+        }
+        resultVO.setMessages(msgResultVOs);
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETCONVERSATIONBYNAME + "){"
-                + JSConst.CALLBACK_GETCONVERSATIONBYNAME + "('" + mGson.toJson(conversation) + "');}";
+                + JSConst.CALLBACK_GETCONVERSATIONBYNAME + "('" + mGson.toJson(resultVO) + "');}";
         onCallback(js);
     }
 
@@ -712,7 +728,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         msg.obj = this;
         msg.what = MSG_SEND_FILE;
         Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
+        bd.putSerializable(BUNDLE_DATA, inputVO);
         msg.setData(bd);
         mHandler.sendMessage(msg);
     }
@@ -754,7 +770,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        HistoryInputVO inputVO=mGson.fromJson(params[0],new TypeToken<HistoryInputVO>(){}.getType());
+        HistoryInputVO inputVO=mGson.fromJson(params[0], new TypeToken<HistoryInputVO>() {
+        }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -782,8 +799,14 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 messages=conversation.loadMoreMsgFromDB(inputVO.getStartMsgId(), Integer.parseInt(inputVO.getPagesize()));
             }
         }
+        List<MsgResultVO> resultVOs=new ArrayList<MsgResultVO>();
+        if (messages!=null){
+            for (EMMessage emMessage : messages) {
+                resultVOs.add(ListenersRegister.convertEMMessage(emMessage));
+            }
+        }
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "){"
-                + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "('" + mGson.toJson(messages) + "');}";
+                + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "('" + mGson.toJson(resultVOs) + "');}";
         onCallback(js);
     }
 
@@ -1564,8 +1587,20 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 e.printStackTrace();
             }
         }
+        GroupResultVO resultVO=new GroupResultVO();
+        if (group!=null){
+            resultVO.setGroupId(group.getGroupId());
+            resultVO.setIsBlock(group.isMsgBlocked());
+            resultVO.setGroupSubject(group.getDescription());
+            resultVO.setOwner(group.getOwner());
+            resultVO.setMembers(group.getMembers());
+            resultVO.setIsPublic(group.isPublic());
+            resultVO.setAllowInvites(group.isAllowInvites());
+            resultVO.setMembersOnly(group.isMembersOnly());
+            resultVO.setGroupMaxUserCount(group.getMaxUsers());
+        }
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
-                + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(group) + "');}";
+                + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(resultVO) + "');}";
         onCallback(js);
     }
 
