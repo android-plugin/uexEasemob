@@ -18,8 +18,14 @@ import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMNotifier;
+import com.easemob.chat.FileMessageBody;
 import com.easemob.chat.GroupChangeListener;
+import com.easemob.chat.ImageMessageBody;
+import com.easemob.chat.LocationMessageBody;
+import com.easemob.chat.MessageBody;
 import com.easemob.chat.TextMessageBody;
+import com.easemob.chat.VideoMessageBody;
+import com.easemob.chat.VoiceMessageBody;
 import com.easemob.util.NetUtils;
 import com.google.gson.Gson;
 
@@ -28,6 +34,8 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallStateOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CmdMsgOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupOptVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MessageVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MsgBodyVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MsgResultVO;
 
 import java.util.List;
 import java.util.UUID;
@@ -41,8 +49,11 @@ public class ListenersRegister {
 
     private ListenersCallback callback;
 
-    public void registerListeners(Context context){
+    private Gson mGson;
+
+    public void registerListeners(Context context,Gson gson){
         mContext=context;
+        mGson=gson;
         //只有注册了广播才能接收到新消息，目前离线消息，在线消息都是走接收消息的广播（离线消息目前无法监听，在登录以后，接收消息广播会执行一次拿到所有的离线消息）
         NewMessageBroadcastReceiver msgReceiver = new NewMessageBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter(EMChatManager.getInstance().getNewMessageBroadcastAction());
@@ -276,14 +287,94 @@ public class ListenersRegister {
             String msgId = intent.getStringExtra("msgid");
             //发送方
             String username = intent.getStringExtra("from");
-
-            MessageVO messageVO=new MessageVO();
-            messageVO.setMsgId(msgId);
-            messageVO.setUsername(username);
+            EMMessage message=EMChatManager.getInstance().getMessage(msgId);
             if (callback!=null) {
-                callback.onNewMessage(messageVO);
+                callback.onNewMessage(mGson.toJson(convertEMMessage(message)));
             }
         }
+    }
+
+    public static MsgResultVO convertEMMessage(EMMessage message){
+        MsgResultVO resultVO=new MsgResultVO();
+        resultVO.setFrom(message.getFrom());
+        resultVO.setTo(message.getTo());
+        resultVO.setMessageId(message.getMsgId());
+        resultVO.setMessageType(getMsgType(message.getType()));
+        resultVO.setMessageTime(String.valueOf(message.getMsgTime()));
+        resultVO.setIsRead(message.isUnread() ? "0" : "1");
+        resultVO.setIsGroup(message.getChatType() == EMMessage.ChatType.GroupChat ? "1" : "0");
+        resultVO.setIsAcked(message.isAcked() ? "1" : "0");
+        resultVO.setMessageBody(getMessageBody(message,message.getType()));
+        return resultVO;
+    }
+
+    private static MsgBodyVO getMessageBody(EMMessage message, EMMessage.Type type){
+        MsgBodyVO msgBodyVO=new MsgBodyVO();
+        if (type== EMMessage.Type.TXT){
+            TextMessageBody messageBody= (TextMessageBody) message.getBody();
+            msgBodyVO.setText(messageBody.getMessage());
+        }else if (type== EMMessage.Type.CMD){
+            CmdMessageBody messageBody= (CmdMessageBody) message.getBody();
+            msgBodyVO.setAction(messageBody.action);
+        }else if (type== EMMessage.Type.LOCATION){
+            LocationMessageBody messageBody= (LocationMessageBody) message.getBody();
+            msgBodyVO.setLatitude(String.valueOf(messageBody.getLatitude()));
+            msgBodyVO.setLongitute(String.valueOf(messageBody.getLongitude()));
+            msgBodyVO.setAddress(messageBody.getAddress());
+        }else if (type== EMMessage.Type.FILE){
+            FileMessageBody messageBody= (FileMessageBody) message.getBody();
+            msgBodyVO.setDisplayName(messageBody.getFileName());
+            msgBodyVO.setRemotePath(messageBody.getRemoteUrl());
+            msgBodyVO.setSecretKey(messageBody.getSecret());
+        }else if (type== EMMessage.Type.IMAGE){
+            ImageMessageBody messageBody= (ImageMessageBody) message.getBody();
+            msgBodyVO.setDisplayName(messageBody.getFileName());
+            msgBodyVO.setRemotePath(messageBody.getRemoteUrl());
+            msgBodyVO.setSecretKey(messageBody.getSecret());
+            msgBodyVO.setThumbnailRemotePath(messageBody.getThumbnailUrl());
+            msgBodyVO.setThumbnailSecretKey(messageBody.getThumbnailSecret());
+        }else if (type== EMMessage.Type.VIDEO){
+            VideoMessageBody messageBody= (VideoMessageBody) message.getBody();
+            msgBodyVO.setDisplayName(messageBody.getFileName());
+            msgBodyVO.setRemotePath(messageBody.getRemoteUrl());
+            msgBodyVO.setSecretKey(messageBody.getSecret());
+            msgBodyVO.setThumbnailRemotePath(messageBody.getThumbnailUrl());
+            msgBodyVO.setThumbnailSecretKey(messageBody.getThumbnailSecret());
+        }else if (type== EMMessage.Type.VOICE){
+            VoiceMessageBody messageBody= (VoiceMessageBody) message.getBody();
+            msgBodyVO.setDisplayName(messageBody.getFileName());
+            msgBodyVO.setRemotePath(messageBody.getRemoteUrl());
+            msgBodyVO.setSecretKey(messageBody.getSecret());
+        }
+        return msgBodyVO;
+    }
+
+    private static String getMsgType(EMMessage.Type type){
+        String result=null;
+        switch (type){
+            case CMD:
+                result="cmd";
+                break;
+            case FILE:
+                result="file";
+                break;
+            case IMAGE:
+                result="image";
+                break;
+            case LOCATION:
+                result="location";
+                break;
+            case VOICE:
+                result="audio";
+                break;
+            case TXT:
+                result="text";
+                break;
+            case VIDEO:
+                result="video";
+                break;
+        }
+        return result;
     }
 
     //实现ConnectionListener接口
@@ -407,7 +498,7 @@ public class ListenersRegister {
     }
 
     public interface ListenersCallback{
-        void onNewMessage(MessageVO messageVO);
+        void onNewMessage(String result);
         void onAckMessage(MessageVO messageVO);
         void onDeliveryMessage(MessageVO messageVO);
         void onContactAdded(List<String> usernameList);
