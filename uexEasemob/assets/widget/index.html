@@ -44,12 +44,12 @@
 			uexEasemob.onCallReceive=onCallReceive;
 			uexEasemob.onCallStateChanged=onCallStateChanged;
 			uexEasemob.onCmdMessageReceive=onCmdMessageReceive;
-
+			uexEasemob.cbGetChatterInfo=cbGetChatterInfo;
 		}
 	}
 
 	function initEasemob(){
-		uexEasemob.initEasemob('');
+		uexEasemob.initEasemob('{"isAutoLoginEnabled":"1"}');
 	}
 
 	function login(){
@@ -396,6 +396,14 @@
 		uexEasemob.updateCurrentUserNick('');
 	}
 
+	function getChatterInfo(){
+		uexEasemob.getChatterInfo();
+	}
+
+	function cbGetChatterInfo(info){
+		alert("cbGetChatterInfo "+info);
+	}
+
 </script>
 </head>
 
@@ -563,6 +571,8 @@
 			<span>53.updateCurrentUserNick</span>
 			<input class='btn' type='button' value='调用接口' onclick='updateCurrentUserNick()'>
 
+			<span>54.getChatterInfo</span>
+			<input class='btn' type='button' value='调用接口' onclick='getChatterInfo()'>
 
 		</div>
 	</div>

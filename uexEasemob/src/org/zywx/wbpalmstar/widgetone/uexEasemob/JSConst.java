@@ -42,4 +42,6 @@ public class JSConst {
     public static final String ON_CALLSTATECHANGED="uexEasemob.onCallStateChanged";
     public static final String ON_CMDMESSAGERECEIVE="uexEasemob.onCmdMessageReceive";
 
+    public static final String CALLBACK_GET_CHATTER_INFO = "uexEasemob.cbGetChatterInfo";
+
 }
