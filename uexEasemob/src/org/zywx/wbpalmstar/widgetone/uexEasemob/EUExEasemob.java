@@ -243,7 +243,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 resultVO.setMsg("");
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_LOGIN + "){"
                         + JSConst.CALLBACK_LOGIN + "('" + mGson.toJson(resultVO) + "');}";
-                onCallback(js);
+                evaluateRootWindowScript(js);
             }
 
             @Override
@@ -253,7 +253,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 resultVO.setMsg(s);
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_LOGIN + "){"
                         + JSConst.CALLBACK_LOGIN + "('" + mGson.toJson(resultVO) + "');}";
-                onCallback(js);
+                evaluateRootWindowScript(js);
             }
 
             @Override
@@ -317,7 +317,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 }finally {
                     String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_REGISTER + "){"
                             + JSConst.CALLBACK_REGISTER + "('" + mGson.toJson(resultVO) + "');}";
-                    onCallback(js);
+                    evaluateRootWindowScript(js);
                 }
             }
         }).start();
@@ -327,61 +327,61 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     public void onNewMessage(String result){
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_NEW_MESSAGE + "){"
                 + JSConst.ON_NEW_MESSAGE + "('" + result + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void onAckMessage(MessageVO messageVO){
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_ACK_MESSAGE + "){"
                 + JSConst.ON_ACK_MESSAGE + "('" + mGson.toJson(messageVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void onDeliveryMessage(MessageVO messageVO){
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_DELIVERY_MESSAGE + "){"
                 + JSConst.ON_DELIVERY_MESSAGE + "('" + mGson.toJson(messageVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onContactAdded(List<String> usernameList) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_ADDED + "){"
                 + JSConst.ON_CONTACT_ADDED + "('" + mGson.toJson(usernameList) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onContactDeleted(List<String> usernameList) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_DELETED + "){"
                 + JSConst.ON_CONTACT_DELETED + "('" + mGson.toJson(usernameList) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onContactInvited(GroupOptVO optVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_INVITED + "){"
                 + JSConst.ON_CONTACT_INVITED + "('" + mGson.toJson(optVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onContactAgreed(GroupOptVO optVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_AGREED + "){"
                 + JSConst.ON_CONTACT_AGREED + "('" + mGson.toJson(optVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onContactRefused(GroupOptVO optVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_REFUSED + "){"
                 + JSConst.ON_CONTACT_REFUSED + "('" + mGson.toJson(optVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onConnected() {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONNECTED + "){"
                 + JSConst.ON_CONNECTED + "();}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
@@ -394,84 +394,84 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_DISCONNECTED + "){"
                 + JSConst.ON_DISCONNECTED + "('" + jsonData.toString() + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onInvitationAccpted(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_INVITATION_ACCPTED + "){"
                 + JSConst.ON_INVITATION_ACCPTED + "('" + mGson.toJson(groupOptVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onInvitationDeclined(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_INVITATION_DECLINED + "){"
                 + JSConst.ON_INVITATION_DECLINED + "('" + mGson.toJson(groupOptVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onUserRemoved(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_USER_REMOVED + "){"
                 + JSConst.ON_USER_REMOVED + "('" + mGson.toJson(groupOptVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onGroupDestroy(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_GROUP_DESTROY + "){"
                 + JSConst.ON_GROUP_DESTROY + "('" + mGson.toJson(groupOptVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onApplicationReceived(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_APPLICATION_RECEIVED + "){"
                 + JSConst.ON_APPLICATION_RECEIVED + "('" + mGson.toJson(groupOptVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onApplicationAccept(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_APPLICATION_ACCEPT + "){"
                 + JSConst.ON_APPLICATION_ACCEPT + "('" + mGson.toJson(groupOptVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onInvitationReceived(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_INVITATION_RECEIVED + "){"
                 + JSConst.ON_INVITATION_RECEIVED + "('" + mGson.toJson(groupOptVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onApplicationDeclined(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_APPLICATION_DECLINED + "){"
                 + JSConst.ON_APPLICATION_DECLINED + "('" + mGson.toJson(groupOptVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onCallReceive(CallReceiveOutputVO outputVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CALLRECEIVE + "){"
                 + JSConst.ON_CALLRECEIVE + "('" + mGson.toJson(outputVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onCallStateChanged(CallStateOutputVO outputVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CALLSTATECHANGED + "){"
                 + JSConst.ON_CALLSTATECHANGED + "('" + mGson.toJson(outputVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     @Override
     public void onCmdMessageReceive(CmdMsgOutputVO outputVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CMDMESSAGERECEIVE + "){"
                 + JSConst.ON_CMDMESSAGERECEIVE + "('" + mGson.toJson(outputVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void getMessageById(String[] params){
@@ -497,7 +497,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMMessage message=EMChatManager.getInstance().getMessage(messageVO.getMsgId());
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETMESSAGEBYID + "){"
                 + JSConst.CALLBACK_GETMESSAGEBYID + "('" + mGson.toJson(message) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void getConversationByName(String[] params){
@@ -535,7 +535,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         resultVO.setMessages(msgResultVOs);
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETCONVERSATIONBYNAME + "){"
                 + JSConst.CALLBACK_GETCONVERSATIONBYNAME + "('" + mGson.toJson(resultVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void sendText(String[] params){
@@ -837,7 +837,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "){"
                 + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "('" + mGson.toJson(resultVOs) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void getUnreadMsgCount(String[] params){
@@ -871,7 +871,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_UNREAD_MSG_COUNT + "){"
                 + JSConst.CALLBACK_GET_UNREAD_MSG_COUNT + "('" + jsonResult.toString() + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void resetUnreadMsgCount(String[] params){
@@ -939,7 +939,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_MSG_COUNT+ "){"
                 + JSConst.CALLBACK_GET_MSG_COUNT + "('" + jsonResult.toString() + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void clearConversation(String[] params){
@@ -1074,7 +1074,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_CONTACT_USERNAMES+ "){"
                 + JSConst.CALLBACK_GET_CONTACT_USERNAMES + "('" + mGson.toJson(usernames) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void addContact(String[] params){
@@ -1206,7 +1206,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         List<String> usernames=EMContactManager.getInstance().getBlackListUsernames();
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_BLACKLIST_USERNAMES+ "){"
                 + JSConst.CALLBACK_GET_BLACKLIST_USERNAMES + "('" + mGson.toJson(usernames) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void addUserToBlackList(String[] params){
@@ -1526,7 +1526,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
             String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
                     + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-            onCallback(js);
+            evaluateRootWindowScript(js);
             return;
         }
 
@@ -1538,7 +1538,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 outputVO.setGrouplist(mGson.toJson(value));
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
                         + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-                onCallback(js);
+                evaluateRootWindowScript(js);
             }
 
             @Override
@@ -1547,7 +1547,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 outputVO.setErrorMsg(errorMsg);
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
                         + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-                onCallback(js);
+                evaluateRootWindowScript(js);
             }
         });
 
@@ -1571,7 +1571,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 outputVO.setResult("0");
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "){"
                         + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-                onCallback(js);
+                evaluateRootWindowScript(js);
             }
 
             @Override
@@ -1581,7 +1581,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 outputVO.setErrorMsg(errorMsg);
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "){"
                         + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-                onCallback(js);
+                evaluateRootWindowScript(js);
             }
         });
     }
@@ -1631,7 +1631,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
                 + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(resultVO) + "');}";
-        onCallback(js);
+        evaluateRootWindowScript(js);
     }
 
     public void blockGroupMessage(String[] params){
@@ -1824,7 +1824,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             List<String> ususernames=EMGroupManager.getInstance().getBlockedUsers(infoVO.getGroupId());
             String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETBLOCKEDUSERS + "){"
                     + JSConst.CALLBACK_GETBLOCKEDUSERS + "('" + mGson.toJson(ususernames) + "');}";
-            onCallback(js);
+            evaluateRootWindowScript(js);
         } catch (EaseMobException e) {
 
         }
@@ -2064,20 +2064,28 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 }
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_CHATTER_INFO + "){"
                         + JSConst.CALLBACK_GET_CHATTER_INFO + "('" + mGson.toJson(chatterInfoVOs) + "');}";
-                onCallback(js);
+                evaluateRootWindowScript(js);
             }
 
             @Override
             public void onError(int error, String errorMsg) {
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_CHATTER_INFO + "){"
                         + JSConst.CALLBACK_GET_CHATTER_INFO + "('" + mGson.toJson(chatterInfoVOs) + "');}";
-                onCallback(js);
+                evaluateRootWindowScript(js);
             }
         });
 
 
     }
 
+    /**
+     * 执行Root Window脚本
+     *
+     * @param script
+     */
+    private void evaluateRootWindowScript(String script) {
+        evaluateScript("root", 0, script);
+    }
 
     @Override
     public void onHandleMessage(Message message) {
