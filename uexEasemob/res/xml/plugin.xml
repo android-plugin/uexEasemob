@@ -82,5 +82,6 @@
 
         <method name="updateCurrentUserNick" />
 
+        <method name="getChatterInfo"/>
     </plugin>
 </uexplugins>
