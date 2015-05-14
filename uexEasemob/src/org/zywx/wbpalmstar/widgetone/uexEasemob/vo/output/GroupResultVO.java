@@ -13,8 +13,8 @@ public class GroupResultVO implements Serializable {
     protected String owner;
     protected List<String> members;
     protected boolean isPublic;
-    protected boolean allowInvites;//是否允许群成员邀请人进群
-    protected boolean membersOnly;//需要申请和验证才能加入
+    protected boolean allowInvites;//鏄惁鍏佽缇ゆ垚鍛橀個璇蜂汉杩涚兢
+    protected boolean membersOnly;//闇�瑕佺敵璇峰拰楠岃瘉鎵嶈兘鍔犲叆
     protected int groupMaxUserCount = 0;
     protected boolean isBlock = false;
     private String groupId;
