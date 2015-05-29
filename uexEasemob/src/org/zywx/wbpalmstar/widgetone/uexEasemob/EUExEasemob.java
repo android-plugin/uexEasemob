@@ -874,6 +874,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     private String getThumbPath(String videoPath){
+        if (DiskCache.cacheFolder==null){
+            DiskCache.initDiskCache(mContext.getApplicationContext());
+        }
         File thumbFile=new File(DiskCache.cacheFolder,"thvideo"+System.currentTimeMillis());
         Bitmap bitmap = null;
         FileOutputStream fos = null;
