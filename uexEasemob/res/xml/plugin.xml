@@ -29,6 +29,8 @@
         <method name="onApplicationDeclined" />
         <method name="sendText" />
         <method name="sendVoice" />
+        <method name="sendVideo"/>
+        <method name="sendHasReadResponseForMessage"/>
         <method name="sendPicture" />
         <method name="sendLocationMsg" />
         <method name="sendFile" />

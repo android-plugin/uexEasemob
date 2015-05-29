@@ -17,6 +17,8 @@ public class SendInputVO implements Serializable {
     private String latitude;
     private String longitude;
     private String length;
+    private String ext;
+
     public String getUsername() {
         return username;
     }
@@ -80,5 +82,13 @@ public class SendInputVO implements Serializable {
 
     public void setLength(String length) {
         this.length = length;
+    }
+
+    public String getExt() {
+        return ext;
+    }
+
+    public void setExt(String ext) {
+        this.ext = ext;
     }
 }

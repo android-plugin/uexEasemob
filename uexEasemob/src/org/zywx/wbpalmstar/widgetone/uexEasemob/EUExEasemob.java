@@ -3,10 +3,12 @@ package org.zywx.wbpalmstar.widgetone.uexEasemob;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.easemob.EMCallBack;
 import com.easemob.EMError;
@@ -25,6 +27,7 @@ import com.easemob.chat.ImageMessageBody;
 import com.easemob.chat.LocationMessageBody;
 import com.easemob.chat.NormalFileMessageBody;
 import com.easemob.chat.TextMessageBody;
+import com.easemob.chat.VideoMessageBody;
 import com.easemob.chat.VoiceMessageBody;
 import com.easemob.exceptions.EMNetworkUnconnectedException;
 import com.easemob.exceptions.EMNoActiveCallException;
@@ -35,9 +38,10 @@ import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.zywx.wbpalmstar.base.BDebug;
+import org.zywx.wbpalmstar.base.cache.DiskCache;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
+import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.AddContactInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.CmdMsgInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.CreateGroupInputVO;
@@ -61,6 +65,8 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MsgResultVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.ResultVO;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -131,7 +137,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     private static final int MSG_GET_CHATTER_INFO=55;
 
     private static final int MSG_INIT=57;
-
+    private static final int MSG_SEND_VIDEO=58;
+    private static final int MSG_SEND_HAS_READ_RESPONSE_FOR_MESSAGE=59;
     private Gson mGson;
 
     public EUExEasemob(Context context, EBrowserView eBrowserView) {
@@ -496,7 +503,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     public void getMessageByIdMsg(MessageVO messageVO){
         EMMessage message=EMChatManager.getInstance().getMessage(messageVO.getMsgId());
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETMESSAGEBYID + "){"
-                + JSConst.CALLBACK_GETMESSAGEBYID + "('" + mGson.toJson(message) + "');}";
+                + JSConst.CALLBACK_GETMESSAGEBYID + "('" + mGson.toJson(ListenersRegister.convertEMMessage(message)) + "');}";
         evaluateRootWindowScript(js);
     }
 
@@ -569,6 +576,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         //设置消息body
         TextMessageBody txtBody = new TextMessageBody(sendInputVO.getContent());
         message.addBody(txtBody);
+        if (!TextUtils.isEmpty(sendInputVO.getExt())) {
+            message.setAttribute("ext", sendInputVO.getExt());
+        }
         //设置接收人
         message.setReceipt(sendInputVO.getUsername());
         //把消息加入到此会话对象中
@@ -623,6 +633,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         //设置消息body
         VoiceMessageBody body = new VoiceMessageBody(new File(sendInputVO.getFilePath()), Integer.valueOf(sendInputVO.getLength()));
         message.addBody(body);
+        if (!TextUtils.isEmpty(sendInputVO.getExt())) {
+            message.setAttribute("ext", sendInputVO.getExt());
+        }
         message.setReceipt(sendInputVO.getUsername());
         conversation.addMessage(message);
         EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
@@ -674,6 +687,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         // 默认超过100k的图片会压缩后发给对方，可以设置成发送原图
         // body.setSendOriginalImage(true);
         message.addBody(body);
+        if (!TextUtils.isEmpty(sendInputVO.getExt())) {
+            message.setAttribute("ext", sendInputVO.getExt());
+        }
         message.setReceipt(sendInputVO.getUsername());
         conversation.addMessage(message);
         EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
@@ -723,6 +739,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         LocationMessageBody locBody = new LocationMessageBody(sendInputVO.getLocationAddress(), Double.valueOf(sendInputVO.getLatitude()), Double.valueOf(sendInputVO.getLongitude()));
         message.addBody(locBody);
+        if (!TextUtils.isEmpty(sendInputVO.getExt())) {
+            message.setAttribute("ext", sendInputVO.getExt());
+        }
         message.setReceipt(sendInputVO.getUsername());
         conversation.addMessage(message);
         EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
@@ -773,6 +792,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
 //设置接收人的username
         message.setReceipt(sendInputVO.getUsername());
+        if (!TextUtils.isEmpty(sendInputVO.getExt())) {
+            message.setAttribute("ext", sendInputVO.getExt());
+        }
 // add message body
         NormalFileMessageBody body = new NormalFileMessageBody(new File(sendInputVO.getFilePath()));
         message.addBody(body);
@@ -794,6 +816,97 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
         });
     }
+
+    public void sendVideo(String[] params){
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        SendInputVO inputVO=mGson.fromJson(params[0], new TypeToken<SendInputVO>() {
+        }.getType());
+        if (inputVO==null){
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_SEND_VIDEO;
+        Bundle bd = new Bundle();
+        bd.putSerializable(BUNDLE_DATA, inputVO);
+        msg.setData(bd);
+        mHandler.sendMessage(msg);
+    }
+
+    private void sendVideoMsg(SendInputVO sendInputVO){
+        EMConversation conversation = EMChatManager.getInstance().getConversation(sendInputVO.getUsername());
+// 创建一个文件消息
+        EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VIDEO);
+// 如果是群聊，设置chattype,默认是单聊
+        if (String.valueOf(2).equals(sendInputVO.getChatType())) {
+            message.setChatType(EMMessage.ChatType.GroupChat);
+        }
+//设置接收人的username
+        message.setReceipt(sendInputVO.getUsername());
+// add message body
+        if (!TextUtils.isEmpty(sendInputVO.getExt())) {
+            message.setAttribute("ext", sendInputVO.getExt());
+        }
+        File videoFile=new File(sendInputVO.getFilePath());
+        VideoMessageBody body = new VideoMessageBody(videoFile,getThumbPath(sendInputVO.getFilePath()),Integer.valueOf(sendInputVO.getLength()),videoFile.length());
+        message.addBody(body);
+        conversation.addMessage(message);
+        EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onError(int i, String s) {
+
+            }
+
+            @Override
+            public void onProgress(int i, String s) {
+
+            }
+        });
+    }
+
+    private String getThumbPath(String videoPath){
+        File thumbFile=new File(DiskCache.cacheFolder,"thvideo"+System.currentTimeMillis());
+        Bitmap bitmap = null;
+        FileOutputStream fos = null;
+        try {
+            if (!thumbFile.getParentFile().exists()) {
+                thumbFile.getParentFile().mkdirs();
+            }
+            bitmap = ThumbnailUtils.createVideoThumbnail(videoPath, 3);
+            if (bitmap == null) {
+                bitmap = BitmapFactory.decodeResource(mContext.getResources(), EUExUtil.getResDrawableID("plugin_easemob_app_panel_video_icon"));
+            }
+            fos = new FileOutputStream(thumbFile);
+
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+
+        } catch (Exception e) {
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                }
+                fos = null;
+            }
+            if (bitmap != null) {
+                bitmap.recycle();
+                bitmap = null;
+            }
+
+        }
+        return thumbFile.getAbsolutePath();
+    }
+
 
     public void getMessageHistory(String[] params){
         if (params == null || params.length < 1) {
@@ -896,6 +1009,33 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     private void resetUnreadMsgCountMsg(HistoryInputVO inputVO) {
         EMConversation conversation = EMChatManager.getInstance().getConversation(inputVO.getUsername());
         conversation.resetUnreadMsgCount();
+    }
+
+    public void sendHasReadResponseForMessage(String[] params){
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        MessageVO inputVO=mGson.fromJson(params[0],new TypeToken<MessageVO>(){}.getType());
+        if (inputVO==null){
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_SEND_HAS_READ_RESPONSE_FOR_MESSAGE;
+        Bundle bd = new Bundle();
+        bd.putSerializable(BUNDLE_DATA,inputVO);
+        msg.setData(bd);
+        mHandler.sendMessage(msg);
+    }
+
+    private void sendHasReadResponseForMessageMsg(MessageVO messageVO){
+        EMMessage emMessage=EMChatManager.getInstance().getMessage(messageVO.getMsgId());
+        try {
+            EMChatManager.getInstance().ackMessageRead(emMessage.getFrom(),emMessage.getMsgId());
+        } catch (EaseMobException e) {
+        }
     }
 
     public void resetAllUnreadMsgCount(String[] params){
@@ -2255,6 +2395,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 break;
             case MSG_INIT:
                 initEasemobMsg(bundle.getStringArray(BUNDLE_DATA));
+                break;
+            case MSG_SEND_VIDEO:
+                sendVideoMsg((SendInputVO) bundle.getSerializable(BUNDLE_DATA));
+                break;
+            case MSG_SEND_HAS_READ_RESPONSE_FOR_MESSAGE:
+                sendHasReadResponseForMessageMsg((MessageVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
             default:
                 super.onHandleMessage(message);
