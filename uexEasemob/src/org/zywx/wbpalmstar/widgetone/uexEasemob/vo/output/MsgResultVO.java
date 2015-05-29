@@ -20,6 +20,9 @@ public class MsgResultVO implements Serializable {
     private String messageTime;
     private String isAcked;
     private String isDelivered;
+    private int length;
+    private String ext;
+
 
     public String getFrom() {
         return from;
@@ -107,5 +110,21 @@ public class MsgResultVO implements Serializable {
 
     public void setIsDelivered(String isDelivered) {
         this.isDelivered = isDelivered;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public String getExt() {
+        return ext;
+    }
+
+    public void setExt(String ext) {
+        this.ext = ext;
     }
 }

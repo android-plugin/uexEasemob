@@ -343,6 +343,13 @@
 	function blockUser(){
 		uexEasemob.blockUser('{"groupId":"1426832511577","username":"ylt1"}');
 	}
+    function sendVideo(){
+        uexEasemob.sendVideo('{"username":"ylt1","chatType":"1","filePath":"/sdcard/video.mp4","length":"3"}');
+    }
+
+    function sendHasReadResponseForMessage(){
+        uexEasemob.sendHasReadResponseForMessage('{"msgId":"65836724617478552_wVA3J-32-d5422"}');
+    }
 
 	function unblockUser(){
 		uexEasemob.unblockUser('{"groupId":"1426832511577","username":"ylt1"}');
@@ -573,7 +580,10 @@
 
 			<span>54.getChatterInfo</span>
 			<input class='btn' type='button' value='调用接口' onclick='getChatterInfo()'>
-
+			<span>55.sendVideo</span>
+			<input class='btn' type='button' value='调用接口' onclick='sendVideo()'>
+			<span>56.sendHasReadResponseForMessage</span>
+			<input class='btn' type='button' value='调用接口' onclick='sendHasReadResponseForMessage()'>
 		</div>
 	</div>
 </body>
