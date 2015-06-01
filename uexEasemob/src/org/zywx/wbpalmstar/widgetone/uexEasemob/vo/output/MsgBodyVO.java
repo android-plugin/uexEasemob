@@ -18,6 +18,7 @@ public class MsgBodyVO implements Serializable {
     private String remotePath;
     private String secretKey;
     private String thumbnailRemotePath;
+    private String length;
     private String thumbnailSecretKey;
     public String getText() {
         return text;
@@ -99,4 +100,11 @@ public class MsgBodyVO implements Serializable {
         this.thumbnailSecretKey = thumbnailSecretKey;
     }
 
+    public String getLength() {
+        return length;
+    }
+
+    public void setLength(String length) {
+        this.length = length;
+    }
 }

@@ -20,7 +20,7 @@ public class MsgResultVO implements Serializable {
     private String messageTime;
     private String isAcked;
     private String isDelivered;
-    private int length;
+    private String length;
     private String ext;
 
 
@@ -112,11 +112,11 @@ public class MsgResultVO implements Serializable {
         this.isDelivered = isDelivered;
     }
 
-    public int getLength() {
+    public String getLength() {
         return length;
     }
 
-    public void setLength(int length) {
+    public void setLength(String length) {
         this.length = length;
     }
 

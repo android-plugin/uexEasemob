@@ -343,11 +343,13 @@ public class ListenersRegister {
             msgBodyVO.setDisplayName(messageBody.getFileName());
             msgBodyVO.setRemotePath(messageBody.getRemoteUrl()==null?messageBody.getLocalUrl():messageBody.getRemoteUrl());
             msgBodyVO.setSecretKey(messageBody.getSecret());
+            msgBodyVO.setLength(String.valueOf(messageBody.getLength()));
             msgBodyVO.setThumbnailRemotePath(messageBody.getThumbnailUrl());
             msgBodyVO.setThumbnailSecretKey(messageBody.getThumbnailSecret());
         }else if (type== EMMessage.Type.VOICE){
             VoiceMessageBody messageBody= (VoiceMessageBody) message.getBody();
             msgBodyVO.setDisplayName(messageBody.getFileName());
+            msgBodyVO.setLength(String.valueOf(messageBody.getLength()));
             msgBodyVO.setRemotePath(messageBody.getRemoteUrl()==null?messageBody.getLocalUrl():messageBody.getRemoteUrl());
             msgBodyVO.setSecretKey(messageBody.getSecret());
         }
