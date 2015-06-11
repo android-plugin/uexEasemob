@@ -2,7 +2,8 @@
 <uexplugins>
     <plugin
         className="org.zywx.wbpalmstar.widgetone.uexEasemob.EUExEasemob"
-        uexName="uexEasemob">
+        uexName="uexEasemob"
+        global="true">
         <method name="initEasemob" />
         <method name="login"/>
         <method name="logout" />
