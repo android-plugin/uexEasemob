@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
-    <plugin uexName="uexEasemob" version="3.0.3" build="3">
-        <info>4:升级环信SDK</info>
-        <info>4:发送语音添加length参数</info>
-        <info>3:添加sendHasReadResponseForMessage等接口</info>
+    <plugin uexName="uexEasemob" version="3.0.5" build="5">
+        <info>5:升级环信SDK</info>
+        <build>4:发送语音添加length参数</build>
+        <build>3:添加sendHasReadResponseForMessage等接口</build>
         <build>2:添加getChatterInfo接口</build>
         <build>0:环信插件</build>
     </plugin>
