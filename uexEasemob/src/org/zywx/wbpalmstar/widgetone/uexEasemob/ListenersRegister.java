@@ -7,13 +7,14 @@ import android.content.IntentFilter;
 
 import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
+import com.easemob.EMEventListener;
+import com.easemob.EMNotifierEvent;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMCallStateChangeListener;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactListener;
 import com.easemob.chat.EMContactManager;
-import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
@@ -22,7 +23,6 @@ import com.easemob.chat.FileMessageBody;
 import com.easemob.chat.GroupChangeListener;
 import com.easemob.chat.ImageMessageBody;
 import com.easemob.chat.LocationMessageBody;
-import com.easemob.chat.MessageBody;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chat.VideoMessageBody;
 import com.easemob.chat.VoiceMessageBody;
@@ -56,24 +56,11 @@ public class ListenersRegister {
         mContext=context;
         mGson=gson;
         //只有注册了广播才能接收到新消息，目前离线消息，在线消息都是走接收消息的广播（离线消息目前无法监听，在登录以后，接收消息广播会执行一次拿到所有的离线消息）
-        NewMessageBroadcastReceiver msgReceiver = new NewMessageBroadcastReceiver();
-        IntentFilter intentFilter = new IntentFilter(EMChatManager.getInstance().getNewMessageBroadcastAction());
-        intentFilter.setPriority(3);
-        context.registerReceiver(msgReceiver, intentFilter);
-
         EMChatManager.getInstance().getChatOptions().setRequireAck(true);
         //如果用到已读的回执需要把这个flag设置成true
 
-        IntentFilter ackMessageIntentFilter = new IntentFilter(EMChatManager.getInstance().getAckMessageBroadcastAction());
-        ackMessageIntentFilter.setPriority(3);
-        context.registerReceiver(ackMessageReceiver, ackMessageIntentFilter);
-
         EMChatManager.getInstance().getChatOptions().setRequireDeliveryAck(true);
         //如果用到已发送的回执需要把这个flag设置成true
-
-        IntentFilter deliveryAckMessageIntentFilter = new IntentFilter(EMChatManager.getInstance().getDeliveryAckMessageBroadcastAction());
-        deliveryAckMessageIntentFilter.setPriority(5);
-        context.registerReceiver(deliveryAckMessageReceiver, deliveryAckMessageIntentFilter);
 
         EMContactManager.getInstance().setContactListener(new MyContactListener());
 
@@ -115,32 +102,59 @@ public class ListenersRegister {
             }
         });
 
-        // 注册一个cmd消息的BroadcastReceiver
-        IntentFilter cmdIntentFilter = new IntentFilter(EMChatManager.getInstance().getCmdMessageBroadcastAction());
-        mContext.registerReceiver(cmdMessageReceiver, cmdIntentFilter);
+        EMChatManager.getInstance().registerEventListener(new EMEventListener() {
+            @Override
+            public void onEvent(EMNotifierEvent event) {
+                EMMessage message = (EMMessage) event.getData();
 
+                switch (event.getEvent()) {
+                    case EventNewMessage: {// 接收新消息
+                        callbackNewMessage(message);
+                        break;
+                    }
+                    case EventDeliveryAck:{//接收已发送回执
+                        MessageVO messageVO=new MessageVO();
+                        messageVO.setMsgId(message.getMsgId());
+                        messageVO.setUsername(message.getFrom());
+                        if (callback!=null){
+                            callback.onDeliveryMessage(messageVO);
+                        }
+                        message.isDelivered=true;
+                        break;
+                    }
+
+                    case EventNewCMDMessage:{//接收透传消息
+                        callbackNewCMDMessage(message);
+                        break;
+                    }
+
+                    case EventReadAck:{//接收已读回执
+                        MessageVO messageVO=new MessageVO();
+                        messageVO.setMsgId(message.getMsgId());
+                        messageVO.setUsername(message.getFrom());
+                        if (callback!=null){
+                            callback.onAckMessage(messageVO);
+                        }
+                        message.isAcked=true;
+                        break;
+                    }
+
+                    case EventOfflineMessage: {//接收离线消息
+                        break;
+                    }
+
+                    case EventConversationListChanged: {//通知会话列表通知event注册（在某些特殊情况，SDK去删除会话的时候会收到回调监听）
+
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+            }
+        });
     }
 
-    /**
-     * cmd消息BroadcastReceiver
-     */
-    private BroadcastReceiver cmdMessageReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //获取cmd message对象
-            String msgId = intent.getStringExtra("msgid");
-            EMMessage message = intent.getParcelableExtra("message");
-            //获取消息body
-            CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
-            String aciton = cmdMsgBody.action;//获取自定义action
-            CmdMsgOutputVO outputVO=new CmdMsgOutputVO();
-            outputVO.setAction(aciton);
-            outputVO.setMessage(new Gson().toJson(message));
-            outputVO.setMsgId(msgId);
-            callback.onCmdMessageReceive(outputVO);
-        }
-    };
 
     private class CallReceiver extends BroadcastReceiver {
 
@@ -278,21 +292,21 @@ public class ListenersRegister {
 
     }
 
-    private class NewMessageBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // 注销广播
-            abortBroadcast();
-
-            // 消息id（每条消息都会生成唯一的一个id，目前是SDK生成）
-            String msgId = intent.getStringExtra("msgid");
-            //发送方
-            String username = intent.getStringExtra("from");
-            EMMessage message=EMChatManager.getInstance().getMessage(msgId);
-            if (callback!=null) {
-                callback.onNewMessage(mGson.toJson(convertEMMessage(message)));
-            }
+    private void callbackNewMessage(EMMessage message){
+        if (callback!=null) {
+            callback.onNewMessage(mGson.toJson(convertEMMessage(message)));
         }
+    }
+
+    private void callbackNewCMDMessage(EMMessage message){
+        //获取消息body
+        CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
+        String aciton = cmdMsgBody.action;//获取自定义action
+        CmdMsgOutputVO outputVO=new CmdMsgOutputVO();
+        outputVO.setAction(aciton);
+        outputVO.setMessage(new Gson().toJson(message));
+        outputVO.setMsgId(message.getMsgId());
+        callback.onCmdMessageReceive(outputVO);
     }
 
     public static MsgResultVO convertEMMessage(EMMessage message){
@@ -447,58 +461,7 @@ public class ListenersRegister {
 
     }
 
-    private BroadcastReceiver ackMessageReceiver = new BroadcastReceiver() {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            abortBroadcast();
-            String msgid = intent.getStringExtra("msgid");
-            String from = intent.getStringExtra("from");
-
-            MessageVO messageVO=new MessageVO();
-            messageVO.setMsgId(msgid);
-            messageVO.setUsername(from);
-            if (callback!=null){
-                callback.onAckMessage(messageVO);
-            }
-            EMConversation conversation = EMChatManager.getInstance().getConversation(from);
-            if (conversation != null) {
-                // 把message设为已读
-                EMMessage msg = conversation.getMessage(msgid);
-                if (msg != null) {
-                    msg.isAcked = true;
-                }
-            }
-
-        }
-    };
-
-    /**
-     * 消息送达BroadcastReceiver
-     */
-    private BroadcastReceiver deliveryAckMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            abortBroadcast();
-
-            String msgid = intent.getStringExtra("msgid");
-            String from = intent.getStringExtra("from");
-            MessageVO messageVO=new MessageVO();
-            messageVO.setMsgId(msgid);
-            messageVO.setUsername(from);
-            if (callback!=null){
-                callback.onDeliveryMessage(messageVO);
-            }
-            EMConversation conversation = EMChatManager.getInstance().getConversation(from);
-            if (conversation != null) {
-                // 把message设为已读
-                EMMessage msg = conversation.getMessage(msgid);
-                if (msg != null) {
-                    msg.isDelivered = true;
-                }
-            }
-        }
-    };
 
     public void setCallback(ListenersCallback callback) {
         this.callback = callback;
