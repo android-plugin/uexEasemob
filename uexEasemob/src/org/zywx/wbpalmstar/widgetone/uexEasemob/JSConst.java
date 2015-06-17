@@ -43,5 +43,5 @@ public class JSConst {
     public static final String ON_CMDMESSAGERECEIVE="uexEasemob.onCmdMessageReceive";
 
     public static final String CALLBACK_GET_CHATTER_INFO = "uexEasemob.cbGetChatterInfo";
-
+    public static final String CALLBACK_GET_TOTAL_UNREAD_MSG_COUNT = "uexEasemob.cbGetTotalUnreadMsgCount";
 }

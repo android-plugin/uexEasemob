@@ -19,6 +19,7 @@ import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
+import com.easemob.chat.EMCursorResult;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupInfo;
 import com.easemob.chat.EMGroupManager;
@@ -49,6 +50,7 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.GroupInfoVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.HistoryInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.ImportMsgInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.NicknameVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.PageVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.UserInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.NotifySettingVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.SendInputVO;
@@ -57,6 +59,7 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallStateOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.ChatterInfoVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CmdMsgOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.ConversationResultVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupInfosOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupOptVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupResultVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupsOutputVO;
@@ -68,6 +71,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -139,6 +143,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     private static final int MSG_INIT=57;
     private static final int MSG_SEND_VIDEO=58;
     private static final int MSG_SEND_HAS_READ_RESPONSE_FOR_MESSAGE=59;
+    private static final int MSG_GET_TOTAL_UNREAD_MSG_COUNT=60;
+
     private Gson mGson;
 
     public EUExEasemob(Context context, EBrowserView eBrowserView) {
@@ -527,10 +533,36 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
+    public static String getChatTypeValue(EMConversation.EMConversationType type){
+        String chatType=null;
+        if (type== EMConversation.EMConversationType.GroupChat){
+            chatType="1";
+        }else if (type== EMConversation.EMConversationType.Chat){
+            chatType="0";
+        }else if (type== EMConversation.EMConversationType.ChatRoom){
+            chatType="2";
+        }
+        return chatType;
+    }
+
+    public static String getChatTypeValue(EMMessage.ChatType type){
+        String chatType=null;
+        if (type== EMMessage.ChatType.GroupChat){
+            chatType="1";
+        }else if (type== EMMessage.ChatType.Chat){
+            chatType="0";
+        }else if (type== EMMessage.ChatType.ChatRoom){
+            chatType="2";
+        }
+        return chatType;
+    }
+
     public void getConversationByNameMSG(MessageVO messageVO){
         EMConversation conversation=EMChatManager.getInstance().getConversation(messageVO.getUsername());
         ConversationResultVO resultVO=new ConversationResultVO();
         resultVO.setIsGroup(conversation.getIsGroup() ? "1" : "0");
+        resultVO.setChatType(getChatTypeValue(conversation.getType()));
+        resultVO.setChatType(conversation.getType().toString());
         resultVO.setChatter(conversation.getUserName());
         List<EMMessage> emMessages=conversation.getAllMessages();
         List<MsgResultVO> msgResultVOs=new ArrayList<MsgResultVO>();
@@ -1665,7 +1697,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 outputVO.setErrorMsg("");
             }else {
                 outputVO.setResult("0");
-                outputVO.setGrouplist(mGson.toJson(grouplist));
+                outputVO.setGrouplist(grouplist);
             }
             String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
                     + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
@@ -1678,7 +1710,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             @Override
             public void onSuccess(List<EMGroup> value) {
                 outputVO.setResult("0");
-                outputVO.setGrouplist(mGson.toJson(value));
+                outputVO.setGrouplist(value);
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
                         + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
                 evaluateRootWindowScript(js);
@@ -1698,35 +1730,43 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void getAllPublicGroupsFromServer(String[] params){
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        PageVO inputVO=mGson.fromJson(params[0],PageVO.class);
+        if (inputVO==null){
+            errorCallback(0, 0, "error params!");
+            return;
+        }
         Message msg = new Message();
         msg.obj = this;
         msg.what = MSG_GETALLPUBLICGROUPSFROMSERVER;
+        Bundle bd = new Bundle();
+        bd.putSerializable(BUNDLE_DATA,inputVO);
+        msg.setData(bd);
         mHandler.sendMessage(msg);
     }
 
-    private void getAllPublicGroupsFromServerMsg() {
-        EMGroupManager.getInstance().asyncGetAllPublicGroupsFromServer(new EMValueCallBack<List<EMGroupInfo>>() {
-
+    private void getAllPublicGroupsFromServerMsg(final PageVO pageVO) {
+        new Thread(new Runnable() {
             @Override
-            public void onSuccess(List<EMGroupInfo> value) {
-                GroupsOutputVO outputVO = new GroupsOutputVO();
-                outputVO.setGrouplist(mGson.toJson(value));
-                outputVO.setResult("0");
-                String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "){"
-                        + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-                evaluateRootWindowScript(js);
+            public void run() {
+                GroupInfosOutputVO outputVO= new GroupInfosOutputVO();
+                try {
+                    final EMCursorResult<EMGroupInfo> result=EMGroupManager.getInstance().getPublicGroupsFromServer(Integer.parseInt(pageVO.getPageSize()),pageVO.getCursor());
+                    outputVO.setCursor(result.getCursor());
+                    outputVO.setGrouplist(result.getData());
+                    outputVO.setResult("0");
+                } catch (EaseMobException e) {
+                    outputVO.setResult("1");
+                }finally {
+                    String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "){"
+                            + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
+                    evaluateRootWindowScript(js);
+                }
             }
-
-            @Override
-            public void onError(int error, String errorMsg) {
-                GroupsOutputVO outputVO = new GroupsOutputVO();
-                outputVO.setResult("1");
-                outputVO.setErrorMsg(errorMsg);
-                String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "){"
-                        + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-                evaluateRootWindowScript(js);
-            }
-        });
+        }).start();
     }
 
     public void getGroup(String[] params){
@@ -2179,7 +2219,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 ChatterInfoVO infoVO=new ChatterInfoVO();
                 EMConversation conversation=EMChatManager.getInstance().getConversation(username);
                 infoVO.setChatter(username);
-                infoVO.setIsGroup("2");
+                infoVO.setIsGroup("0");
+                infoVO.setChatType("0");
                 if (conversation.getLastMessage()!=null) {
                     infoVO.setLastMsg(ListenersRegister.convertEMMessage(conversation.getLastMessage()));
                 }
@@ -2196,6 +2237,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                     ChatterInfoVO infoVO = new ChatterInfoVO();
                     String groupName = emGroup.getGroupName();
                     infoVO.setIsGroup("1");
+                    infoVO.setChatType("1");
                     infoVO.setGroupName(emGroup.getNick());
                     EMConversation conversation = EMChatManager.getInstance().getConversation(emGroup.getUsername());
                     infoVO.setUnreadMsgCount(String.valueOf(conversation.getUnreadMsgCount()));
@@ -2217,8 +2259,29 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 evaluateRootWindowScript(js);
             }
         });
+    }
 
+    public void getTotalUnreadMsgCount(String[] params){
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_GET_TOTAL_UNREAD_MSG_COUNT;
+        mHandler.sendMessage(msg);
+    }
 
+    public void getTotalUnreadMsgCountMsg(){
+        int unreadMsgCountTotal = 0;
+        int chatroomUnreadMsgCount = 0;
+        unreadMsgCountTotal = EMChatManager.getInstance().getUnreadMsgsCount();
+        for(EMConversation conversation:EMChatManager.getInstance().getAllConversations().values()){
+            if(conversation.getType() == EMConversation.EMConversationType.ChatRoom)
+                chatroomUnreadMsgCount=chatroomUnreadMsgCount+conversation.getUnreadMsgCount();
+        }
+        int totalCount=unreadMsgCountTotal-chatroomUnreadMsgCount;
+        HashMap<String,String> params=new HashMap<String, String>();
+        params.put("count", String.valueOf(totalCount));
+        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_TOTAL_UNREAD_MSG_COUNT + "){"
+                + JSConst.CALLBACK_GET_TOTAL_UNREAD_MSG_COUNT + "('" + mGson.toJson(params) + "');}";
+        evaluateRootWindowScript(js);
     }
 
     /**
@@ -2346,7 +2409,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 getGroupsFromServerMsg((GroupInfoVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
             case MSG_GETALLPUBLICGROUPSFROMSERVER:
-                getAllPublicGroupsFromServerMsg();
+                getAllPublicGroupsFromServerMsg((PageVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
             case MSG_GETGROUP:
                 getGroupMsg((GroupInfoVO) bundle.getSerializable(BUNDLE_DATA));
@@ -2404,6 +2467,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 break;
             case MSG_SEND_HAS_READ_RESPONSE_FOR_MESSAGE:
                 sendHasReadResponseForMessageMsg((MessageVO) bundle.getSerializable(BUNDLE_DATA));
+                break;
+            case MSG_GET_TOTAL_UNREAD_MSG_COUNT:
+                getTotalUnreadMsgCountMsg();
                 break;
             default:
                 super.onHandleMessage(message);

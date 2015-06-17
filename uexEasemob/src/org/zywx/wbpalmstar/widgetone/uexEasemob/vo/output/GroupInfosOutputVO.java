@@ -1,6 +1,5 @@
 package org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output;
 
-import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupInfo;
 
 import java.io.Serializable;
@@ -8,14 +7,15 @@ import java.util.List;
 
 /**
  */
-public class GroupsOutputVO implements Serializable {
-    private static final long serialVersionUID = -1305826581588016313L;
+public class GroupInfosOutputVO implements Serializable {
+
+    private static final long serialVersionUID = 2239805697002416405L;
 
     private String result;
 
     private String errorMsg;
 
-    private List<EMGroup> grouplist;
+    private List<EMGroupInfo> grouplist;
 
     private String cursor;
 
@@ -35,11 +35,11 @@ public class GroupsOutputVO implements Serializable {
         this.errorMsg = errorMsg;
     }
 
-    public List<EMGroup> getGrouplist() {
+    public List<EMGroupInfo> getGrouplist() {
         return grouplist;
     }
 
-    public void setGrouplist(List<EMGroup> grouplist) {
+    public void setGrouplist(List<EMGroupInfo> grouplist) {
         this.grouplist = grouplist;
     }
 
