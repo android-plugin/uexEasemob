@@ -318,6 +318,7 @@ public class ListenersRegister {
         resultVO.setMessageTime(String.valueOf(message.getMsgTime()));
         resultVO.setIsRead(message.isUnread() ? "0" : "1");
         resultVO.setIsGroup(message.getChatType() == EMMessage.ChatType.GroupChat ? "1" : "0");
+        resultVO.setChatType(EUExEasemob.getChatTypeValue(message.getChatType()));
         resultVO.setIsAcked(message.isAcked() ? "1" : "0");
         resultVO.setMessageBody(getMessageBody(message,message.getType()));
         try {

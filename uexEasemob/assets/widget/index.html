@@ -45,6 +45,7 @@
 			uexEasemob.onCallStateChanged=onCallStateChanged;
 			uexEasemob.onCmdMessageReceive=onCmdMessageReceive;
 			uexEasemob.cbGetChatterInfo=cbGetChatterInfo;
+			uexEasemob.cbGetTotalUnreadMsgCount=cbGetTotalUnreadMsgCount;
 		}
 	}
 
@@ -309,7 +310,7 @@
 	}
 
 	function getAllPublicGroupsFromServer(){
-		uexEasemob.getAllPublicGroupsFromServer('');
+		uexEasemob.getAllPublicGroupsFromServer('{"pageSize":10,"cursor":"15"}');
 	}
 
 	function cbGetAllPublicGroupsFromServer(info){
@@ -410,6 +411,14 @@
 	function cbGetChatterInfo(info){
 		alert("cbGetChatterInfo "+info);
 	}
+
+	function getTotalUnreadMsgCount(){
+	    uexEasemob.getTotalUnreadMsgCount();
+	}
+
+    function cbGetTotalUnreadMsgCount(info){
+        alert("cbGetTotalUnreadMsgCount "+info);
+    }
 
 </script>
 </head>
@@ -584,6 +593,8 @@
 			<input class='btn' type='button' value='调用接口' onclick='sendVideo()'>
 			<span>56.sendHasReadResponseForMessage</span>
 			<input class='btn' type='button' value='调用接口' onclick='sendHasReadResponseForMessage()'>
+			<span>57.getTotalUnreadMsgCount</span>
+			<input class='btn' type='button' value='调用接口' onclick='getTotalUnreadMsgCount()'>
 		</div>
 	</div>
 </body>

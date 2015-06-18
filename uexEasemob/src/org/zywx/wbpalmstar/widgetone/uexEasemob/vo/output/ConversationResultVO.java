@@ -11,6 +11,7 @@ public class ConversationResultVO implements Serializable {
     private String chatter;
     private String isGroup;
     private List<MsgResultVO> messages;
+    private String chatType;//0-单聊 1-群聊 2-聊天室
 
     public String getChatter() {
         return chatter;
@@ -34,5 +35,13 @@ public class ConversationResultVO implements Serializable {
 
     public void setMessages(List<MsgResultVO> messages) {
         this.messages = messages;
+    }
+
+    public String getChatType() {
+        return chatType;
+    }
+
+    public void setChatType(String chatType) {
+        this.chatType = chatType;
     }
 }

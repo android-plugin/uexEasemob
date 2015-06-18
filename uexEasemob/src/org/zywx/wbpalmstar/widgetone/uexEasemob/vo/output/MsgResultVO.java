@@ -22,7 +22,7 @@ public class MsgResultVO implements Serializable {
     private String isDelivered;
     private String length;
     private String ext;
-
+    private String chatType;//0-单聊 1-群聊 2-聊天室
 
     public String getFrom() {
         return from;
@@ -126,5 +126,13 @@ public class MsgResultVO implements Serializable {
 
     public void setExt(String ext) {
         this.ext = ext;
+    }
+
+    public String getChatType() {
+        return chatType;
+    }
+
+    public void setChatType(String chatType) {
+        this.chatType = chatType;
     }
 }

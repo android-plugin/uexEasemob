@@ -11,6 +11,7 @@ public class ChatterInfoVO implements Serializable {
     private String chatter;
     private String groupName;
     private String isGroup;
+    private String chatType;//0-单聊 1-群聊 2-聊天室
     private String unreadMsgCount;
     private MsgResultVO lastMsg;
 
@@ -52,5 +53,13 @@ public class ChatterInfoVO implements Serializable {
 
     public void setLastMsg(MsgResultVO lastMsg) {
         this.lastMsg = lastMsg;
+    }
+
+    public String getChatType() {
+        return chatType;
+    }
+
+    public void setChatType(String chatType) {
+        this.chatType = chatType;
     }
 }
