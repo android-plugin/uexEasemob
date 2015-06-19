@@ -3,6 +3,7 @@ package org.zywx.wbpalmstar.widgetone.uexEasemob;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -1754,7 +1755,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             public void run() {
                 GroupInfosOutputVO outputVO= new GroupInfosOutputVO();
                 try {
-                    final EMCursorResult<EMGroupInfo> result=EMGroupManager.getInstance().getPublicGroupsFromServer(Integer.parseInt(pageVO.getPageSize()),pageVO.getCursor());
+                    String cursor = null;
+                    if(!TextUtils.isEmpty(cursor)){
+                        cursor = pageVO.getCursor();
+                    }
+                    final EMCursorResult<EMGroupInfo> result=EMGroupManager.getInstance()
+                            .getPublicGroupsFromServer(Integer.parseInt(pageVO.getPageSize())
+                                    ,cursor);
                     outputVO.setCursor(result.getCursor());
                     outputVO.setGrouplist(result.getData());
                     outputVO.setResult("0");
