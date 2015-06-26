@@ -148,6 +148,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private Gson mGson;
 
+    private List<String> tempContacts=new ArrayList<String>();
+
     public EUExEasemob(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
         mGson =new Gson();
@@ -358,6 +360,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     @Override
     public void onContactAdded(List<String> usernameList) {
+        if (usernameList!=null){
+            tempContacts.addAll(usernameList);
+        }
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_ADDED + "){"
                 + JSConst.ON_CONTACT_ADDED + "('" + mGson.toJson(usernameList) + "');}";
         evaluateRootWindowScript(js);
@@ -365,6 +370,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     @Override
     public void onContactDeleted(List<String> usernameList) {
+        if (usernameList!=null){
+            tempContacts.removeAll(usernameList);
+        }
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_DELETED + "){"
                 + JSConst.ON_CONTACT_DELETED + "('" + mGson.toJson(usernameList) + "');}";
         evaluateRootWindowScript(js);
@@ -1242,11 +1250,16 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     private void getContactUserNamesMsg() {
-        List<String> usernames = null;
+        List<String> usernames = new ArrayList<String>();
+        if (tempContacts!=null){
+            usernames.addAll(tempContacts);
+        }
         try {
-            usernames = EMContactManager.getInstance().getContactUserNames();
+            List<String> localNames= EMContactManager.getInstance().getContactUserNames();
+            if (localNames!=null){
+                usernames.addAll(localNames);
+            }
         } catch (EaseMobException e) {
-
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_CONTACT_USERNAMES+ "){"
                 + JSConst.CALLBACK_GET_CONTACT_USERNAMES + "('" + mGson.toJson(usernames) + "');}";
@@ -2213,6 +2226,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     public void getChatterInfoMsg(){
         List<String> usernames = new ArrayList<String>();
+        if (tempContacts!=null){
+            usernames.addAll(tempContacts);
+        }
         try {
             List<String> tempList = EMContactManager.getInstance().getContactUserNames();
             if (tempList!=null){
@@ -2220,8 +2236,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
         } catch (EaseMobException e) {
         }
-        final List<ChatterInfoVO> chatterInfoVOs=new ArrayList<ChatterInfoVO>();
-        if (usernames!=null&&usernames.size()>0){
+      final List<ChatterInfoVO> chatterInfoVOs=new ArrayList<ChatterInfoVO>();
+        if (usernames.size() > 0){
             for (String username:usernames){
                 ChatterInfoVO infoVO=new ChatterInfoVO();
                 EMConversation conversation=EMChatManager.getInstance().getConversation(username);
