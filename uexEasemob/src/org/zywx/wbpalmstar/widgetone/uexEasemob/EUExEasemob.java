@@ -360,7 +360,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     @Override
     public void onContactAdded(List<String> usernameList) {
         if (usernameList!=null){
-            tempContacts.addAll(usernameList);
+            for (String username:usernameList){
+                if (!tempContacts.contains(username)) {
+                    tempContacts.add(username);
+                }
+            }
+
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_ADDED + "){"
                 + JSConst.ON_CONTACT_ADDED + "('" + mGson.toJson(usernameList) + "');}";
