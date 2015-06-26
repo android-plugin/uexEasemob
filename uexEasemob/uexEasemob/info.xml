@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
-    <plugin uexName="uexEasemob" version="3.0.6" build="6">
-        <info>6:添加getTotalUnreadMsgCount接口</info>
+    <plugin uexName="uexEasemob" version="3.0.7" build="7">
+        <info>7:getChatterInfo增加返回新加好友的聊天记录</info>
+        <build>6:添加getTotalUnreadMsgCount接口</build>
         <build>5:升级环信SDK</build>
         <build>4:发送语音添加length参数</build>
         <build>3:添加sendHasReadResponseForMessage等接口</build>
