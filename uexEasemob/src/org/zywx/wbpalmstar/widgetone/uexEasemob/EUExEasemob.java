@@ -1262,7 +1262,11 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             List<String> localNames= EMContactManager.getInstance().getContactUserNames();
             if (localNames!=null){
-                usernames.addAll(localNames);
+                for (String username:localNames) {
+                    if (!usernames.contains(username)) {
+                        usernames.add(username);
+                    }
+                }
             }
         } catch (EaseMobException e) {
         }
@@ -2237,7 +2241,11 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             List<String> tempList = EMContactManager.getInstance().getContactUserNames();
             if (tempList!=null){
-                usernames.addAll(tempList);
+                for (String username:tempList) {
+                    if (!usernames.contains(username)) {
+                        usernames.add(username);
+                    }
+                }
             }
         } catch (EaseMobException e) {
         }
