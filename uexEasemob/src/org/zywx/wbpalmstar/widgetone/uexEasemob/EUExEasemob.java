@@ -1833,6 +1833,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             resultVO.setAllowInvites(group.isAllowInvites());
             resultVO.setMembersOnly(group.isMembersOnly());
             resultVO.setGroupMaxUserCount(group.getMaxUsers());
+            resultVO.setGroupName(group.getGroupName());
+            resultVO.setGroupDescription(group.getDescription());
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
                 + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(resultVO) + "');}";

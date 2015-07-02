@@ -18,6 +18,8 @@ public class GroupResultVO implements Serializable {
     protected int groupMaxUserCount = 0;
     protected boolean isBlock = false;
     private String groupId;
+    private String groupName;//群组名称
+    private String groupDescription;//群组描述
 
     public String getGroupSubject() {
         return groupSubject;
@@ -89,5 +91,21 @@ public class GroupResultVO implements Serializable {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public String getGroupDescription() {
+        return groupDescription;
+    }
+
+    public void setGroupDescription(String groupDescription) {
+        this.groupDescription = groupDescription;
     }
 }
