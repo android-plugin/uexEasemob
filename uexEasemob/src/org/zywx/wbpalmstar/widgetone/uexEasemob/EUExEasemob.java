@@ -615,7 +615,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         //创建一条文本消息
         EMMessage message = EMMessage.createSendMessage(EMMessage.Type.TXT);
         //如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(2).equals(sendInputVO.getChatType())) {
+        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         //设置消息body
@@ -672,7 +672,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         //创建一条文本消息
         EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VOICE);
         //如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(2).equals(sendInputVO.getChatType())) {
+        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         //设置消息body
@@ -725,7 +725,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMConversation conversation = EMChatManager.getInstance().getConversation(sendInputVO.getUsername());
         EMMessage message = EMMessage.createSendMessage(EMMessage.Type.IMAGE);
         //如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(2).equals(sendInputVO.getChatType())) {
+        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         ImageMessageBody body = new ImageMessageBody(new File(sendInputVO.getFilePath()));
@@ -779,7 +779,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMConversation conversation = EMChatManager.getInstance().getConversation(sendInputVO.getUsername());
         EMMessage message = EMMessage.createSendMessage(EMMessage.Type.LOCATION);
 //如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(2).equals(sendInputVO.getChatType())) {
+        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         LocationMessageBody locBody = new LocationMessageBody(sendInputVO.getLocationAddress(), Double.valueOf(sendInputVO.getLatitude()), Double.valueOf(sendInputVO.getLongitude()));
@@ -832,7 +832,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 // 创建一个文件消息
         EMMessage message = EMMessage.createSendMessage(EMMessage.Type.FILE);
 // 如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(2).equals(sendInputVO.getChatType())) {
+        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
 //设置接收人的username
@@ -887,7 +887,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 // 创建一个文件消息
         EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VIDEO);
 // 如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(2).equals(sendInputVO.getChatType())) {
+        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
 //设置接收人的username
@@ -983,7 +983,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         if (String.valueOf("0").equals(inputVO.getPagesize())||TextUtils.isEmpty(inputVO.getPagesize())){
             messages = conversation.getAllMessages();
         }else{
-            if ("2".equals(inputVO.getChatType())){
+            if ("1".equals(inputVO.getChatType())){
                 //是群聊
                 messages=conversation.loadMoreGroupMsgFromDB(inputVO.getStartMsgId(), Integer.parseInt(inputVO.getPagesize()));
             }else{
@@ -2076,7 +2076,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             msg.setTo(inputVO.getTo());
             msg.setMsgTime(System.currentTimeMillis());
         }
-        if ("2".equals(inputVO.getChatType())){
+        if ("1".equals(inputVO.getChatType())){
             msg.setChatType(EMMessage.ChatType.GroupChat);
         }
         EMChatManager.getInstance().importMessage(msg, false);
@@ -2173,7 +2173,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMMessage cmdMsg = EMMessage.createSendMessage(EMMessage.Type.CMD);
 
         //支持单聊和群聊，默认单聊，如果是群聊添加下面这行
-        if ("2".equals(inputVO.getChatType())) {
+        if ("1".equals(inputVO.getChatType())) {
             cmdMsg.setChatType(EMMessage.ChatType.GroupChat);
         }
         String action=inputVO.getAction();//action可以自定义，在广播接收时可以收到
