@@ -150,6 +150,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private List<String> tempContacts=new ArrayList<String>();
 
+    private boolean debug=false;//用于同步调试
+
     public EUExEasemob(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
         mGson =new Gson();
@@ -191,6 +193,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 EMChat.getInstance().setAutoLogin(true);
             }else if ("2".equals(isAutoLogin)){
                 EMChat.getInstance().setAutoLogin(false);
+            }
+            if ("1".equals(jsonObject.optString("debug"))){
+                debug=true;
             }
         } catch (JSONException e) {
         }
@@ -2328,7 +2333,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      * @param script
      */
     private void evaluateRootWindowScript(String script) {
-        evaluateScript("root", 0, script);
+        if (debug){
+            //如果是调试中心
+            evaluateScript("appCanPlayerHome", 0, script);
+        }else{
+            evaluateScript("root", 0, script);
+        }
     }
 
     @Override
