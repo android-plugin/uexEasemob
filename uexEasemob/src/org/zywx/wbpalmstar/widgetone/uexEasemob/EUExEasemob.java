@@ -199,9 +199,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
         } catch (JSONException e) {
         }
-
-        EMChat.getInstance().init(mContext.getApplicationContext());
-        ListenersRegister register=new ListenersRegister();
+         ListenersRegister register=new ListenersRegister();
         register.registerListeners(mContext.getApplicationContext(),mGson);
         register.setCallback(this);
 
@@ -265,6 +263,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_LOGIN + "){"
                         + JSConst.CALLBACK_LOGIN + "('" + mGson.toJson(resultVO) + "');}";
                 evaluateRootWindowScript(js);
+                EMChat.getInstance().setAppInited();
             }
 
             @Override

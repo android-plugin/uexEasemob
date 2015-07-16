@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
-    <plugin uexName="uexEasemob" version="3.0.8" build="8">
-        <info>8:getGroup添加groupName,groupDescription字段</info>
+    <plugin uexName="uexEasemob" version="3.0.9" build="9">
+        <info>9:支持离线消息</info>
+        <build>8:getGroup添加groupName,groupDescription字段</build>
         <build>7:getChatterInfo增加返回新加好友的聊天记录</build>
         <build>6:添加getTotalUnreadMsgCount接口</build>
         <build>5:升级环信SDK</build>

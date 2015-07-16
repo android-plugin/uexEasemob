@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
@@ -55,6 +56,67 @@ public class ListenersRegister {
     public void registerListeners(Context context,Gson gson){
         mContext=context;
         mGson=gson;
+        EMChat.getInstance().init(context);
+        EMChatManager.getInstance().registerEventListener(new EMEventListener() {
+            @Override
+            public void onEvent(EMNotifierEvent event) {
+                 switch (event.getEvent()) {
+                    case EventNewMessage: {// 接收新消息
+                        EMMessage message = (EMMessage) event.getData();
+                        callbackNewMessage(message);
+                        break;
+                    }
+                    case EventDeliveryAck: {//接收已发送回执
+                        EMMessage message = (EMMessage) event.getData();
+                        MessageVO messageVO = new MessageVO();
+                        messageVO.setMsgId(message.getMsgId());
+                        messageVO.setUsername(message.getFrom());
+                        if (callback != null) {
+                            callback.onDeliveryMessage(messageVO);
+                        }
+                        message.isDelivered = true;
+                        break;
+                    }
+
+                    case EventNewCMDMessage: {//接收透传消息
+                        EMMessage message = (EMMessage) event.getData();
+                        callbackNewCMDMessage(message);
+                        break;
+                    }
+
+                    case EventReadAck: {//接收已读回执
+                        EMMessage message = (EMMessage) event.getData();
+                        MessageVO messageVO = new MessageVO();
+                        messageVO.setMsgId(message.getMsgId());
+                        messageVO.setUsername(message.getFrom());
+                        if (callback != null) {
+                            callback.onAckMessage(messageVO);
+                        }
+                        message.isAcked = true;
+                        break;
+                    }
+
+                    case EventOfflineMessage: {//接收离线消息
+                        Log.i("appcan", "EventOfflineMessage");
+                        List<EMMessage> emMessages= (List<EMMessage>) event.getData();
+                        if (emMessages!=null&&!emMessages.isEmpty()){
+                            for (EMMessage emMessage:emMessages){
+                                callbackNewMessage(emMessage);
+                            }
+                        }
+                        break;
+                    }
+
+                    case EventConversationListChanged: {//通知会话列表通知event注册（在某些特殊情况，SDK去删除会话的时候会收到回调监听）
+
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+            }
+        });
         //只有注册了广播才能接收到新消息，目前离线消息，在线消息都是走接收消息的广播（离线消息目前无法监听，在登录以后，接收消息广播会执行一次拿到所有的离线消息）
         EMChatManager.getInstance().getChatOptions().setRequireAck(true);
         //如果用到已读的回执需要把这个flag设置成true
@@ -69,12 +131,9 @@ public class ListenersRegister {
 
         EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
 
-        EMChat.getInstance().setAppInited();
-
         //注册实时语音监听
         IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingCallBroadcastAction());
         context.registerReceiver(new CallReceiver(), callFilter);
-
         //设置通话状态监听
         EMChatManager.getInstance().addVoiceCallStateChangeListener(new EMCallStateChangeListener() {
             @Override
@@ -101,58 +160,7 @@ public class ListenersRegister {
                 callback.onCallStateChanged(outputVO);
             }
         });
-
-        EMChatManager.getInstance().registerEventListener(new EMEventListener() {
-            @Override
-            public void onEvent(EMNotifierEvent event) {
-                EMMessage message = (EMMessage) event.getData();
-
-                switch (event.getEvent()) {
-                    case EventNewMessage: {// 接收新消息
-                        callbackNewMessage(message);
-                        break;
-                    }
-                    case EventDeliveryAck:{//接收已发送回执
-                        MessageVO messageVO=new MessageVO();
-                        messageVO.setMsgId(message.getMsgId());
-                        messageVO.setUsername(message.getFrom());
-                        if (callback!=null){
-                            callback.onDeliveryMessage(messageVO);
-                        }
-                        message.isDelivered=true;
-                        break;
-                    }
-
-                    case EventNewCMDMessage:{//接收透传消息
-                        callbackNewCMDMessage(message);
-                        break;
-                    }
-
-                    case EventReadAck:{//接收已读回执
-                        MessageVO messageVO=new MessageVO();
-                        messageVO.setMsgId(message.getMsgId());
-                        messageVO.setUsername(message.getFrom());
-                        if (callback!=null){
-                            callback.onAckMessage(messageVO);
-                        }
-                        message.isAcked=true;
-                        break;
-                    }
-
-                    case EventOfflineMessage: {//接收离线消息
-                        break;
-                    }
-
-                    case EventConversationListChanged: {//通知会话列表通知event注册（在某些特殊情况，SDK去删除会话的时候会收到回调监听）
-
-                        break;
-                    }
-
-                    default:
-                        break;
-                }
-            }
-        });
+         EMChat.getInstance().setAppInited();
     }
 
 
