@@ -10,6 +10,7 @@ import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.easemob.EMCallBack;
 import com.easemob.EMError;
@@ -67,12 +68,14 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupsOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MessageVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MsgResultVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.ResultVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.SendMsgResultVO;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -146,6 +149,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     private static final int MSG_SEND_HAS_READ_RESPONSE_FOR_MESSAGE=59;
     private static final int MSG_GET_TOTAL_UNREAD_MSG_COUNT=60;
 
+    private static final int MSG_GET_RECENT_CHATTERS=61;
+
     private Gson mGson;
 
     private List<String> tempContacts=new ArrayList<String>();
@@ -200,7 +205,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } catch (JSONException e) {
         }
          ListenersRegister register=new ListenersRegister();
-        register.registerListeners(mContext.getApplicationContext(),mGson);
+        register.registerListeners(mContext.getApplicationContext(), mGson);
         register.setCallback(this);
 
         //如果使用环信的好友体系需要先设置
@@ -246,7 +251,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         msg.obj = this;
         msg.what = MSG_LOGIN;
         Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
+        bd.putSerializable(BUNDLE_DATA, inputVO);
         msg.setData(bd);
         mHandler.sendMessage(msg);
     }
@@ -618,7 +623,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     private void sendTextMsg(SendInputVO sendInputVO) {
         EMConversation conversation = EMChatManager.getInstance().getConversation(sendInputVO.getUsername());
         //创建一条文本消息
-        EMMessage message = EMMessage.createSendMessage(EMMessage.Type.TXT);
+        final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.TXT);
         //如果是群聊，设置chattype,默认是单聊
         if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
@@ -638,6 +643,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
             @Override
             public void onError(int arg0, String arg1) {
+                callbackSendMsgResult(false, arg1, message);
             }
 
             @Override
@@ -647,7 +653,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
             @Override
             public void onSuccess() {
-
+                callbackSendMsgResult(true, null, message);
             }
         });
     }
@@ -675,7 +681,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     private void sendVoiceMsg(SendInputVO sendInputVO) {
         EMConversation conversation = EMChatManager.getInstance().getConversation(sendInputVO.getUsername());
         //创建一条文本消息
-        EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VOICE);
+        final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VOICE);
         //如果是群聊，设置chattype,默认是单聊
         if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
@@ -691,12 +697,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
             @Override
             public void onSuccess() {
-
+                callbackSendMsgResult(true, null, message);
             }
 
             @Override
             public void onError(int i, String s) {
-
+                callbackSendMsgResult(false, s, message);
             }
 
             @Override
@@ -728,7 +734,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private void sendPictureMsg(SendInputVO sendInputVO) {
         EMConversation conversation = EMChatManager.getInstance().getConversation(sendInputVO.getUsername());
-        EMMessage message = EMMessage.createSendMessage(EMMessage.Type.IMAGE);
+        final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.IMAGE);
         //如果是群聊，设置chattype,默认是单聊
         if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
@@ -745,12 +751,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
             @Override
             public void onSuccess() {
-
+                callbackSendMsgResult(true, null, message);
             }
 
             @Override
             public void onError(int i, String s) {
-
+                callbackSendMsgResult(false, s, message);
             }
 
             @Override
@@ -782,7 +788,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private void sendLocationMsgResult(SendInputVO sendInputVO) {
         EMConversation conversation = EMChatManager.getInstance().getConversation(sendInputVO.getUsername());
-        EMMessage message = EMMessage.createSendMessage(EMMessage.Type.LOCATION);
+        final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.LOCATION);
 //如果是群聊，设置chattype,默认是单聊
         if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
@@ -797,12 +803,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
             @Override
             public void onSuccess() {
-
+                callbackSendMsgResult(true, null, message);
             }
 
             @Override
             public void onError(int i, String s) {
-
+                callbackSendMsgResult(false, s, message);
             }
 
             @Override
@@ -835,7 +841,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     private void sendFileMsg(SendInputVO sendInputVO) {
         EMConversation conversation = EMChatManager.getInstance().getConversation(sendInputVO.getUsername());
 // 创建一个文件消息
-        EMMessage message = EMMessage.createSendMessage(EMMessage.Type.FILE);
+        final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.FILE);
 // 如果是群聊，设置chattype,默认是单聊
         if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
@@ -852,12 +858,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
             @Override
             public void onSuccess() {
-
+                callbackSendMsgResult(true, null, message);
             }
 
             @Override
             public void onError(int i, String s) {
-
+                callbackSendMsgResult(false, s, message);
             }
 
             @Override
@@ -890,7 +896,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     private void sendVideoMsg(SendInputVO sendInputVO){
         EMConversation conversation = EMChatManager.getInstance().getConversation(sendInputVO.getUsername());
 // 创建一个文件消息
-        EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VIDEO);
+        final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VIDEO);
 // 如果是群聊，设置chattype,默认是单聊
         if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
@@ -908,12 +914,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
             @Override
             public void onSuccess() {
-
+                callbackSendMsgResult(true,null,message);
             }
 
             @Override
             public void onError(int i, String s) {
-
+                callbackSendMsgResult(false,null,message);
             }
 
             @Override
@@ -2181,7 +2187,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     private void sendCmdMessageMsg(CmdMsgInputVO inputVO) {
-        EMMessage cmdMsg = EMMessage.createSendMessage(EMMessage.Type.CMD);
+        final EMMessage cmdMsg = EMMessage.createSendMessage(EMMessage.Type.CMD);
 
         //支持单聊和群聊，默认单聊，如果是群聊添加下面这行
         if ("1".equals(inputVO.getChatType())) {
@@ -2194,12 +2200,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMChatManager.getInstance().sendMessage(cmdMsg, new EMCallBack() {
             @Override
             public void onSuccess() {
-
+                callbackSendMsgResult(true, null, cmdMsg);
             }
 
             @Override
             public void onError(int i, String s) {
-
+                callbackSendMsgResult(false, null, cmdMsg);
             }
 
             @Override
@@ -2283,7 +2289,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                     infoVO.setGroupName(emGroup.getNick());
                     EMConversation conversation = EMChatManager.getInstance().getConversation(emGroup.getUsername());
                     infoVO.setUnreadMsgCount(String.valueOf(conversation.getUnreadMsgCount()));
-                    if (conversation.getLastMessage()!=null) {
+                    if (conversation.getLastMessage() != null) {
                         infoVO.setLastMsg(ListenersRegister.convertEMMessage(conversation.getLastMessage()));
                     }
                     infoVO.setChatter(emGroup.getUsername());
@@ -2301,6 +2307,43 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 evaluateRootWindowScript(js);
             }
         });
+    }
+
+
+    public void getRecentChatters(String[] params){
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_GET_RECENT_CHATTERS;
+        mHandler.sendMessage(msg);
+    }
+
+    public void getRecentChattersMsg(){
+        List<EMConversation> conversations=HXHelper.loadConversationsWithRecentChat();
+        List<ChatterInfoVO> chatterInfoVOs=new ArrayList<ChatterInfoVO>();
+        if (conversations!=null){
+            for (EMConversation conversation:conversations){
+                ChatterInfoVO infoVO=new ChatterInfoVO();
+                infoVO.setChatType(getChatTypeValue(conversation.getType()));
+                infoVO.setChatter(conversation.getUserName());
+                infoVO.setIsGroup("0");
+                if (conversation.getType()== EMConversation.EMConversationType.GroupChat) {
+                    EMGroup emGroup=EMGroupManager.getInstance().getGroup(conversation.getUserName());
+                    if (emGroup!=null) {
+                        infoVO.setGroupName(emGroup.getNick());
+                        infoVO.setChatter(emGroup.getGroupName());
+                    }
+                    infoVO.setIsGroup("1");
+                }
+                if (conversation.getLastMessage()!=null){
+                    infoVO.setLastMsg(ListenersRegister.convertEMMessage(conversation.getLastMessage()));
+                }
+                infoVO.setUnreadMsgCount(String.valueOf(conversation.getUnreadMsgCount()));
+                chatterInfoVOs.add(infoVO);
+             }
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_RECENT_CHATTERS + "){"
+                    + JSConst.CALLBACK_GET_RECENT_CHATTERS + "('" + mGson.toJson(chatterInfoVOs) + "');}";
+            evaluateRootWindowScript(js);
+        }
     }
 
     public void getTotalUnreadMsgCount(String[] params){
@@ -2323,6 +2366,16 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         params.put("count", String.valueOf(totalCount));
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_TOTAL_UNREAD_MSG_COUNT + "){"
                 + JSConst.CALLBACK_GET_TOTAL_UNREAD_MSG_COUNT + "('" + mGson.toJson(params) + "');}";
+        evaluateRootWindowScript(js);
+    }
+
+    private void callbackSendMsgResult(boolean result,String errorInfo,EMMessage emMessage){
+        SendMsgResultVO resultVO=new SendMsgResultVO();
+        resultVO.setIsSuccess(result);
+        resultVO.setErrorStr(errorInfo);
+        resultVO.setMessage(ListenersRegister.convertEMMessage(emMessage));
+        String js = SCRIPT_HEADER + "if(" + JSConst.ON_MESSAGE_SENT + "){"
+                + JSConst.ON_MESSAGE_SENT + "('" + mGson.toJson(resultVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
@@ -2517,6 +2570,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 break;
             case MSG_GET_TOTAL_UNREAD_MSG_COUNT:
                 getTotalUnreadMsgCountMsg();
+                break;
+            case MSG_GET_RECENT_CHATTERS:
+                getRecentChattersMsg();
                 break;
             default:
                 super.onHandleMessage(message);

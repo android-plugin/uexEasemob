@@ -87,5 +87,6 @@
 
         <method name="getChatterInfo"/>
         <method name="getTotalUnreadMsgCount"/>
+        <method name="getRecentChatters"/>
     </plugin>
 </uexplugins>

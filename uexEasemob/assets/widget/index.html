@@ -46,11 +46,17 @@
 			uexEasemob.onCmdMessageReceive=onCmdMessageReceive;
 			uexEasemob.cbGetChatterInfo=cbGetChatterInfo;
 			uexEasemob.cbGetTotalUnreadMsgCount=cbGetTotalUnreadMsgCount;
+			uexEasemob.cbGetRecentChatters=cbGetRecentChatters;
+			uexEasemob.onMessageSent=onMessageSent;
 		}
 	}
 
+	function onMessageSent(info){
+		alert("onMessageSent "+info);
+	}
+
 	function initEasemob(){
-		uexEasemob.initEasemob('{"isAutoLoginEnabled":"1"}');
+		uexEasemob.initEasemob('{"isAutoLoginEnabled":"0"}');
 	}
 
 	function login(){
@@ -318,7 +324,7 @@
 	}
 
 	function getGroup(){
-		uexEasemob.getGroup('{"groupId":"1426832511577","loadCache":"false"}');
+		uexEasemob.getGroup('{"groupId":"1435745877522","loadCache":"false"}');
 	}
 
 	function cbGetGroup(info){
@@ -326,11 +332,11 @@
 	}
 
 	function blockGroupMessage(){
-		uexEasemob.blockGroupMessage('{"groupId":"1426832511577"}');
+		uexEasemob.blockGroupMessage('{"groupId":"1435745877522"}');
 	}
 
 	function unblockGroupMessage(){
-		uexEasemob.unblockGroupMessage('{"groupId":"1426832511577"}');
+		uexEasemob.unblockGroupMessage('{"groupId":"1435745877522"}');
 	}
 
 	function changeGroupName(){
@@ -419,6 +425,15 @@
     function cbGetTotalUnreadMsgCount(info){
         alert("cbGetTotalUnreadMsgCount "+info);
     }
+
+    function getRecentChatters(){
+	    uexEasemob.getRecentChatters();
+	}
+
+    function cbGetRecentChatters(info){
+        alert("getRecentChatters "+info);
+    }
+
 
 </script>
 </head>
@@ -595,6 +610,8 @@
 			<input class='btn' type='button' value='调用接口' onclick='sendHasReadResponseForMessage()'>
 			<span>57.getTotalUnreadMsgCount</span>
 			<input class='btn' type='button' value='调用接口' onclick='getTotalUnreadMsgCount()'>
+			<span>58.getRecentChatters</span>
+			<input class='btn' type='button' value='调用接口' onclick='getRecentChatters()'>
 		</div>
 	</div>
 </body>
