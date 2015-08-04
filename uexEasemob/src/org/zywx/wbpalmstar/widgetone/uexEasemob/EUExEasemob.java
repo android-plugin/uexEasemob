@@ -61,6 +61,7 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallStateOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.ChatterInfoVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CmdMsgOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.ConversationResultVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupCreateResultVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupInfosOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupOptVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupResultVO;
@@ -914,12 +915,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
             @Override
             public void onSuccess() {
-                callbackSendMsgResult(true,null,message);
+                callbackSendMsgResult(true, null, message);
             }
 
             @Override
             public void onError(int i, String s) {
-                callbackSendMsgResult(false,null,message);
+                callbackSendMsgResult(false, null, message);
             }
 
             @Override
@@ -1495,22 +1496,32 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     private void createPrivateGroupMsg(CreateGroupInputVO inputVO) {
-       if (!TextUtils.isEmpty(inputVO.getMaxUsers())){
-           //前一种方法创建的群聊默认最大群聊用户数为200，传入maxUsers后设置自定义的最大用户数，最大为2000
-           try {
-               EMGroupManager.getInstance().createPrivateGroup(inputVO.getGroupName(), inputVO.getDesc(),
-                       inputVO.getMembers(),Boolean.valueOf(inputVO.getAllowInvite()), Integer.parseInt(inputVO.getMaxUsers()));//需异步处理
-           } catch (EaseMobException e) {
-
-           }
-       }else{
-           try {
-               EMGroupManager.getInstance().createPrivateGroup(inputVO.getGroupName(), inputVO.getDesc(),
-                       inputVO.getMembers(),Boolean.valueOf(inputVO.getAllowInvite()));//需异步处理
-           } catch (EaseMobException e) {
-
-           }
-       }
+        GroupCreateResultVO resultVO = new GroupCreateResultVO();
+        if (!TextUtils.isEmpty(inputVO.getMaxUsers())) {
+            //前一种方法创建的群聊默认最大群聊用户数为200，传入maxUsers后设置自定义的最大用户数，最大为2000
+            try {
+                EMGroup emGroup = EMGroupManager.getInstance().createPrivateGroup(inputVO.getGroupName(), inputVO.getDesc(),
+                        inputVO.getMembers(), Boolean.valueOf(inputVO.getAllowInvite()), Integer.parseInt(inputVO.getMaxUsers()));//需异步处理
+                resultVO.setIsSuccess(true);
+                resultVO.setGroup(convertEMGroup2VO(emGroup));
+            } catch (EaseMobException e) {
+                resultVO.setIsSuccess(false);
+                resultVO.setErrorStr(String.valueOf(e.getErrorCode()));
+            }
+        } else {
+            try {
+                EMGroup emGroup=EMGroupManager.getInstance().createPrivateGroup(inputVO.getGroupName(), inputVO.getDesc(),
+                        inputVO.getMembers(), Boolean.valueOf(inputVO.getAllowInvite()));//需异步处理
+                resultVO.setGroup(convertEMGroup2VO(emGroup));
+                resultVO.setIsSuccess(true);
+            } catch (EaseMobException e) {
+                resultVO.setIsSuccess(false);
+                resultVO.setErrorStr(String.valueOf(e.getErrorCode()));
+            }
+        }
+        String js = SCRIPT_HEADER + "if(" + JSConst.ON_GROUP_CREATED + "){"
+                + JSConst.ON_GROUP_CREATED + "('" + mGson.toJson(resultVO) + "');}";
+        evaluateRootWindowScript(js);
     }
 
     public void createPublicGroup(String[] params){
@@ -1533,23 +1544,33 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     private void createPublicGroupMsg(CreateGroupInputVO inputVO) {
+        GroupCreateResultVO resultVO = new GroupCreateResultVO();
         if (!TextUtils.isEmpty(inputVO.getMaxUsers())){
             //前一种方法创建的群聊默认最大群聊用户数为200，传入maxUsers后设置自定义的最大用户数，最大为2000
             try {
-                EMGroupManager.getInstance().createPublicGroup(inputVO.getGroupName(),
+                EMGroup emGroup=EMGroupManager.getInstance().createPublicGroup(inputVO.getGroupName(),
                         inputVO.getDesc(), inputVO.getMembers(), Boolean.valueOf(inputVO.getNeedApprovalRequired()),
                         Integer.valueOf(inputVO.getMaxUsers()));//需异步处理
+                resultVO.setIsSuccess(true);
+                resultVO.setGroup(convertEMGroup2VO(emGroup));
             } catch (EaseMobException e) {
-
+                resultVO.setIsSuccess(true);
+                resultVO.setErrorStr(String.valueOf(e.getErrorCode()));
             }
         }else{
             try {
-                EMGroupManager.getInstance().createPublicGroup(inputVO.getGroupName(),
+                EMGroup emGroup=EMGroupManager.getInstance().createPublicGroup(inputVO.getGroupName(),
                         inputVO.getDesc(), inputVO.getMembers(), Boolean.valueOf(inputVO.getNeedApprovalRequired()));//需异步处理
+                resultVO.setIsSuccess(true);
+                resultVO.setGroup(convertEMGroup2VO(emGroup));
             } catch (EaseMobException e) {
-
+                resultVO.setIsSuccess(true);
+                resultVO.setErrorStr(String.valueOf(e.getErrorCode()));
             }
         }
+        String js = SCRIPT_HEADER + "if(" + JSConst.ON_GROUP_CREATED + "){"
+                + JSConst.ON_GROUP_CREATED + "('" + mGson.toJson(resultVO) + "');}";
+        evaluateRootWindowScript(js);
     }
 
     public void addUsersToGroup(String[] params){
@@ -1839,6 +1860,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
             }
         }
+        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
+                + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(convertEMGroup2VO(group)) + "');}";
+        evaluateRootWindowScript(js);
+    }
+
+    public static GroupResultVO convertEMGroup2VO(EMGroup group){
         GroupResultVO resultVO=new GroupResultVO();
         if (group!=null){
             resultVO.setGroupId(group.getGroupId());
@@ -1853,9 +1880,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             resultVO.setGroupName(group.getGroupName());
             resultVO.setGroupDescription(group.getDescription());
         }
-        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
-                + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(resultVO) + "');}";
-        evaluateRootWindowScript(js);
+        return resultVO;
     }
 
     public void blockGroupMessage(String[] params){

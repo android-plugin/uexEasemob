@@ -48,4 +48,6 @@ public class JSConst {
     public static final String CALLBACK_GET_RECENT_CHATTERS = "uexEasemob.cbGetRecentChatters";
     public static final String ON_MESSAGE_SENT = "uexEasemob.onMessageSent";
 
+    public static final String ON_GROUP_CREATED = "uexEasemob.onGroupCreated";
+
 }
