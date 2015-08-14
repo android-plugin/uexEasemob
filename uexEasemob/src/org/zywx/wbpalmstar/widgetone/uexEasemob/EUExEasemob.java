@@ -41,6 +41,8 @@ import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.zywx.wbpalmstar.base.BUtility;
+import org.zywx.wbpalmstar.base.FileHelper;
 import org.zywx.wbpalmstar.base.cache.DiskCache;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
@@ -688,7 +690,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         //设置消息body
-        VoiceMessageBody body = new VoiceMessageBody(new File(sendInputVO.getFilePath()), Integer.valueOf(sendInputVO.getLength()));
+        VoiceMessageBody body = new VoiceMessageBody(new File(getRealPath(sendInputVO.getFilePath())), Integer.valueOf(sendInputVO.getLength()));
         message.addBody(body);
         if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
@@ -711,6 +713,14 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
             }
         });
+    }
+
+    public String getRealPath(String path){
+        String realPath=BUtility.makeRealPath(
+                BUtility.makeUrl(mBrwView.getCurrentUrl(), path),
+                mBrwView.getCurrentWidget().m_widgetPath,
+                mBrwView.getCurrentWidget().m_wgtType);
+        return realPath;
     }
 
     public void sendPicture(String[] params){
@@ -740,7 +750,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         if (String.valueOf(1).equals(sendInputVO.getChatType())) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
-        ImageMessageBody body = new ImageMessageBody(new File(sendInputVO.getFilePath()));
+        ImageMessageBody body = new ImageMessageBody(new File(getRealPath(sendInputVO.getFilePath())));
         // 默认超过100k的图片会压缩后发给对方，可以设置成发送原图
         // body.setSendOriginalImage(true);
         message.addBody(body);
@@ -853,7 +863,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             message.setAttribute("ext", sendInputVO.getExt());
         }
 // add message body
-        NormalFileMessageBody body = new NormalFileMessageBody(new File(sendInputVO.getFilePath()));
+        NormalFileMessageBody body = new NormalFileMessageBody(new File(getRealPath(sendInputVO.getFilePath())));
         message.addBody(body);
         conversation.addMessage(message);
         EMChatManager.getInstance().sendMessage(message, new EMCallBack() {
@@ -908,7 +918,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }
-        File videoFile=new File(sendInputVO.getFilePath());
+        File videoFile=new File(getRealPath(sendInputVO.getFilePath()));
         VideoMessageBody body = new VideoMessageBody(videoFile,getThumbPath(sendInputVO.getFilePath()),Integer.valueOf(sendInputVO.getLength()),videoFile.length());
         message.addBody(body);
         conversation.addMessage(message);

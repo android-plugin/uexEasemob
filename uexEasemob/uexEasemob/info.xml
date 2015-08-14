@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
-    <plugin uexName="uexEasemob" version="3.0.11" build="11">
-        <info>11:添加创建群回调onGroupCreated</info>
+    <plugin uexName="uexEasemob" version="3.0.12" build="12">
+        <info>12:发送附件支持wgt,wgts协议</info>
+        <build>11:添加创建群回调onGroupCreated</build>
         <build>10:添加getRecentChatters接口</build>
         <build>9:支持离线消息</build>
         <build>8:getGroup添加groupName,groupDescription字段</build>
