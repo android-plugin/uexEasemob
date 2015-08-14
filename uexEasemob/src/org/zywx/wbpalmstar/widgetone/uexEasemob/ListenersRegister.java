@@ -31,6 +31,8 @@ import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.NetUtils;
 import com.google.gson.Gson;
 
+import org.zywx.wbpalmstar.widgetone.uexEasemob.model.DefaultHXSDKModel;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.model.HXSDKModel;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallReceiveOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallStateOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CmdMsgOutputVO;
@@ -53,10 +55,17 @@ public class ListenersRegister {
 
     private Gson mGson;
 
+    public static HXSDKHelper hxsdkHelper=new HXSDKHelper() {
+        @Override
+        protected HXSDKModel createModel() {
+            return null;
+        }
+    };
+
     public void registerListeners(Context context,Gson gson){
         mContext=context;
         mGson=gson;
-        EMChat.getInstance().init(context);
+        hxsdkHelper.onInit(context);
         EMChatManager.getInstance().registerEventListener(new EMEventListener() {
             @Override
             public void onEvent(EMNotifierEvent event) {
@@ -64,6 +73,9 @@ public class ListenersRegister {
                     case EventNewMessage: {// 接收新消息
                         EMMessage message = (EMMessage) event.getData();
                         callbackNewMessage(message);
+                        if (isRunBackground()){
+                            HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
+                        }
                         break;
                     }
                     case EventDeliveryAck: {//接收已发送回执
@@ -103,6 +115,9 @@ public class ListenersRegister {
                             for (EMMessage emMessage:emMessages){
                                 callbackNewMessage(emMessage);
                             }
+                        }
+                        if (isRunBackground()){
+                            HXSDKHelper.getInstance().getNotifier().onNewMesg(emMessages);
                         }
                         break;
                     }
@@ -163,6 +178,9 @@ public class ListenersRegister {
          EMChat.getInstance().setAppInited();
     }
 
+    public boolean isRunBackground(){
+        return true;
+    }
 
     private class CallReceiver extends BroadcastReceiver {
 
