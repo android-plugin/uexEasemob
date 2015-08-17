@@ -2250,7 +2250,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         });
     }
 
-    public void updateCurrentUserNick(String[] params){
+    public void updateCurrentUserNickname(String[] params){
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
             return;

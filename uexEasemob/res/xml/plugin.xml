@@ -83,7 +83,7 @@
         <method name="sendCmdMessage" />
         <method name="onCmdMessageReceive" />
 
-        <method name="updateCurrentUserNick" />
+        <method name="updateCurrentUserNickname" />
 
         <method name="getChatterInfo"/>
         <method name="getTotalUnreadMsgCount"/>
