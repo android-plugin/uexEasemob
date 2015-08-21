@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.easemob.EMConnectionListener;
@@ -346,7 +347,7 @@ public class ListenersRegister {
         resultVO.setIsGroup(message.getChatType() == EMMessage.ChatType.GroupChat ? "1" : "0");
         resultVO.setChatType(EUExEasemob.getChatTypeValue(message.getChatType()));
         resultVO.setIsAcked(message.isAcked() ? "1" : "0");
-        resultVO.setMessageBody(getMessageBody(message,message.getType()));
+        resultVO.setMessageBody(getMessageBody(message, message.getType()));
         try {
             resultVO.setExt(message.getStringAttribute("ext"));
         } catch (EaseMobException e) {
@@ -370,19 +371,22 @@ public class ListenersRegister {
         }else if (type== EMMessage.Type.FILE){
             FileMessageBody messageBody= (FileMessageBody) message.getBody();
             msgBodyVO.setDisplayName(messageBody.getFileName());
-            msgBodyVO.setRemotePath(messageBody.getRemoteUrl() == null ? messageBody.getLocalUrl() : messageBody.getRemoteUrl());
+            msgBodyVO.setRemotePath(isEmpty(messageBody.getRemoteUrl())? messageBody.getLocalUrl() :
+                    messageBody.getRemoteUrl());
             msgBodyVO.setSecretKey(messageBody.getSecret());
         }else if (type== EMMessage.Type.IMAGE){
             ImageMessageBody messageBody= (ImageMessageBody) message.getBody();
             msgBodyVO.setDisplayName(messageBody.getFileName());
-            msgBodyVO.setRemotePath(messageBody.getRemoteUrl()==null?messageBody.getLocalUrl():messageBody.getRemoteUrl());
+            msgBodyVO.setRemotePath(isEmpty(messageBody.getRemoteUrl())?messageBody.getLocalUrl():messageBody
+                    .getRemoteUrl());
             msgBodyVO.setSecretKey(messageBody.getSecret());
             msgBodyVO.setThumbnailRemotePath(messageBody.getThumbnailUrl());
             msgBodyVO.setThumbnailSecretKey(messageBody.getThumbnailSecret());
         }else if (type== EMMessage.Type.VIDEO){
             VideoMessageBody messageBody= (VideoMessageBody) message.getBody();
             msgBodyVO.setDisplayName(messageBody.getFileName());
-            msgBodyVO.setRemotePath(messageBody.getRemoteUrl()==null?messageBody.getLocalUrl():messageBody.getRemoteUrl());
+            msgBodyVO.setRemotePath(isEmpty(messageBody.getRemoteUrl())?messageBody.getLocalUrl():messageBody
+                    .getRemoteUrl());
             msgBodyVO.setSecretKey(messageBody.getSecret());
             msgBodyVO.setLength(String.valueOf(messageBody.getLength()));
             msgBodyVO.setThumbnailRemotePath(messageBody.getThumbnailUrl());
@@ -391,10 +395,18 @@ public class ListenersRegister {
             VoiceMessageBody messageBody= (VoiceMessageBody) message.getBody();
             msgBodyVO.setDisplayName(messageBody.getFileName());
             msgBodyVO.setLength(String.valueOf(messageBody.getLength()));
-            msgBodyVO.setRemotePath(messageBody.getRemoteUrl()==null?messageBody.getLocalUrl():messageBody.getRemoteUrl());
+            msgBodyVO.setRemotePath(isEmpty(messageBody.getRemoteUrl())?messageBody.getLocalUrl():messageBody
+                    .getRemoteUrl());
             msgBodyVO.setSecretKey(messageBody.getSecret());
         }
         return msgBodyVO;
+    }
+
+    public static boolean isEmpty(String value){
+        if (TextUtils.isEmpty(value)||"null".equals(value)){
+            return true;
+        }
+        return false;
     }
 
     private static String getMsgType(EMMessage.Type type){

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
-    <plugin uexName="uexEasemob" version="3.0.12" build="12">
-        <info>12:发送附件支持wgt,wgts协议</info>
+    <plugin uexName="uexEasemob" version="3.0.13" build="13">
+        <info>13:修复重新登陆后消息记录remoteUrl为空的问题</info>
+        <build>12:发送附件支持wgt,wgts协议</build>
         <build>11:添加创建群回调onGroupCreated</build>
         <build>10:添加getRecentChatters接口</build>
         <build>9:支持离线消息</build>
