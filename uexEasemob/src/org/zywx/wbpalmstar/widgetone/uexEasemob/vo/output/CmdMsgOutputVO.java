@@ -1,5 +1,6 @@
 package org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output;
 
+
 import java.io.Serializable;
 
 /**
@@ -9,7 +10,7 @@ public class CmdMsgOutputVO implements Serializable {
     private static final long serialVersionUID = 5593033161174598040L;
 
     private String msgId;
-    private String message;
+    private MsgResultVO message;
     private String action;
 
     public String getMsgId() {
@@ -20,11 +21,11 @@ public class CmdMsgOutputVO implements Serializable {
         this.msgId = msgId;
     }
 
-    public String getMessage() {
+    public MsgResultVO getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
+    public void setMessage(MsgResultVO message) {
         this.message = message;
     }
 

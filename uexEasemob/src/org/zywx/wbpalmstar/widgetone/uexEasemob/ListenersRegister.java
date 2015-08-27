@@ -331,7 +331,7 @@ public class ListenersRegister {
         String aciton = cmdMsgBody.action;//获取自定义action
         CmdMsgOutputVO outputVO=new CmdMsgOutputVO();
         outputVO.setAction(aciton);
-        outputVO.setMessage(new Gson().toJson(message));
+        outputVO.setMessage(convertEMMessage(message));
         outputVO.setMsgId(message.getMsgId());
         callback.onCmdMessageReceive(outputVO);
     }
