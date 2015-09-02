@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
-    <plugin uexName="uexEasemob" version="3.0.14" build="14">
-        <info>14:修复CMD消息json不能解析的问题</info>
+    <plugin uexName="uexEasemob" version="3.0.15" build="15">
+        <info>15:去掉特殊字符</info>
+        <build>14:修复CMD消息json不能解析的问题</build>
         <build>13:修复重新登陆后消息记录remoteUrl为空的问题</build>
         <build>12:发送附件支持wgt,wgts协议</build>
         <build>11:添加创建群回调onGroupCreated</build>

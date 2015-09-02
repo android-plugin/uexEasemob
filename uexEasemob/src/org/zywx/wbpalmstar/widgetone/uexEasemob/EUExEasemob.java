@@ -1081,7 +1081,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         conversation.resetUnreadMsgCount();
     }
 
-    public void sendHasReadResponseForMessage(String[] params){
+    public void sendHasReadResponseForMessage(String[] params){
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
             return;
