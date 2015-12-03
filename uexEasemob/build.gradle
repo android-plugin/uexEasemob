@@ -3,11 +3,14 @@ apply plugin: 'com.android.application'
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     compile files('libs/easemobchat_2.1.9.jar')
+    compile files('libs/AppCanEngine-Easemob.jar')
+    compile files('libs/AppCanEngine-Ease.jar')
+    compile files('libs/easemobchat_2.1.91.jar')
 }
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 22
+    buildToolsVersion "23.0.0"
 
     defaultConfig {
         // 应用的包名
