@@ -3,14 +3,12 @@ package org.zywx.wbpalmstar.widgetone.uexEasemob;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.easemob.EMCallBack;
 import com.easemob.EMError;
@@ -42,7 +40,6 @@ import com.google.gson.reflect.TypeToken;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.zywx.wbpalmstar.base.BUtility;
-import org.zywx.wbpalmstar.base.FileHelper;
 import org.zywx.wbpalmstar.base.cache.DiskCache;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
@@ -54,10 +51,10 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.GroupInfoVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.HistoryInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.ImportMsgInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.NicknameVO;
-import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.PageVO;
-import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.UserInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.NotifySettingVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.PageVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.SendInputVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.UserInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallReceiveOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallStateOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.ChatterInfoVO;
@@ -78,7 +75,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -205,6 +201,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             if ("1".equals(jsonObject.optString("debug"))){
                 debug=true;
             }
+            String appKey=jsonObject.optString("appKey");
+            EMChat.getInstance().setAppkey(appKey);
         } catch (JSONException e) {
         }
          ListenersRegister register=new ListenersRegister();
