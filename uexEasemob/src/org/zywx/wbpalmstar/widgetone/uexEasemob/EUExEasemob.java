@@ -65,6 +65,7 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupInfosOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupOptVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupResultVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.GroupsOutputVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MessageHistoryVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MessageVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MsgResultVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.ResultVO;
@@ -1016,8 +1017,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 resultVOs.add(ListenersRegister.convertEMMessage(emMessage));
             }
         }
+        MessageHistoryVO historyVO=new MessageHistoryVO();
+        historyVO.messages=resultVOs;
         String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "){"
-                + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "('" + mGson.toJson(resultVOs) + "');}";
+                + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "('" + mGson.toJson(historyVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
