@@ -32,7 +32,6 @@ import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.NetUtils;
 import com.google.gson.Gson;
 
-import org.zywx.wbpalmstar.widgetone.uexEasemob.model.DefaultHXSDKModel;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.model.HXSDKModel;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallReceiveOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallStateOutputVO;
@@ -366,7 +365,7 @@ public class ListenersRegister {
         }else if (type== EMMessage.Type.LOCATION){
             LocationMessageBody messageBody= (LocationMessageBody) message.getBody();
             msgBodyVO.setLatitude(String.valueOf(messageBody.getLatitude()));
-            msgBodyVO.setLongitute(String.valueOf(messageBody.getLongitude()));
+            msgBodyVO.setLongitude(String.valueOf(messageBody.getLongitude()));
             msgBodyVO.setAddress(messageBody.getAddress());
         }else if (type== EMMessage.Type.FILE){
             FileMessageBody messageBody= (FileMessageBody) message.getBody();

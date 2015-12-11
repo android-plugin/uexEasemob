@@ -11,7 +11,7 @@ public class MsgBodyVO implements Serializable {
 
     private String text;
     private String action;
-    private String longitute;
+    private String longitude;
     private String latitude;
     private String address;
     private String displayName;
@@ -36,12 +36,12 @@ public class MsgBodyVO implements Serializable {
         this.action = action;
     }
 
-    public String getLongitute() {
-        return longitute;
+    public String getLongitude() {
+        return longitude;
     }
 
-    public void setLongitute(String longitute) {
-        this.longitute = longitute;
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
     }
 
     public String getLatitude() {
