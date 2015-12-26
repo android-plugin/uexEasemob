@@ -48,7 +48,12 @@
 			uexEasemob.cbGetTotalUnreadMsgCount=cbGetTotalUnreadMsgCount;
 			uexEasemob.cbGetRecentChatters=cbGetRecentChatters;
 			uexEasemob.onMessageSent=onMessageSent;
+			uexEasemob.onGroupCreated=onGroupCreated;
 		}
+	}
+
+	function onGroupCreated(info){
+		alert("onGroupCreated "+info);
 	}
 
 	function onMessageSent(info){
@@ -56,7 +61,7 @@
 	}
 
 	function initEasemob(){
-		uexEasemob.initEasemob('{"isAutoLoginEnabled":"0"}');
+		uexEasemob.initEasemob('{"isAutoLoginEnabled":"0","appKey":"easemob-demo#chatdemoui"}');
 	}
 
 	function login(){
@@ -168,7 +173,7 @@
 	}
 
 	function sendText(){
-		uexEasemob.sendText('{"username":"ylt1","chatType":"1","content":"send from js..."}');
+		uexEasemob.sendText('{"username":"ylt1","chatType":"0","content":"send from js...","ext":"name=1&p=2"}');
 	}
 
 	function sendVoice(){
@@ -188,7 +193,7 @@
 	}
 
 	function getMessageHistory(){
-		uexEasemob.getMessageHistory('{"username":"ylt1","chatType":"1","startMsgId":"0","pagesize":"0"}');
+		uexEasemob.getMessageHistory('{"username":"ylt1","chatType":"0","startMsgId":"0","pagesize":"0"}');
 	}
 
 	function cbGetMessageHistory(info){
@@ -248,7 +253,7 @@
 	}
 
 	function addContact(){
-		uexEasemob.addContact('{"toAddUsername":"ylt1","reason":"reason ...."}');
+		uexEasemob.addContact('{"toAddUsername":"appcanuser2","reason":"reason ...."}');
 	}
 
 	function deleteContact(){
