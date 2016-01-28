@@ -2,10 +2,6 @@ apply plugin: 'com.android.application'
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
-    compile files('libs/easemobchat_2.1.9.jar')
-    compile files('libs/AppCanEngine-Easemob.jar')
-    compile files('libs/AppCanEngine-Ease.jar')
-    compile files('libs/easemobchat_2.1.91.jar')
 }
 
 android {
@@ -16,7 +12,11 @@ android {
         // 应用的包名
         applicationId "org.zywx.wbpalmstar.widgetone.uexEasemob"
     }
-
+    packagingOptions {
+        exclude 'META-INF/MANIFEST.MF'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'

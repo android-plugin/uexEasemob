@@ -39,6 +39,7 @@ import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.base.BUtility;
 import org.zywx.wbpalmstar.base.cache.DiskCache;
 import org.zywx.wbpalmstar.engine.EBrowserView;
@@ -1259,14 +1260,31 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     private void setNotifyBySoundAndVibrateMsg(NotifySettingVO settingVO) {
-        EMChatOptions chatOptions=EMChatManager.getInstance().getChatOptions();
+        EMChatOptions chatOptions = EMChatManager.getInstance().getChatOptions();
         //setting里面字段不传时值为null
-        chatOptions.setNotifyBySoundAndVibrate(!"0".equals(settingVO.getEnable())); //默认为true 开启新消息提醒
-        chatOptions.setNoticeBySound(!"0".equals(settingVO.getSoundEnable())); //默认为true 开启声音提醒
-        chatOptions.setNoticedByVibrate(!"0".equals(settingVO.getVibrateEnable())); //默认为true 开启震动提醒
-        chatOptions.setUseSpeaker(!"0".equals(settingVO.getUserSpeaker())); //默认为true 开启扬声器播放
-        chatOptions.setShowNotificationInBackgroud(!"0".equals(settingVO.getShowNotificationInBackgroud())); //默认为true
-        chatOptions.setAcceptInvitationAlways(!"0".equals(settingVO.getAcceptInvitationAlways()));
+        if (!TextUtils.isEmpty(settingVO.getEnable())) {
+            //默认为true 开启新消息提醒
+            ListenersRegister.hxsdkHelper.hxModel.setSettingMsgNotification(!"0".equals(settingVO.getEnable()));
+        }
+        if (!TextUtils.isEmpty(settingVO.getSoundEnable())) {
+            //默认为true 开启声音提醒
+            ListenersRegister.hxsdkHelper.hxModel.setSettingMsgSound(!"0".equals(settingVO.getSoundEnable()));
+        }
+        if (!TextUtils.isEmpty(settingVO.getVibrateEnable())) {
+            //默认为true 开启震动提醒
+            ListenersRegister.hxsdkHelper.hxModel.setSettingMsgVibrate(!"0".equals(settingVO.getVibrateEnable()));
+
+        }
+        if (!TextUtils.isEmpty(settingVO.getUserSpeaker())) {
+            ListenersRegister.hxsdkHelper.hxModel.setSettingMsgSpeaker(!"0".equals(settingVO.getUserSpeaker()));
+            //默认为true 开启扬声器播放
+        }
+        if (!TextUtils.isEmpty(settingVO.getShowNotificationInBackgroud())) {
+            chatOptions.setShowNotificationInBackgroud(!"0".equals(settingVO.getShowNotificationInBackgroud())); //默认为true
+        }
+        if (!TextUtils.isEmpty(settingVO.getAcceptInvitationAlways())) {
+            chatOptions.setAcceptInvitationAlways(!"0".equals(settingVO.getAcceptInvitationAlways()));
+        }
     }
 
     public void getContactUserNames(String[] params){
@@ -1919,7 +1937,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMGroupManager.getInstance().blockGroupMessage(infoVO.getGroupId());//需异步处理
         } catch (EaseMobException e) {
-
+            if (BDebug.DEBUG){
+                e.printStackTrace();
+            }
         }
     }
 

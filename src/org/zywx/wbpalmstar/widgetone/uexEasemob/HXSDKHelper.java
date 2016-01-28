@@ -13,10 +13,6 @@
  */
 package org.zywx.wbpalmstar.widgetone.uexEasemob;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -37,6 +33,10 @@ import com.easemob.exceptions.EaseMobException;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.model.DefaultHXSDKModel;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.model.HXNotifier;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.model.HXSDKModel;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * The developer can derive from this class to talk with HuanXin SDK
@@ -285,7 +285,7 @@ public abstract class HXSDKHelper {
         options.setRequireDeliveryAck(hxModel.getRequireDeliveryAck());
         // 设置从db初始化加载时, 每个conversation需要加载msg的个数
         options.setNumberOfMessagesLoaded(20);
-        
+
         notifier = createNotifier();
         notifier.init(appContext);
         
