@@ -2386,7 +2386,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                     EMGroup emGroup=EMGroupManager.getInstance().getGroup(conversation.getUserName());
                     if (emGroup!=null) {
                         infoVO.setGroupName(emGroup.getNick());
-                        infoVO.setChatter(emGroup.getGroupName());
+                        infoVO.setChatter(emGroup.getGroupId());
                     }
                     infoVO.setIsGroup("1");
                 }
