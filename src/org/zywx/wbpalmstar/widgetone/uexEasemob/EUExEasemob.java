@@ -158,6 +158,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private boolean debug=false;//用于同步调试
 
+    private boolean mHasInit =false;
+
     public EUExEasemob(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
         mGson =new Gson();
@@ -179,7 +181,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void initEasemobMsg(String[] param){
-
+        if (mHasInit){
+            return;
+        }
+        mHasInit =true;
         int pid = android.os.Process.myPid();
         String processAppName = getAppName(pid);
         // 如果app启用了远程的service，此application:onCreate会被调用2次
