@@ -1,5 +1,7 @@
 package org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input;
 
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -18,6 +20,7 @@ public class SendInputVO implements Serializable {
     private String longitude;
     private String length;
     private String ext;
+    private JSONObject extObj;
 
     public String getUsername() {
         return username;
@@ -90,5 +93,13 @@ public class SendInputVO implements Serializable {
 
     public void setExt(String ext) {
         this.ext = ext;
+    }
+
+    public JSONObject getExtObj() {
+        return extObj;
+    }
+
+    public void setExtObj(JSONObject extObj) {
+        this.extObj = extObj;
     }
 }

@@ -24,7 +24,9 @@ public class JSConst {
     public static final String ON_GROUP_DESTROY="uexEasemob.onGroupDestroy";
     public static final String ON_APPLICATION_RECEIVED="uexEasemob.onApplicationReceived";
     public static final String ON_APPLICATION_ACCEPT="uexEasemob.onApplicationAccept";
-    public static final String ON_INVITATION_RECEIVED="uexEasemob.onInvitationReceived";
+    //public static final String ON_INVITATION_RECEIVED="uexEasemob.onInvitationReceived";
+    //重命名回调接口和iOS保持一致。
+    public static final String ON_INVITATION_RECEIVED="uexEasemob.onReceiveGroupInvitation";
     public static final String ON_APPLICATION_DECLINED="uexEasemob.onApplicationDeclined";
     public static final String CALLBACK_GET_MESSAGE_HISTORY = "uexEasemob.cbGetMessageHistory";
     public static final String CALLBACK_GET_UNREAD_MSG_COUNT = "uexEasemob.cbGetUnreadMsgCount";
@@ -50,4 +52,5 @@ public class JSConst {
 
     public static final String ON_GROUP_CREATED = "uexEasemob.onGroupCreated";
 
+    public static final String ON_DID_JOINED_GROUP = "uexEasemob.onDidJoinedGroup";
 }

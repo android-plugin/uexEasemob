@@ -72,6 +72,10 @@
         <method name="blockUser" />
         <method name="unblockUser" />
         <method name="getBlockedUsers"/>
+        <method name="acceptJoinApplication"/>
+        <method name="declineJoinApplication"/>
+        <method name="acceptInvitationFromGroup"/>
+        <method name="declineInvitationFromGroup"/>
 
         <method name="importMessage" />
         <method name="onCallReceive" />

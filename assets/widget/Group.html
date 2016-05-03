@@ -58,7 +58,7 @@ function createPrivateGroup(){
         var needApprovalRequired = document.getElementById("createPublicGroupneedApprovalRequired").value;
         var maxUsers = document.getElementById("createPublicGroupmaxUsers").value;
         var initialWelcomeMessage = document.getElementById("createPublicGroupinitialWelcomeMessage").value;
-        uexEasemob.createPublicGroup('{"groupName":"'+groupName+'","desc":"'+desc+'","members":"'+members+'","needApprovalRequired":"'+needApprovalRequired+'","maxUsers":"'+maxUsers+'","initialWelcomeMessage":"'+initialWelcomeMessage+'"}');
+        uexEasemob.createPublicGroup('{"groupName":"'+groupName+'","desc":"'+desc+'","members":'+members+',"needApprovalRequired":"'+needApprovalRequired+'","maxUsers":"'+maxUsers+'","initialWelcomeMessage":"'+initialWelcomeMessage+'"}');
     }
     
     //[5.9]
@@ -66,7 +66,7 @@ function createPrivateGroup(){
         var isGroupOwner = document.getElementById("addUsersToGroupisGroupOwner").value;
         var groupId = document.getElementById("addUsersToGroupgroupId").value;
         var newmembers = document.getElementById("addUsersToGroupnewmembers").value;
-        uexEasemob.addUsersToGroup('{"isGroupOwner":"'+isGroupOwner+'","groupId":"'+groupId+'","newmembers":"'+newmembers+'"}');
+        uexEasemob.addUsersToGroup('{"isGroupOwner":"'+isGroupOwner+'","groupId":"'+groupId+'","newmembers":'+newmembers+'}');
     }
     
     //[5.10]
@@ -161,6 +161,36 @@ function createPrivateGroup(){
         uexEasemob.getBlockedUsers('{"groupId":"'+groupId+'"}');
     }
     
+    function acceptJoinApplication(){
+        var params={
+            groupId:document.getElementById("acceptJoinApplication_groupId").value,
+            username:document.getElementById("acceptJoinApplication_username").value
+        }
+        uexEasemob.acceptJoinApplication(JSON.stringify(params));
+    }
+    function declineJoinApplication(){
+        var params={
+            groupId:document.getElementById("declineJoinApplication_groupId").value,
+            username:document.getElementById("declineJoinApplication_username").value,
+            reason:document.getElementById("declineJoinApplication_reason").value,
+        }
+        uexEasemob.declineJoinApplication(JSON.stringify(params));
+    }
+    function acceptInvitationFromGroup(){
+        var params={
+            groupId:document.getElementById("acceptInvitationFromGroup_groupId").value,
+            username:document.getElementById("acceptInvitationFromGroup_username").value
+        }
+        uexEasemob.acceptInvitationFromGroup(JSON.stringify(params));
+    }
+    function declineInvitationFromGroup(){
+        var params={
+            groupId:document.getElementById("declineInvitationFromGroup_groupId").value,
+            username:document.getElementById("declineInvitationFromGroup_username").value,
+            reason:document.getElementById("declineInvitationFromGroup_reason").value,
+        }
+        uexEasemob.declineInvitationFromGroup(JSON.stringify(params));
+    }
 
 
        </script>
@@ -187,93 +217,117 @@ function createPrivateGroup(){
             
              <div> </div><div>======Group==========</div>
              
-             <div> </div><span>[5.7]  createPrivateGroup</span>
+             <div> </div><span>createPrivateGroup</span>
              <div>groupName:</div><input class="textbox" type="text" id="createPrivateGroupgroupName" value="testPrivateGroup"></input>
              <div>desc:</div><input class="textbox" type="text" id="createPrivateGroupdesc" value="uexEasemobPrivateGroupTest"></input>
-             <div>members:</div><input class="textbox" type="text" id="createPrivateGroupmembers" value='["appcanuser2"]'></input>
+             <div>members:</div><input class="textbox" type="text" id="createPrivateGroupmembers" value='["mikuser2"]'></input>
              <div>allowInvite:</div><input class="textbox" type="text" id="createPrivateGroupallowInvite" value="1"></input>
              <div>maxUsers:</div><input class="textbox" type="text" id="createPrivateGroupmaxUsers" value="20"></input>
              <div>initialWelcomeMessage:</div><input class="textbox" type="text" id="createPrivateGroupinitialWelcomeMessage" value="Welcome to a Private Group!"></input>
              <input class='btn' type='button' value='调用接口' onclick='createPrivateGroup()'></input>
              
-             <div> </div><span>[5.8]  createPublicGroup</span>
-             <div>groupName:</div><input class="textbox" type="text" id="createPublicGroupgroupName" value=""></input>
-             <div>desc:</div><input class="textbox" type="text" id="createPublicGroupdesc" value=""></input>
-             <div>members:</div><input class="textbox" type="text" id="createPublicGroupmembers" value=""></input>
-             <div>needApprovalRequired:</div><input class="textbox" type="text" id="createPublicGroupneedApprovalRequired" value=""></input>
-             <div>maxUsers:</div><input class="textbox" type="text" id="createPublicGroupmaxUsers" value=""></input>
-             <div>initialWelcomeMessage:</div><input class="textbox" type="text" id="createPublicGroupinitialWelcomeMessage" value=""></input>
+             <div> </div><span> createPublicGroup</span>
+             <div>groupName:</div><input class="textbox" type="text" id="createPublicGroupgroupName" value="testPublicGroup222"></input>
+             <div>desc:</div><input class="textbox" type="text" id="createPublicGroupdesc" value="uexEasemobPublicGroupTest"></input>
+             <div>members:</div><input class="textbox" type="text" id="createPublicGroupmembers" value='["mikuser2"]'></input>
+             <div>needApprovalRequired:</div><input class="textbox" type="text" id="createPublicGroupneedApprovalRequired" value="1"></input>
+             <div>maxUsers:</div><input class="textbox" type="text" id="createPublicGroupmaxUsers" value="30"></input>
+             <div>initialWelcomeMessage:</div><input class="textbox" type="text" id="createPublicGroupinitialWelcomeMessage" value="A Public Group!"></input>
              <input class='btn' type='button' value='调用接口' onclick='createPublicGroup()'></input>
              
-             <div> </div><span>[5.9]  addUsersToGroup</span>
+             <div> </div><span>addUsersToGroup</span>
              <div>isGroupOwner:</div><input class="textbox" type="text" id="addUsersToGroupisGroupOwner" value=""></input>
-             <div>groupId:</div><input class="textbox" type="text" id="addUsersToGroupgroupId" value=""></input>
-             <div>newmembers:</div><input class="textbox" type="text" id="addUsersToGroupnewmembers" value=""></input>
+             <div>groupId:</div><input class="textbox" type="text" id="addUsersToGroupgroupId" value="1461216725947"></input>
+             <div>newmembers:</div><input class="textbox" type="text" id="addUsersToGroupnewmembers" value='["mikuser2"]'></input>
              <input class='btn' type='button' value='调用接口' onclick='addUsersToGroup()'></input>
              
-             <div> </div><span>[5.10]  removeUserFromGroup</span>
-             <div>groupId:</div><input class="textbox" type="text" id="removeUserFromGroupgroupId" value=""></input>
-             <div>username:</div><input class="textbox" type="text" id="removeUserFromGroupusername" value=""></input>
+             <div> </div><span>removeUserFromGroup</span>
+             <div>groupId:</div><input class="textbox" type="text" id="removeUserFromGroupgroupId" value="1461216725947"></input>
+             <div>username:</div><input class="textbox" type="text" id="removeUserFromGroupusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='removeUserFromGroup()'></input>
              
-             <div> </div><span>[5.11]  joinGroup</span>
-             <div>groupId:</div><input class="textbox" type="text" id="joinGroupgroupId" value=""></input>
+             <div> </div><span>joinGroup</span>
+             <div>groupId:</div><input class="textbox" type="text" id="joinGroupgroupId" value="1461216725947"></input>
              <div>reason:</div><input class="textbox" type="text" id="joinGroupreason" value=""></input>
              <div>groupName:</div><input class="textbox" type="text" id="joinGroupgroupName" value=""></input>
              <input class='btn' type='button' value='调用接口' onclick='joinGroup()'></input>
              
-             <div> </div><span>[5.12]  exitFromGroup</span>
-             <div>groupId:</div><input class="textbox" type="text" id="exitFromGroupgroupId" value=""></input>
+             <div> </div><span>exitFromGroup</span>
+             <div>groupId:</div><input class="textbox" type="text" id="exitFromGroupgroupId" value="1461216725947"></input>
              <input class='btn' type='button' value='调用接口' onclick='exitFromGroup()'></input>
              
-             <div> </div><span>[5.13]  exitAndDeleteGroup</span>
-             <div>groupId:</div><input class="textbox" type="text" id="exitAndDeleteGroupgroupId" value=""></input>
+             <div> </div><span>exitAndDeleteGroup</span>
+             <div>groupId:</div><input class="textbox" type="text" id="exitAndDeleteGroupgroupId" value="1461216725947"></input>
              <input class='btn' type='button' value='调用接口' onclick='exitAndDeleteGroup()'></input>
              
-             <div> </div><span>[5.14]  getGroupsFromServer</span>
+             <div> </div><span>getGroupsFromServer</span>
              <div>loadCache:</div><input class="textbox" type="text" id="getGroupsFromServerloadCache" value=""></input>
              <input class='btn' type='button' value='调用接口' onclick='getGroupsFromServer()'></input>
              
-             <div> </div><span>[5.16]  getAllPublicGroupsFromServer</span>
+             <div> </div><span>getAllPublicGroupsFromServer</span>
              <div>pageSize:</div><input class="textbox" type="text" id="getAllPublicGroupsFromServerpageSize" value=""></input>
              <div>cursor:</div><input class="textbox" type="text" id="getAllPublicGroupsFromServercursor" value=""></input>
              <input class='btn' type='button' value='调用接口' onclick='getAllPublicGroupsFromServer()'></input>
              
-             <div> </div><span>[5.18]  getGroup</span>
-             <div>groupId:</div><input class="textbox" type="text" id="getGroupgroupId" value="1435543608122"></input>
+             <div> </div><span>getGroup</span>
+             <div>groupId:</div><input class="textbox" type="text" id="getGroupgroupId" value="1461216725947"></input>
              <div>loadCache:</div><input class="textbox" type="text" id="getGrouploadCache" value=""></input>
              <input class='btn' type='button' value='调用接口' onclick='getGroup()'></input>
              
-             <div> </div><span>[5.20]  blockGroupMessage</span>
-             <div>groupId:</div><input class="textbox" type="text" id="blockGroupMessagegroupId" value=""></input>
+             <div> </div><span>blockGroupMessage</span>
+             <div>groupId:</div><input class="textbox" type="text" id="blockGroupMessagegroupId" value="1461216725947"></input>
              <input class='btn' type='button' value='调用接口' onclick='blockGroupMessage()'></input>
              
-             <div> </div><span>[5.21]  unblockGroupMessage</span>
-             <div>groupId:</div><input class="textbox" type="text" id="unblockGroupMessagegroupId" value=""></input>
+             <div> </div><span>unblockGroupMessage</span>
+             <div>groupId:</div><input class="textbox" type="text" id="unblockGroupMessagegroupId" value="1461216725947"></input>
              <input class='btn' type='button' value='调用接口' onclick='unblockGroupMessage()'></input>
              
-             <div> </div><span>[5.22]  changeGroupName</span>
-             <div>groupId:</div><input class="textbox" type="text" id="changeGroupNamegroupId" value=""></input>
+             <div> </div><span>changeGroupName</span>
+             <div>groupId:</div><input class="textbox" type="text" id="changeGroupNamegroupId" value="1461216725947"></input>
              <div>changedGroupName:</div><input class="textbox" type="text" id="changeGroupNamechangedGroupName" value=""></input>
              <input class='btn' type='button' value='调用接口' onclick='changeGroupName()'></input>
              
-             <div> </div><span>[5.23]  setReceiveNotNoifyGroup</span>
+             <div> </div><span>setReceiveNotNoifyGroup</span>
              <div>groupIds:</div><input class="textbox" type="text" id="setReceiveNotNoifyGroupgroupIds" value=""></input>
              <input class='btn' type='button' value='调用接口' onclick='setReceiveNotNoifyGroup()'></input>
              
-             <div> </div><span>[5.24]  blockUser</span>
-             <div>groupId:</div><input class="textbox" type="text" id="blockUsergroupId" value=""></input>
-             <div>username:</div><input class="textbox" type="text" id="blockUserusername" value=""></input>
+             <div> </div><span>blockUser</span>
+             <div>groupId:</div><input class="textbox" type="text" id="blockUsergroupId" value="1461216725947"></input>
+             <div>username:</div><input class="textbox" type="text" id="blockUserusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='blockUser()'></input>
              
-             <div> </div><span>[5.25]  unblockUser</span>
-             <div>groupId:</div><input class="textbox" type="text" id="unblockUsergroupId" value=""></input>
-             <div>username:</div><input class="textbox" type="text" id="unblockUserusername" value=""></input>
+             <div> </div><span>unblockUser</span>
+             <div>groupId:</div><input class="textbox" type="text" id="unblockUsergroupId" value="1461216725947"></input>
+             <div>username:</div><input class="textbox" type="text" id="unblockUserusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='unblockUser()'></input>
              
-             <div> </div><span>[5.26]  getBlockedUsers</span>
-             <div>groupId:</div><input class="textbox" type="text" id="getBlockedUsersgroupId" value=""></input>
+             <div> </div><span>getBlockedUsers</span>
+             <div>groupId:</div><input class="textbox" type="text" id="getBlockedUsersgroupId" value="1461216725947"></input>
              <input class='btn' type='button' value='调用接口' onclick='getBlockedUsers()'></input>
+             
+             
+             <div> </div><span>acceptJoinApplication 3.0.22新增接口</span>
+             <div>groupId:</div><input class="textbox" type="text" id="acceptJoinApplication_groupId" value=""></input>
+             <div>username:</div><input class="textbox" type="text" id="acceptJoinApplication_username" value="mikuser2"></input>
+             <input class='btn' type='button' value='调用接口' onclick='acceptJoinApplication()'></input>
+             
+             <div> </div><span>declineJoinApplication 3.0.22新增接口</span>
+             <div>groupId:</div><input class="textbox" type="text" id="declineJoinApplication_groupId" value=""></input>
+             <div>username:</div><input class="textbox" type="text" id="declineJoinApplication_username" value="mikuser2"></input>
+             <div>reason:</div><input class="textbox" type="text" id="declineJoinApplication_reason" value=""></input>
+             <input class='btn' type='button' value='调用接口' onclick='declineJoinApplication()'></input>
+             
+             <div> </div><span>acceptInvitationFromGroup 3.0.22新增接口</span>
+             <div>groupId:</div><input class="textbox" type="text" id="acceptInvitationFromGroup_groupId" value="1461907230765"></input>
+             <div>username:</div><input class="textbox" type="text" id="acceptInvitationFromGroup_username" value="mikuser2"></input>
+             <input class='btn' type='button' value='调用接口' onclick='acceptInvitationFromGroup()'></input>
+             
+             <div> </div><span>declineInvitationFromGroup 3.0.22新增接口</span>
+             <div>groupId:</div><input class="textbox" type="text" id="declineInvitationFromGroup_groupId" value="1461907230765"></input>
+             <div>username:</div><input class="textbox" type="text" id="declineInvitationFromGroup_username" value="mikuser2"></input>
+             <div>reason:</div><input class="textbox" type="text" id="declineInvitationFromGroup_reason" value=""></input>
+             <input class='btn' type='button' value='调用接口' onclick='declineInvitationFromGroup()'></input>
+             
         <div>======回调区域==========</div>
         <div id='TestCallBack'>原本内容</div>
         <div id='TestData'>原本内容</div>

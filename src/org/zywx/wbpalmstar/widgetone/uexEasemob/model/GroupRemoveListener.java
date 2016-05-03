@@ -1,6 +1,6 @@
 package org.zywx.wbpalmstar.widgetone.uexEasemob.model;
 
-import com.easemob.EMGroupChangeListener;
+import com.hyphenate.EMGroupChangeListener;
 
 /**
  * 群组被解散或者被T监听

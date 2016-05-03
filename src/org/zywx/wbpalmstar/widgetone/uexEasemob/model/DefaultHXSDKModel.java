@@ -17,16 +17,14 @@ package org.zywx.wbpalmstar.widgetone.uexEasemob.model;
  * UI Demo HX Model implementation
  */
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import org.zywx.wbpalmstar.widgetone.uexEasemob.utils.HXPreferenceUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * HuanXin default SDK Model implementation
@@ -150,55 +148,7 @@ public class DefaultHXSDKModel extends HXSDKModel{
     public String getAppProcessName() {
         return context.getPackageName();
     }
-    
-//    public void setDisabledGroups(List<String> groups){
-//        if(dao == null){
-//            dao = new UserDao(context);
-//        }
-//
-//        dao.setDisabledGroups(groups);
-//        valueCache.put(Key.DisabledGroups, groups);
-//    }
-    
-//    public List<String> getDisabledGroups(){
-//        Object val = valueCache.get(Key.DisabledGroups);
-//
-//        if(dao == null){
-//            dao = new UserDao(context);
-//        }
-//
-//        if(val == null){
-//            val = dao.getDisabledGroups();
-//            valueCache.put(Key.DisabledGroups, val);
-//        }
-//
-//        return (List<String>) val;
-//    }
-//
-//    public void setDisabledIds(List<String> ids){
-//        if(dao == null){
-//            dao = new UserDao(context);
-//        }
-//
-//        dao.setDisabledIds(ids);
-//        valueCache.put(Key.DisabledIds, ids);
-//    }
-//
-//    public List<String> getDisabledIds(){
-//        Object val = valueCache.get(Key.DisabledIds);
-//
-//        if(dao == null){
-//            dao = new UserDao(context);
-//        }
-//
-//        if(val == null){
-//            val = dao.getDisabledIds();
-//            valueCache.put(Key.DisabledIds, val);
-//        }
-//
-//        return (List<String>) val;
-//    }
-   
+
     public void allowChatroomOwnerLeave(boolean value){
         HXPreferenceUtils.getInstance().setSettingAllowChatroomOwnerLeave(value);
     }

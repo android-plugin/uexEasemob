@@ -48,7 +48,9 @@
         var appKey = document.getElementById("initEasemobappKey").value;
         var apnsCertName = document.getElementById("initEasemobapnsCertName").value;
         var isAutoLoginEnabled = document.getElementById("initEasemobisAutoLoginEnabled").value;
-        uexEasemob.initEasemob('{"appKey":"'+appKey+'","apnsCertName":"'+apnsCertName+'","isAutoLoginEnabled":"'+isAutoLoginEnabled+'"}');
+        var isAutoAcceptGroupInvitation = document.getElementById("isAutoAcceptGroupInvitation").value;
+        uexEasemob.initEasemob('{"appKey":"'+appKey+'","apnsCertName":"'+apnsCertName+'","isAutoLoginEnabled":"'+isAutoLoginEnabled+'","isAutoAcceptGroupInvitation":"'+isAutoAcceptGroupInvitation+'"}');
+        
     }
     
     //[1.2]
@@ -110,30 +112,32 @@
             <div> </div><div>======Initialization==========</div>
             
             
-            <div> </div><span>[1.1]  initEasemob</span>
+            <div> </div><span>initEasemob</span>
             <div>appKey:</div><input class="textbox" type="text" id="initEasemobappKey" value="easemob-demo#chatdemoui">
+
                 <div>apnsCertName:</div><input class="textbox" type="text" id="initEasemobapnsCertName" value="chatdemoui">
-                    <div>isAutoLoginEnabled:</div><input class="textbox" type="text" id="initEasemobisAutoLoginEnabled" value="2">
+                    <div>isAutoLoginEnabled:</div><input class="textbox" type="text" id="initEasemobisAutoLoginEnabled" value="1">
+                        <div>isAutoAcceptGroupInvitation 3.0.22新增参数:</div><input class="textbox" type="text" id="isAutoAcceptGroupInvitation" value="2">
                         <input class='btn' type='button' value='调用接口' onclick='initEasemob()'>
                             
-                            <div> </div><span>[1.2]  login</span>
-                            <div>username:</div><input class="textbox" type="text" id="loginusername" value="appcanuser1">
+                            <div> </div><span>login</span>
+                            <div>username:</div><input class="textbox" type="text" id="loginusername" value="mikuser1">
                                 <div>password:</div><input class="textbox" type="text" id="loginpassword" value="123456">
                                     <input class='btn' type='button' value='调用接口' onclick='login()'>
                                         
-                                        <div> </div><span>[1.4]  logout</span>
+                                        <div> </div><span>logout</span>
                                         <input class='btn' type='button' value='调用接口' onclick='logout()'>
                                             
-                                            <div> </div><span>[1.5]  registerUser</span>
+                                            <div> </div><span>registerUser</span>
                                             <div>username:</div><input class="textbox" type="text" id="registerUserusername" value="">
                                                 <div>password:</div><input class="textbox" type="text" id="registerUserpassword" value="">
                                                     <input class='btn' type='button' value='调用接口' onclick='registerUser()'>
                                                         
-                                                        <div> </div><span>[1.7]  updateCurrentUserNickname</span>
+                                                        <div> </div><span>updateCurrentUserNickname</span>
                                                         <div>nickname:</div><input class="textbox" type="text" id="updateCurrentUserNicknamenickname" value="">
                                                             <input class='btn' type='button' value='调用接口' onclick='updateCurrentUserNickname()'>
                                                                 
-                                                                <div> </div><span>[1.8]  getLoginInfo</span>
+                                                                <div> </div><span>getLoginInfo</span>
                                                                 <input class='btn' type='button' value='调用接口' onclick='getLoginInfo()'>
                                                                     <div>======回调记录==========</div>
                                                                     <div id='TestCallBack'>原本内容</div>

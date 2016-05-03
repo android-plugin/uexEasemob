@@ -3,14 +3,14 @@ package org.zywx.wbpalmstar.widgetone.uexEasemob;
 import android.util.Log;
 import android.util.Pair;
 
-import com.easemob.chat.EMChatManager;
-import com.easemob.chat.EMConversation;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMConversation;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ylt on 15/7/31.
@@ -24,7 +24,8 @@ public class HXHelper {
     +	 */
     public static List<EMConversation> loadConversationsWithRecentChat() {
         // 获取所有会话，包括陌生人
-        Hashtable<String, EMConversation> conversations = EMChatManager.getInstance().getAllConversations();
+//        hyphenate alert: getAllConversations return type change from Hashtable to Map
+        Map<String, EMConversation> conversations = EMClient.getInstance().chatManager().getAllConversations();
         // 过滤掉messages size为0的conversation
         /**
          * 如果在排序过程中有新消息收到，lastMsgTime会发生变化

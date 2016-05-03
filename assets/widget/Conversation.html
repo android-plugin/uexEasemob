@@ -116,6 +116,9 @@
     function getTotalUnreadMsgCount(){
         uexEasemob.getTotalUnreadMsgCount();
     }
+    function getRecentChatters(){
+        uexEasemob.getRecentChatters();
+    }
 
        </script>
 </head>
@@ -140,57 +143,60 @@
             
             
              <div> </div><div>======Conversation==========</div>
-             <div> </div><span>[3.1]  getConversationByName</span>
-             <div>username:</div><input class="textbox" type="text" id="getConversationByNameusername" value="appcanuser2"></input>
+             <div> </div><span>getConversationByName</span>
+             <div>username:</div><input class="textbox" type="text" id="getConversationByNameusername" value="mikuser2"></input>
              <div>chatType:</div><input class="textbox" type="text" id="getConversationByNamechatType" value="0"></input>
              <input class='btn' type='button' value='调用接口' onclick='getConversationByName()'></input>
              
-             <div> </div><span>[3.3]  getMessageHistory</span>
-             <div>username:</div><input class="textbox" type="text" id="getMessageHistoryusername" value="appcanuser2"></input>
+             <div> </div><span>getMessageHistory</span>
+             <div>username:</div><input class="textbox" type="text" id="getMessageHistoryusername" value="mikuser2"></input>
              <div>chatType:</div><input class="textbox" type="text" id="getMessageHistorychatType" value="0"></input>
              <div>startMsgId:</div><input class="textbox" type="text" id="getMessageHistorystartMsgId" value=""></input>
              <div>pagesize:</div><input class="textbox" type="text" id="getMessageHistorypagesize" value=""></input>
              <input class='btn' type='button' value='调用接口' onclick='getMessageHistory()'></input>
              
-             <div> </div><span>[3.5]  getUnreadMsgCount</span>
-             <div>username:</div><input class="textbox" type="text" id="getUnreadMsgCountusername" value="appcanuser2"></input>
+             <div> </div><span>getUnreadMsgCount</span>
+             <div>username:</div><input class="textbox" type="text" id="getUnreadMsgCountusername" value="mikuser2"></input>
              <div>chatType:</div><input class="textbox" type="text" id="getUnreadMsgCountchatType" value="0"></input>
              <input class='btn' type='button' value='调用接口' onclick='getUnreadMsgCount()'></input>
              
-             <div> </div><span>[3.7]  resetUnreadMsgCount</span>
-             <div>username:</div><input class="textbox" type="text" id="resetUnreadMsgCountusername" value="appcanuser2"></input>
+             <div> </div><span>resetUnreadMsgCount</span>
+             <div>username:</div><input class="textbox" type="text" id="resetUnreadMsgCountusername" value="mikuser2"></input>
              <div>chatType:</div><input class="textbox" type="text" id="resetUnreadMsgCountchatType" value="0"></input>
              <input class='btn' type='button' value='调用接口' onclick='resetUnreadMsgCount()'></input>
              
-             <div> </div><span>[3.8]  resetAllUnreadMsgCount</span>
+             <div> </div><span>resetAllUnreadMsgCount</span>
              <input class='btn' type='button' value='调用接口' onclick='resetAllUnreadMsgCount()'></input>
              
-             <div> </div><span>[3.9]  getMsgCount</span>
-             <div>username:</div><input class="textbox" type="text" id="getMsgCountusername" value="appcanuser2"></input>
+             <div> </div><span> getMsgCount</span>
+             <div>username:</div><input class="textbox" type="text" id="getMsgCountusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='getMsgCount()'></input>
              
-             <div> </div><span>[3.11]  clearConversation</span>
-             <div>username:</div><input class="textbox" type="text" id="clearConversationusername" value="appcanuser2"></input>
+             <div> </div><span>clearConversation</span>
+             <div>username:</div><input class="textbox" type="text" id="clearConversationusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='clearConversation()'></input>
              
-             <div> </div><span>[3.12]  deleteConversation</span>
-             <div>username:</div><input class="textbox" type="text" id="deleteConversationusername" value="appcanuser2"></input>
+             <div> </div><span>deleteConversation</span>
+             <div>username:</div><input class="textbox" type="text" id="deleteConversationusername" value="mikuser2"></input>
              <div>chatType:</div><input class="textbox" type="text" id="deleteConversationchatType" value="0"></input>
              <input class='btn' type='button' value='调用接口' onclick='deleteConversation()'></input>
              
-             <div> </div><span>[3.13]  removeMessage</span>
-             <div>username:</div><input class="textbox" type="text" id="removeMessageusername" value="appcanuser2"></input>
+             <div> </div><span>removeMessage</span>
+             <div>username:</div><input class="textbox" type="text" id="removeMessageusername" value="mikuser2"></input>
              <div>msgId:</div><input class="textbox" type="text" id="removeMessagemsgId" value=""></input>
              <div>chatType:</div><input class="textbox" type="text" id="removeMessagechatType" value="0"></input>
              <input class='btn' type='button' value='调用接口' onclick='removeMessage()'></input>
              
-             <div> </div><span>[3.14]  deleteAllConversation</span>
+             <div> </div><span>deleteAllConversation</span>
              <input class='btn' type='button' value='调用接口' onclick='deleteAllConversation()'></input>
              
-             <div> </div><span>[3.15]  getChatterInfo</span>
+             <div> </div><span>getChatterInfo</span>
              <input class='btn' type='button' value='调用接口' onclick='getChatterInfo()'></input>
-             <div> </div><span>[3.17]  getTotalUnreadMsgCount</span>
+             <div> </div><span>getTotalUnreadMsgCount</span>
              <input class='btn' type='button' value='调用接口' onclick='getTotalUnreadMsgCount()'></input>
+             
+             <div> </div><span>getRecentChatters</span>
+             <input class='btn' type='button' value='调用接口' onclick='getRecentChatters()'></input>
         
         <div>======回调区域==========</div>
         <div id='TestCallBack'>原本内容</div>

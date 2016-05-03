@@ -18,17 +18,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-import com.easemob.EMCallBack;
-import com.easemob.EMConnectionListener;
-import com.easemob.EMError;
-import com.easemob.EMValueCallBack;
-import com.easemob.chat.EMChat;
-import com.easemob.chat.EMChatConfig.EMEnvMode;
-import com.easemob.chat.EMChatManager;
-import com.easemob.chat.EMChatOptions;
-import com.easemob.chat.EMContactManager;
-import com.easemob.chat.EMGroupManager;
-import com.easemob.exceptions.EaseMobException;
+import com.hyphenate.EMCallBack;
+import com.hyphenate.EMConnectionListener;
+import com.hyphenate.EMError;
+import com.hyphenate.EMValueCallBack;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMOptions;
+import com.hyphenate.exceptions.HyphenateException;
 
 import org.zywx.wbpalmstar.widgetone.uexEasemob.model.DefaultHXSDKModel;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.model.HXNotifier;
@@ -156,7 +152,7 @@ public abstract class HXSDKHelper {
      *     // do HuanXin related work
      * }
      */
-    public synchronized boolean onInit(Context context){
+    public synchronized boolean onInit(Context context, EMOptions options){
         if(sdkInited){
             return true;
         }
@@ -187,16 +183,20 @@ public abstract class HXSDKHelper {
         }
 
         // 初始化环信SDK,一定要先调用init()
-        EMChat.getInstance().init(context);
+//        hyphenate alert: use other function instead: EMClient.getInstance().init(Context context, EMOptions options);
+//        hyphenate alert: use other function instead: EMClient.getInstance().init(Context context, EMChatOptions options);
+        EMClient.getInstance().init(context, options);
         
         // 设置sandbox测试环境
         if(hxModel.isSandboxMode()){
-            EMChat.getInstance().setEnv(EMEnvMode.EMSandboxMode);
+//            hyphenate alert: no longer support EMChat.getInstance().setEnv method
+//            hyphenate alert: no longer support EMChat.getInstance().setEnv method
+            //EMChat.getInstance().setEnv(EMEnvMode.EMSandboxMode);
         }
         
         if(hxModel.isDebugMode()){
             // set debug mode in development process
-            EMChat.getInstance().setDebugMode(true);    
+            EMClient.getInstance().setDebugMode(true);    
         }
 
         Log.d(TAG, "initialize EMChat SDK");
@@ -267,24 +267,22 @@ public abstract class HXSDKHelper {
     abstract protected HXSDKModel createModel();
     
     /**
-     * please make sure you have to get EMChatOptions by following method and set related options
-     *      EMChatOptions options = EMChatManager.getInstance().getChatOptions();
+     * please make sure you have to get EMOptions by following method and set related options
+     *      EMOptions options = EMClient.getInstance().getOptions();
      */
     protected void initHXOptions(){
         Log.d(TAG, "init HuanXin Options");
         
-        // 获取到EMChatOptions对象
-        EMChatOptions options = EMChatManager.getInstance().getChatOptions();
+        // 获取到EMOptions对象
+        EMOptions options = EMClient.getInstance().getOptions();
         // 默认添加好友时，是不需要验证的，改成需要验证
         options.setAcceptInvitationAlways(hxModel.getAcceptInvitationAlways());
         // 默认环信是不维护好友关系列表的，如果app依赖环信的好友关系，把这个属性设置为true
-        options.setUseRoster(hxModel.getUseHXRoster());
         // 设置是否需要已读回执
         options.setRequireAck(hxModel.getRequireReadAck());
         // 设置是否需要已送达回执
         options.setRequireDeliveryAck(hxModel.getRequireDeliveryAck());
         // 设置从db初始化加载时, 每个conversation需要加载msg的个数
-        options.setNumberOfMessagesLoaded(20);
 
         notifier = createNotifier();
         notifier.init(appContext);
@@ -311,7 +309,7 @@ public abstract class HXSDKHelper {
     public void logout(final EMCallBack callback){
         setPassword(null);
         reset();
-        EMChatManager.getInstance().logout(new EMCallBack(){
+        EMClient.getInstance().logout(true,new EMCallBack(){
 
             @Override
             public void onSuccess() {
@@ -321,7 +319,7 @@ public abstract class HXSDKHelper {
             }
 
             @Override
-            public void onError(int code, String message) {                
+            public void onError(int code, String message) {
             }
 
             @Override
@@ -330,7 +328,7 @@ public abstract class HXSDKHelper {
                     callback.onProgress(progress, status);
                 }
             }
-            
+
         });
     }
     
@@ -339,7 +337,7 @@ public abstract class HXSDKHelper {
      * @return
      */
     public boolean isLogined(){
-       return EMChat.getInstance().isLoggedIn();
+       return EMClient.getInstance().isLoggedInBefore();
     }
     
     protected HXNotifier.HXNotificationInfoProvider getNotificationListener(){
@@ -358,7 +356,7 @@ public abstract class HXSDKHelper {
             public void onDisconnected(int error) {
             	if (error == EMError.USER_REMOVED) {
             		onCurrentAccountRemoved();
-            	}else if (error == EMError.CONNECTION_CONFLICT) {
+            	}else if (error == EMError.USER_LOGIN_ANOTHER_DEVICE) {
                     onConnectionConflict();
                 }else{
                     onConnectionDisconnected(error);
@@ -372,7 +370,7 @@ public abstract class HXSDKHelper {
         };
         
         //注册连接监听
-        EMChatManager.getInstance().addConnectionListener(connectionListener);       
+        EMClient.getInstance().addConnectionListener(connectionListener);       
     }
 
     /**
@@ -486,7 +484,7 @@ public abstract class HXSDKHelper {
      * 同步操作，从服务器获取群组列表
      * 该方法会记录更新状态，可以通过isSyncingGroupsFromServer获取是否正在更新
      * 和HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished()获取是否更新已经完成
-     * @throws EaseMobException
+     * @throws HyphenateException
      */
     public synchronized void asyncFetchGroupsFromServer(final EMCallBack callback){
         if(isSyncingGroupsWithServer){
@@ -499,10 +497,10 @@ public abstract class HXSDKHelper {
             @Override
             public void run(){
                 try {
-                    EMGroupManager.getInstance().getGroupsFromServer();
+                    EMClient.getInstance().groupManager().getJoinedGroupsFromServer();
                     
                     // in case that logout already before server returns, we should return immediately
-                    if(!EMChat.getInstance().isLoggedIn()){
+                    if(!EMClient.getInstance().isLoggedInBefore()){
                         return;
                     }
                     
@@ -513,7 +511,7 @@ public abstract class HXSDKHelper {
                     if(callback != null){
                         callback.onSuccess();
                     }
-                } catch (EaseMobException e) {
+                } catch (HyphenateException e) {
                     hxModel.setGroupsSynced(false);
                     isGroupsSyncedWithServer = false;
                     isSyncingGroupsWithServer = false;
@@ -544,10 +542,10 @@ public abstract class HXSDKHelper {
             public void run(){
                 List<String> usernames = null;
                 try {
-                    usernames = EMContactManager.getInstance().getContactUserNames();
+                    usernames = EMClient.getInstance().contactManager().getAllContactsFromServer();
                     
                     // in case that logout already before server returns, we should return immediately
-                    if(!EMChat.getInstance().isLoggedIn()){
+                    if(!EMClient.getInstance().isLoggedInBefore()){
                         return;
                     }
                     
@@ -558,7 +556,7 @@ public abstract class HXSDKHelper {
                     if(callback != null){
                         callback.onSuccess(usernames);
                     }
-                } catch (EaseMobException e) {
+                } catch (HyphenateException e) {
                     hxModel.setContactSynced(false);
                     isContactsSyncedWithServer = false;
                     isSyncingContactsWithServer = false;
@@ -591,10 +589,10 @@ public abstract class HXSDKHelper {
             public void run(){
                 try {
                     List<String> usernames = null;
-                    usernames = EMContactManager.getInstance().getBlackListUsernamesFromServer();
+                    usernames = EMClient.getInstance().contactManager().getBlackListFromServer();
                     
                     // in case that logout already before server returns, we should return immediately
-                    if(!EMChat.getInstance().isLoggedIn()){
+                    if(!EMClient.getInstance().isLoggedInBefore()){
                         return;
                     }
                     
@@ -605,7 +603,7 @@ public abstract class HXSDKHelper {
                     if(callback != null){
                         callback.onSuccess(usernames);
                     }
-                } catch (EaseMobException e) {
+                } catch (HyphenateException e) {
                     hxModel.setBlacklistSynced(false);
                     
                     isBlackListSyncedWithServer = false;
@@ -657,7 +655,6 @@ public abstract class HXSDKHelper {
         }
         
         // 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
-        EMChat.getInstance().setAppInited();
         alreadyNotified = true;
     }
     

@@ -45,7 +45,7 @@
         var username = document.getElementById("sendTextusername").value;
         var chatType = document.getElementById("sendTextchatType").value;
         var content = document.getElementById("sendTextcontent").value;
-        uexEasemob.sendText('{"username":"'+username+'","chatType":"'+chatType+'","content":"'+content+'"}');
+        uexEasemob.sendText('{"username":"'+username+'","chatType":"'+chatType+'","content":"'+content+'","ext":"ss"}');
     }
     
     //[2.6]
@@ -154,13 +154,13 @@
             
              <div> </div><div>======Message==========</div>
             <div> </div><span>[2.5]  sendText</span>
-            <div>username:</div><input class="textbox" type="text" id="sendTextusername" value="appcanuser2"></input>
+            <div>username:</div><input class="textbox" type="text" id="sendTextusername" value="mikuser2"></input>
             <div>chatType:</div><input class="textbox" type="text" id="sendTextchatType" value="0"></input>
             <div>content:</div><input class="textbox" type="text" id="sendTextcontent" value="Textcontent"></input>
             <input class='btn' type='button' value='调用接口' onclick='sendText()'></input>
             
             <div> </div><span>[2.6]  sendVoice</span>
-            <div>username:</div><input class="textbox" type="text" id="sendVoiceusername" value="appcanuser2"></input>
+            <div>username:</div><input class="textbox" type="text" id="sendVoiceusername" value="mikuser2"></input>
             <div>chatType:</div><input class="textbox" type="text" id="sendVoicechatType" value="0"></input>
             <div>filePath:</div><input class="textbox" type="text" id="sendVoicefilePath" value="res://callRing.mp3"></input>
             <div>length:</div><input class="textbox" type="text" id="sendVoicelength" value="123"></input>
@@ -168,14 +168,14 @@
             <input class='btn' type='button' value='调用接口' onclick='sendVoice()'></input>
             
             <div> </div><span>[2.7]  sendPicture</span>
-            <div>username:</div><input class="textbox" type="text" id="sendPictureusername" value="appcanuser2"></input>
+            <div>username:</div><input class="textbox" type="text" id="sendPictureusername" value="mikuser2"></input>
             <div>chatType:</div><input class="textbox" type="text" id="sendPicturechatType" value="0"></input>
             <div>filePath:</div><input class="textbox" type="text" id="sendPicturefilePath" value="res://2.jpg"></input>
             <div>displayName:</div><input class="textbox" type="text" id="sendPicturedisplayName" value="2.jpg"></input>
             <input class='btn' type='button' value='调用接口' onclick='sendPicture()'></input>
             
             <div> </div><span>[2.8]  sendLocationMsg</span>
-            <div>username:</div><input class="textbox" type="text" id="sendLocationMsgusername" value="appcanuser2"></input>
+            <div>username:</div><input class="textbox" type="text" id="sendLocationMsgusername" value="mikuser2"></input>
             <div>chatType:</div><input class="textbox" type="text" id="sendLocationMsgchatType" value="0"></input>
             <div>locationAddress:</div><input class="textbox" type="text" id="sendLocationMsglocationAddress" value=""></input>
             <div>latitude:</div><input class="textbox" type="text" id="sendLocationMsglatitude" value=""></input>
@@ -183,7 +183,7 @@
             <input class='btn' type='button' value='调用接口' onclick='sendLocationMsg()'></input>
             
             <div> </div><span>[2.9]  sendFile</span>
-            <div>username:</div><input class="textbox" type="text" id="sendFileusername" value="appcanuser2"></input>
+            <div>username:</div><input class="textbox" type="text" id="sendFileusername" value="mikuser2"></input>
             <div>chatType:</div><input class="textbox" type="text" id="sendFilechatType" value="0"></input>
             <div>filePath:</div><input class="textbox" type="text" id="sendFilefilePath" value="res://3.jpg"></input>
             <div>displayName:</div><input class="textbox" type="text" id="sendFiledisplayName" value="3.jpg"></input>
@@ -192,7 +192,7 @@
             <div> </div><span>[2.10]  sendCmdMessage</span>
             <div>chatType:</div><input class="textbox" type="text" id="sendCmdMessagechatType" value="0"></input>
             <div>action:</div><input class="textbox" type="text" id="sendCmdMessageaction" value=""></input>
-            <div>toUsername:</div><input class="textbox" type="text" id="sendCmdMessagetousername" value="appcanuser2"></input>
+            <div>toUsername:</div><input class="textbox" type="text" id="sendCmdMessagetoUsername" value="mikuser2"></input>
             <input class='btn' type='button' value='调用接口' onclick='sendCmdMessage()'></input>
             
             <div> </div><span>[2.11]  setNotifyBySoundAndVibrate</span>
@@ -210,7 +210,7 @@
             <input class='btn' type='button' value='调用接口' onclick='getMessageById()'></input>
             
             <div> </div><span>[2.14]  sendVideo</span>
-            <div>username:</div><input class="textbox" type="text" id="sendVideousername" value="appcanuser2"></input>
+            <div>username:</div><input class="textbox" type="text" id="sendVideousername" value="mikuser2"></input>
             <div>chatType:</div><input class="textbox" type="text" id="sendVideochatType" value="0"></input>
             <div>filePath:</div><input class="textbox" type="text" id="sendVideofilePath" value="res://1.mp4"></input>
             <div>length:</div><input class="textbox" type="text" id="sendVideolength" value="456"></input>

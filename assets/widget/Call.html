@@ -41,23 +41,23 @@
 
     
     
-    //[6.3]
+
     function makeVoiceCall(){
         var username = document.getElementById("makeVoiceCallusername").value;
         uexEasemob.makeVoiceCall('{"username":"'+username+'"}');
     }
     
-    //[6.4]
+
     function answerCall(){
         uexEasemob.answerCall('');
     }
     
-    //[6.5]
+
     function rejectCall(){
         uexEasemob.rejectCall('');
     }
     
-    //[6.6]
+
     function endCall(){
         uexEasemob.endCall('');
     }
@@ -85,17 +85,17 @@
             
             
              <div> </div><div>======Call==========</div>
-             <div> </div><span>[6.3]  makeVoiceCall</span>
-             <div>username:</div><input class="textbox" type="text" id="makeVoiceCallusername" value="appcanuser2"></input>
+             <div> </div><span> makeVoiceCall</span>
+             <div>username:</div><input class="textbox" type="text" id="makeVoiceCallusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='makeVoiceCall()'></input>
              
-             <div> </div><span>[6.4]  answerCall</span>
+             <div> </div><span> answerCall</span>
              <input class='btn' type='button' value='调用接口' onclick='answerCall()'></input>
              
-             <div> </div><span>[6.5]  rejectCall</span>
+             <div> </div><span> rejectCall</span>
              <input class='btn' type='button' value='调用接口' onclick='rejectCall()'></input>
              
-             <div> </div><span>[6.6]  endCall</span>
+             <div> </div><span>endCall</span>
              <input class='btn' type='button' value='调用接口' onclick='endCall()'></input>
         
         <div>======回调区域==========</div>

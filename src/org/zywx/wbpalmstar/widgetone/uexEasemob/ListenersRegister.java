@@ -5,32 +5,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.easemob.EMConnectionListener;
-import com.easemob.EMError;
-import com.easemob.EMEventListener;
-import com.easemob.EMNotifierEvent;
-import com.easemob.chat.CmdMessageBody;
-import com.easemob.chat.EMCallStateChangeListener;
-import com.easemob.chat.EMChat;
-import com.easemob.chat.EMChatManager;
-import com.easemob.chat.EMContactListener;
-import com.easemob.chat.EMContactManager;
-import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
-import com.easemob.chat.EMMessage;
-import com.easemob.chat.EMNotifier;
-import com.easemob.chat.FileMessageBody;
-import com.easemob.chat.GroupChangeListener;
-import com.easemob.chat.ImageMessageBody;
-import com.easemob.chat.LocationMessageBody;
-import com.easemob.chat.TextMessageBody;
-import com.easemob.chat.VideoMessageBody;
-import com.easemob.chat.VoiceMessageBody;
-import com.easemob.exceptions.EaseMobException;
-import com.easemob.util.NetUtils;
 import com.google.gson.Gson;
+import com.hyphenate.EMConnectionListener;
+import com.hyphenate.EMContactListener;
+import com.hyphenate.EMError;
+import com.hyphenate.EMGroupChangeListener;
+import com.hyphenate.EMMessageListener;
+import com.hyphenate.chat.EMCallStateChangeListener;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMCmdMessageBody;
+import com.hyphenate.chat.EMFileMessageBody;
+import com.hyphenate.chat.EMImageMessageBody;
+import com.hyphenate.chat.EMLocationMessageBody;
+import com.hyphenate.chat.EMMessage;
+import com.hyphenate.chat.EMOptions;
+import com.hyphenate.chat.EMTextMessageBody;
+import com.hyphenate.chat.EMVideoMessageBody;
+import com.hyphenate.chat.EMVoiceMessageBody;
+import com.hyphenate.exceptions.HyphenateException;
+import com.hyphenate.util.NetUtils;
 
 import org.zywx.wbpalmstar.widgetone.uexEasemob.model.HXSDKModel;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallReceiveOutputVO;
@@ -41,7 +35,9 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MessageVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MsgBodyVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.MsgResultVO;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -62,97 +58,80 @@ public class ListenersRegister {
         }
     };
 
-    public void registerListeners(Context context,Gson gson){
+    public void registerListeners(Context context, EMOptions options, Gson gson){
         mContext=context;
         mGson=gson;
-        hxsdkHelper.onInit(context);
-        EMChatManager.getInstance().registerEventListener(new EMEventListener() {
+        hxsdkHelper.onInit(context, options);
+        EMClient.getInstance().chatManager().addMessageListener(new EMMessageListener() {
             @Override
-            public void onEvent(EMNotifierEvent event) {
-                 switch (event.getEvent()) {
-                    case EventNewMessage: {// 接收新消息
-                        EMMessage message = (EMMessage) event.getData();
-                        callbackNewMessage(message);
-                        if (isRunBackground()){
-                            HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
-                        }
-                        break;
+            public void onMessageReceived(List<EMMessage> list) {
+                for (EMMessage message : list) {
+                    callbackNewMessage(message);
+                    if (isRunBackground()){
+                        HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
                     }
-                    case EventDeliveryAck: {//接收已发送回执
-                        EMMessage message = (EMMessage) event.getData();
-                        MessageVO messageVO = new MessageVO();
-                        messageVO.setMsgId(message.getMsgId());
-                        messageVO.setUsername(message.getFrom());
-                        if (callback != null) {
-                            callback.onDeliveryMessage(messageVO);
-                        }
-                        message.isDelivered = true;
-                        break;
-                    }
-
-                    case EventNewCMDMessage: {//接收透传消息
-                        EMMessage message = (EMMessage) event.getData();
-                        callbackNewCMDMessage(message);
-                        break;
-                    }
-
-                    case EventReadAck: {//接收已读回执
-                        EMMessage message = (EMMessage) event.getData();
-                        MessageVO messageVO = new MessageVO();
-                        messageVO.setMsgId(message.getMsgId());
-                        messageVO.setUsername(message.getFrom());
-                        if (callback != null) {
-                            callback.onAckMessage(messageVO);
-                        }
-                        message.isAcked = true;
-                        break;
-                    }
-
-                    case EventOfflineMessage: {//接收离线消息
-                        Log.i("appcan", "EventOfflineMessage");
-                        List<EMMessage> emMessages= (List<EMMessage>) event.getData();
-                        if (emMessages!=null&&!emMessages.isEmpty()){
-                            for (EMMessage emMessage:emMessages){
-                                callbackNewMessage(emMessage);
-                            }
-                        }
-                        if (isRunBackground()){
-                            HXSDKHelper.getInstance().getNotifier().onNewMesg(emMessages);
-                        }
-                        break;
-                    }
-
-                    case EventConversationListChanged: {//通知会话列表通知event注册（在某些特殊情况，SDK去删除会话的时候会收到回调监听）
-
-                        break;
-                    }
-
-                    default:
-                        break;
                 }
             }
+
+            @Override
+            public void onCmdMessageReceived(List<EMMessage> list) {
+                for (EMMessage message : list) {
+                    callbackNewCMDMessage(message);
+                }
+            }
+
+            @Override
+            public void onMessageReadAckReceived(List<EMMessage> list) {
+                for (EMMessage message : list) {
+                    MessageVO messageVO = new MessageVO();
+                    messageVO.setMsgId(message.getMsgId());
+                    messageVO.setUsername(message.getFrom());
+                    if (callback != null) {
+                        callback.onAckMessage(messageVO);
+                    }
+                }
+            }
+
+            @Override
+            public void onMessageDeliveryAckReceived(List<EMMessage> list) {
+                for (EMMessage message : list) {
+                    MessageVO messageVO = new MessageVO();
+                    messageVO.setMsgId(message.getMsgId());
+                    messageVO.setUsername(message.getFrom());
+                    if (callback != null) {
+                        callback.onDeliveryMessage(messageVO);
+                    }
+                    message.setDelivered(true);
+                }
+            }
+
+            @Override
+            public void onMessageChanged(EMMessage emMessage, Object o) {
+
+            }
         });
+
         //只有注册了广播才能接收到新消息，目前离线消息，在线消息都是走接收消息的广播（离线消息目前无法监听，在登录以后，接收消息广播会执行一次拿到所有的离线消息）
-        EMChatManager.getInstance().getChatOptions().setRequireAck(true);
+        EMClient.getInstance().getOptions().setRequireAck(true);
         //如果用到已读的回执需要把这个flag设置成true
 
-        EMChatManager.getInstance().getChatOptions().setRequireDeliveryAck(true);
+        EMClient.getInstance().getOptions().setRequireDeliveryAck(true);
         //如果用到已发送的回执需要把这个flag设置成true
 
-        EMContactManager.getInstance().setContactListener(new MyContactListener());
+        EMClient.getInstance().contactManager().setContactListener(new MyContactListener());
 
         //注册一个监听连接状态的listener
-        EMChatManager.getInstance().addConnectionListener(new MyConnectionListener());
+        EMClient.getInstance().addConnectionListener(new MyConnectionListener());
 
-        EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
+        EMClient.getInstance().groupManager().addGroupChangeListener(new MyGroupChangeListener());
 
         //注册实时语音监听
-        IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingCallBroadcastAction());
+        IntentFilter callFilter = new IntentFilter(EMClient.getInstance().callManager().getIncomingCallBroadcastAction());
         context.registerReceiver(new CallReceiver(), callFilter);
         //设置通话状态监听
-        EMChatManager.getInstance().addVoiceCallStateChangeListener(new EMCallStateChangeListener() {
+        EMClient.getInstance().callManager().addCallStateChangeListener(new EMCallStateChangeListener() {
             @Override
-            public void onCallStateChanged(CallState callState, EMCallStateChangeListener.CallError error) {
+            public void onCallStateChanged(CallState callState, CallError callError) {
                 CallStateOutputVO outputVO = new CallStateOutputVO();
                 switch (callState) {
                     case CONNECTING: // 正在连接对方
@@ -175,7 +154,6 @@ public class ListenersRegister {
                 callback.onCallStateChanged(outputVO);
             }
         });
-         EMChat.getInstance().setAppInited();
     }
 
     public boolean isRunBackground(){
@@ -197,37 +175,23 @@ public class ListenersRegister {
         }
     }
 
-    private class MyGroupChangeListener implements GroupChangeListener {
+    private class MyGroupChangeListener implements EMGroupChangeListener {
 
         @Override
         public void onInvitationReceived(String groupId, String groupName,String inviter, String reason) {
-
             //收到加入群聊的邀请
-
-            boolean hasGroup = false;
-            for (EMGroup group : EMGroupManager.getInstance().getAllGroups()) {
-                if (group.getGroupId().equals(groupId)) {
-                    hasGroup = true;
-                    break;
-                }
-            }
-            if (!hasGroup)
-                return;
-
-            // 被邀请
             EMMessage msg = EMMessage.createReceiveMessage(EMMessage.Type.TXT);
             msg.setChatType(EMMessage.ChatType.GroupChat);
             msg.setFrom(inviter);
             msg.setTo(groupId);
             msg.setMsgId(UUID.randomUUID().toString());
-            msg.addBody(new TextMessageBody(inviter + "邀请你加入了群聊"));
+            msg.addBody(new EMTextMessageBody(inviter + "邀请你加入了群聊"));
             // 保存邀请消息
-            EMChatManager.getInstance().saveMessage(msg);
+            EMClient.getInstance().chatManager().saveMessage(msg);
             // 提醒新消息
-            EMNotifier.getInstance(mContext).notifyOnNewMsg();
             GroupOptVO groupOptVO=new GroupOptVO();
             groupOptVO.setGroupId(groupId);
-            groupOptVO.setGroupName(groupName);
+//            groupOptVO.setGroupName(groupName);
             groupOptVO.setInviter(inviter);
             groupOptVO.setReason(reason);
             callback.onInvitationReceived(groupOptVO);
@@ -294,11 +258,11 @@ public class ListenersRegister {
             msg.setFrom(accepter);
             msg.setTo(groupId);
             msg.setMsgId(UUID.randomUUID().toString());
-            msg.addBody(new TextMessageBody(accepter + "同意了你的群聊申请"));
+            msg.addBody(new EMTextMessageBody(accepter + "同意了你的群聊申请"));
             // 保存同意消息
-            EMChatManager.getInstance().saveMessage(msg);
+            EMClient.getInstance().chatManager().saveMessage(msg);
             // 提醒新消息
-            EMNotifier.getInstance(mContext).notifyOnNewMsg();
+            //EMNotifier.getInstance(mContext).notifyOnNewMsg();
             GroupOptVO groupOptVO=new GroupOptVO();
             groupOptVO.setGroupId(groupId);
             groupOptVO.setGroupName(groupName);
@@ -316,6 +280,15 @@ public class ListenersRegister {
             callback.onApplicationDeclined(groupOptVO);
         }
 
+        @Override
+        public void onAutoAcceptInvitationFromGroup(String groupId, String inviter, String inviteMessage ) {
+            Map<String, String> result  = new HashMap<String, String>();
+            result.put("groupId", groupId);
+            result.put("username", inviter);
+            result.put("message", inviteMessage);
+            callback.onDidJoinedGroup(result);
+
+        }
     }
 
     private void callbackNewMessage(EMMessage message){
@@ -326,8 +299,8 @@ public class ListenersRegister {
 
     private void callbackNewCMDMessage(EMMessage message){
         //获取消息body
-        CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
-        String aciton = cmdMsgBody.action;//获取自定义action
+        EMCmdMessageBody cmdMsgBody = (EMCmdMessageBody) message.getBody();
+        String aciton = cmdMsgBody.action();//获取自定义action
         CmdMsgOutputVO outputVO=new CmdMsgOutputVO();
         outputVO.setAction(aciton);
         outputVO.setMessage(convertEMMessage(message));
@@ -349,7 +322,7 @@ public class ListenersRegister {
         resultVO.setMessageBody(getMessageBody(message, message.getType()));
         try {
             resultVO.setExt(message.getStringAttribute("ext"));
-        } catch (EaseMobException e) {
+        } catch (HyphenateException e) {
         }
         return resultVO;
     }
@@ -357,24 +330,24 @@ public class ListenersRegister {
     private static MsgBodyVO getMessageBody(EMMessage message, EMMessage.Type type){
         MsgBodyVO msgBodyVO=new MsgBodyVO();
         if (type== EMMessage.Type.TXT){
-            TextMessageBody messageBody= (TextMessageBody) message.getBody();
+            EMTextMessageBody messageBody= (EMTextMessageBody) message.getBody();
             msgBodyVO.setText(messageBody.getMessage());
         }else if (type== EMMessage.Type.CMD){
-            CmdMessageBody messageBody= (CmdMessageBody) message.getBody();
-            msgBodyVO.setAction(messageBody.action);
+            EMCmdMessageBody messageBody= (EMCmdMessageBody) message.getBody();
+            msgBodyVO.setAction(messageBody.action());
         }else if (type== EMMessage.Type.LOCATION){
-            LocationMessageBody messageBody= (LocationMessageBody) message.getBody();
+            EMLocationMessageBody messageBody= (EMLocationMessageBody) message.getBody();
             msgBodyVO.setLatitude(String.valueOf(messageBody.getLatitude()));
             msgBodyVO.setLongitude(String.valueOf(messageBody.getLongitude()));
             msgBodyVO.setAddress(messageBody.getAddress());
         }else if (type== EMMessage.Type.FILE){
-            FileMessageBody messageBody= (FileMessageBody) message.getBody();
+            EMFileMessageBody messageBody= (EMFileMessageBody) message.getBody();
             msgBodyVO.setDisplayName(messageBody.getFileName());
             msgBodyVO.setRemotePath(isEmpty(messageBody.getRemoteUrl())? messageBody.getLocalUrl() :
                     messageBody.getRemoteUrl());
             msgBodyVO.setSecretKey(messageBody.getSecret());
         }else if (type== EMMessage.Type.IMAGE){
-            ImageMessageBody messageBody= (ImageMessageBody) message.getBody();
+            EMImageMessageBody messageBody= (EMImageMessageBody) message.getBody();
             msgBodyVO.setDisplayName(messageBody.getFileName());
             msgBodyVO.setRemotePath(isEmpty(messageBody.getRemoteUrl())?messageBody.getLocalUrl():messageBody
                     .getRemoteUrl());
@@ -382,16 +355,16 @@ public class ListenersRegister {
             msgBodyVO.setThumbnailRemotePath(messageBody.getThumbnailUrl());
             msgBodyVO.setThumbnailSecretKey(messageBody.getThumbnailSecret());
         }else if (type== EMMessage.Type.VIDEO){
-            VideoMessageBody messageBody= (VideoMessageBody) message.getBody();
+            EMVideoMessageBody messageBody= (EMVideoMessageBody) message.getBody();
             msgBodyVO.setDisplayName(messageBody.getFileName());
             msgBodyVO.setRemotePath(isEmpty(messageBody.getRemoteUrl())?messageBody.getLocalUrl():messageBody
                     .getRemoteUrl());
             msgBodyVO.setSecretKey(messageBody.getSecret());
-            msgBodyVO.setLength(String.valueOf(messageBody.getLength()));
+            msgBodyVO.setLength(String.valueOf(messageBody.getVideoFileLength()));
             msgBodyVO.setThumbnailRemotePath(messageBody.getThumbnailUrl());
             msgBodyVO.setThumbnailSecretKey(messageBody.getThumbnailSecret());
         }else if (type== EMMessage.Type.VOICE){
-            VoiceMessageBody messageBody= (VoiceMessageBody) message.getBody();
+            EMVoiceMessageBody messageBody= (EMVoiceMessageBody) message.getBody();
             msgBodyVO.setDisplayName(messageBody.getFileName());
             msgBodyVO.setLength(String.valueOf(messageBody.getLength()));
             msgBodyVO.setRemotePath(isEmpty(messageBody.getRemoteUrl())?messageBody.getLocalUrl():messageBody
@@ -448,28 +421,27 @@ public class ListenersRegister {
             if(error == EMError.USER_REMOVED){
                 // 显示帐号已经被移除
                 result=1;
-            }else if (error == EMError.CONNECTION_CONFLICT) {
+            }else if (error == EMError.USER_LOGIN_ANOTHER_DEVICE) {
                 // 显示帐号在其他设备登陆
                 result=2;
             } else if (NetUtils.hasNetwork(mContext)){
                 result=3;
             }
-            callback.onDisconnected(result);
+            if (callback != null) {
+                callback.onDisconnected(result);
+            }
+
         }
     }
-
     private class MyContactListener implements EMContactListener {
-
         @Override
-        public void onContactAdded(List<String> usernameList) {
-            // 保存增加的联系人
-            callback.onContactAdded(usernameList);
+        public void onContactAdded(String username) {
+            callback.onContactAdded(username);
         }
 
         @Override
-        public void onContactDeleted(final List<String> usernameList) {
-            // 被删除
-            callback.onContactDeleted(usernameList);
+        public void onContactDeleted(String username) {
+            callback.onContactDeleted(username);
         }
 
         @Override
@@ -496,7 +468,6 @@ public class ListenersRegister {
             optVO.setUsername(username);
             callback.onContactRefused(optVO);
         }
-
     }
 
 
@@ -509,8 +480,8 @@ public class ListenersRegister {
         void onNewMessage(String result);
         void onAckMessage(MessageVO messageVO);
         void onDeliveryMessage(MessageVO messageVO);
-        void onContactAdded(List<String> usernameList);
-        void onContactDeleted(List<String> usernameList);
+        void onContactAdded(String username);
+        void onContactDeleted(String username);
         void onContactInvited(GroupOptVO optVO);
         void onContactAgreed(GroupOptVO optVO);
         void onContactRefused(GroupOptVO optVO);
@@ -527,5 +498,6 @@ public class ListenersRegister {
         void onCallReceive(CallReceiveOutputVO outputVO);
         void onCallStateChanged(CallStateOutputVO outputVO);
         void onCmdMessageReceive(CmdMsgOutputVO outputVO);
+        void onDidJoinedGroup(Map<String, String> data);
     }
 }

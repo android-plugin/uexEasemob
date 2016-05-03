@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
-    <plugin uexName="uexEasemob" version="3.0.22" build="22">
-        <info>22:init只执行一次</info>
+    <plugin uexName="uexEasemob" version="3.0.23" build="23">
+        <info>23:升级环信官方SDK到3.1.2, 同时添加客服功能</info>
+        <build>22:init只执行一次</build>
         <build>21:修改getRecentChatters</build>
         <build>20:修复setNotifyBySoundAndVibrate无效的问题</build>
         <build>19:纠正拼写错误</build>

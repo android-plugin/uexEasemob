@@ -1,7 +1,6 @@
 package org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output;
 
-import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupInfo;
+import com.hyphenate.chat.EMGroup;
 
 import java.io.Serializable;
 import java.util.List;
