@@ -37,7 +37,6 @@ import com.hyphenate.exceptions.HyphenateException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.base.BUtility;
 import org.zywx.wbpalmstar.base.cache.DiskCache;
@@ -2242,7 +2241,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         if ("1".equals(inputVO.getChatType())){
             msg.setChatType(EMMessage.ChatType.GroupChat);
         }
-        List<EMMessage> list = new ArrayList<>();
+        List<EMMessage> list = new ArrayList<EMMessage>();
         list.add(msg);
         EMClient.getInstance().chatManager().importMessages(list);
     }
