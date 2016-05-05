@@ -636,6 +636,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
+        try {
+            JSONObject jsonObject = new JSONObject(params[0]);
+            inputVO.setExtObj(jsonObject.optJSONObject("extObj"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Message msg = new Message();
         msg.obj = this;
         msg.what = MSG_SEND_TEXT;
@@ -694,6 +700,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
+        }
+        try {
+            JSONObject jsonObject = new JSONObject(params[0]);
+            inputVO.setExtObj(jsonObject.optJSONObject("extObj"));
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         Message msg = new Message();
         msg.obj = this;
@@ -795,6 +807,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
+        try {
+            JSONObject jsonObject = new JSONObject(params[0]);
+            inputVO.setExtObj(jsonObject.optJSONObject("extObj"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Message msg = new Message();
         msg.obj = this;
         msg.what = MSG_SEND_PICTURE;
@@ -851,6 +869,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
+        try {
+            JSONObject jsonObject = new JSONObject(params[0]);
+            inputVO.setExtObj(jsonObject.optJSONObject("extObj"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Message msg = new Message();
         msg.obj = this;
         msg.what = MSG_SEND_LOCATION;
@@ -904,6 +928,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
+        }
+        try {
+            JSONObject jsonObject = new JSONObject(params[0]);
+            inputVO.setExtObj(jsonObject.optJSONObject("extObj"));
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         Message msg = new Message();
         msg.obj = this;
@@ -962,6 +992,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
+        try {
+            JSONObject jsonObject = new JSONObject(params[0]);
+            inputVO.setExtObj(jsonObject.optJSONObject("extObj"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Message msg = new Message();
         msg.obj = this;
         msg.what = MSG_SEND_VIDEO;
@@ -983,7 +1019,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         message.setReceipt(sendInputVO.getUsername());
         // add message body
         if (sendInputVO.getExtObj() != null) {
-            message.setAttribute("extObj", sendInputVO.getExtObj());
+            message.setAttribute("extObj", (JSONObject)sendInputVO.getExtObj());
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }

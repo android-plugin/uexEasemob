@@ -7,6 +7,8 @@ import android.content.IntentFilter;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.hyphenate.EMConnectionListener;
 import com.hyphenate.EMContactListener;
 import com.hyphenate.EMError;
@@ -320,9 +322,15 @@ public class ListenersRegister {
         resultVO.setChatType(EUExEasemob.getChatTypeValue(message.getChatType()));
         resultVO.setIsAcked(message.isAcked() ? "1" : "0");
         resultVO.setMessageBody(getMessageBody(message, message.getType()));
+        if (!TextUtils.isEmpty(message.getStringAttribute("ext", ""))) {
+            resultVO.setExt(message.getStringAttribute("ext", ""));
+        }
         try {
-            resultVO.setExt(message.getStringAttribute("ext"));
+            JsonParser jsonParser = new JsonParser();
+            JsonObject gsonObject = (JsonObject) jsonParser.parse(message.getJSONObjectAttribute("extObj").toString());
+            resultVO.setExtObj(gsonObject);
         } catch (HyphenateException e) {
+            e.printStackTrace();
         }
         return resultVO;
     }

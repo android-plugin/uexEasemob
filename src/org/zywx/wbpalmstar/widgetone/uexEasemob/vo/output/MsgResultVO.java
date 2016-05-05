@@ -1,5 +1,7 @@
 package org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output;
 
+import com.google.gson.JsonObject;
+
 import java.io.Serializable;
 
 /**
@@ -22,6 +24,8 @@ public class MsgResultVO implements Serializable {
     private String isDelivered;
     private String length;
     private String ext;
+
+    private JsonObject extObj;
     private String chatType;//0-单聊 1-群聊 2-聊天室
 
     public String getFrom() {
@@ -134,5 +138,13 @@ public class MsgResultVO implements Serializable {
 
     public void setChatType(String chatType) {
         this.chatType = chatType;
+    }
+
+    public JsonObject getExtObj() {
+        return extObj;
+    }
+
+    public void setExtObj(JsonObject extObj) {
+        this.extObj = extObj;
     }
 }
