@@ -1661,8 +1661,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                     options.style = EMGroupManager.EMGroupStyle.EMGroupStylePrivateOnlyOwnerInvite;
                 }
                 options.maxUsers = Integer.parseInt(inputVO.getMaxUsers());
-                //无reason
-                EMGroup emGroup = EMClient.getInstance().groupManager().createGroup(inputVO.getGroupName(),inputVO.getDesc(), inputVO.getMembers(), null, options);
+                EMGroup emGroup = EMClient.getInstance().groupManager().createGroup(inputVO.getGroupName(),inputVO.getDesc(), inputVO.getMembers(), inputVO.getInitialWelcomeMessage(), options);
                 resultVO.setIsSuccess(true);
                 resultVO.setGroup(convertEMGroup2VO(emGroup));
             } catch (HyphenateException e) {
@@ -1717,7 +1716,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             //前一种方法创建的群聊默认最大群聊用户数为200，传入maxUsers后设置自定义的最大用户数，最大为2000
             try {
                 options.maxUsers = Integer.parseInt(inputVO.getMaxUsers());
-                EMGroup emGroup = EMClient.getInstance().groupManager().createGroup(inputVO.getGroupName(), inputVO.getDesc(), inputVO.getMembers(), null, options);
+                EMGroup emGroup = EMClient.getInstance().groupManager().createGroup(inputVO.getGroupName(), inputVO.getDesc(), inputVO.getMembers(), inputVO.getInitialWelcomeMessage(), options);
                 resultVO.setIsSuccess(true);
                 resultVO.setGroup(convertEMGroup2VO(emGroup));
             } catch (HyphenateException e) {

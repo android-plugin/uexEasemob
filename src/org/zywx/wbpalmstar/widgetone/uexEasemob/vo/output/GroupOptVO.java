@@ -18,6 +18,7 @@ public class GroupOptVO implements Serializable {
     private String decliner;
     private String username;
     private String accepter;
+    private String message;
 
     public String getGroupId() {
         return groupId;
@@ -89,5 +90,13 @@ public class GroupOptVO implements Serializable {
 
     public void setAccepter(String accepter) {
         this.accepter = accepter;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

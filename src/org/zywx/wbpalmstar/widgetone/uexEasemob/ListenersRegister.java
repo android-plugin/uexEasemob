@@ -193,9 +193,8 @@ public class ListenersRegister {
             // 提醒新消息
             GroupOptVO groupOptVO=new GroupOptVO();
             groupOptVO.setGroupId(groupId);
-//            groupOptVO.setGroupName(groupName);
             groupOptVO.setInviter(inviter);
-            groupOptVO.setReason(reason);
+            groupOptVO.setMessage(reason);
             callback.onInvitationReceived(groupOptVO);
 
         }

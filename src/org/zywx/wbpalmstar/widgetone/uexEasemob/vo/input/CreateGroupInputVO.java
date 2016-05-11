@@ -14,6 +14,7 @@ public class CreateGroupInputVO implements Serializable {
     private String allowInvite;
     private String maxUsers;
     private String needApprovalRequired;
+    private String initialWelcomeMessage;
 
     public String getGroupName() {
         return groupName;
@@ -61,5 +62,13 @@ public class CreateGroupInputVO implements Serializable {
 
     public void setNeedApprovalRequired(String needApprovalRequired) {
         this.needApprovalRequired = needApprovalRequired;
+    }
+
+    public String getInitialWelcomeMessage() {
+        return initialWelcomeMessage;
+    }
+
+    public void setInitialWelcomeMessage(String initialWelcomeMessage) {
+        this.initialWelcomeMessage = initialWelcomeMessage;
     }
 }
