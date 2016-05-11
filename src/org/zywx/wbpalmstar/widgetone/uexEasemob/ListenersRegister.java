@@ -310,6 +310,9 @@ public class ListenersRegister {
     }
 
     public static MsgResultVO convertEMMessage(EMMessage message){
+        if (message == null) {
+            return null;
+        }
         MsgResultVO resultVO=new MsgResultVO();
         resultVO.setFrom(message.getFrom());
         resultVO.setTo(message.getTo());
