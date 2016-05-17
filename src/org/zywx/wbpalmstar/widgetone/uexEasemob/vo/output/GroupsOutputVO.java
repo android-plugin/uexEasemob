@@ -1,7 +1,5 @@
 package org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output;
 
-import com.hyphenate.chat.EMGroup;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -14,7 +12,7 @@ public class GroupsOutputVO implements Serializable {
 
     private String errorMsg;
 
-    private List<EMGroup> grouplist;
+    private  List <GroupResultVO> grouplist;
 
     private String cursor;
 
@@ -34,11 +32,11 @@ public class GroupsOutputVO implements Serializable {
         this.errorMsg = errorMsg;
     }
 
-    public List<EMGroup> getGrouplist() {
+    public List<GroupResultVO> getGrouplist() {
         return grouplist;
     }
 
-    public void setGrouplist(List<EMGroup> grouplist) {
+    public void setGrouplist(List<GroupResultVO> grouplist) {
         this.grouplist = grouplist;
     }
 

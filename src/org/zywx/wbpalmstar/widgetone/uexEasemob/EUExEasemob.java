@@ -1914,7 +1914,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 outputVO.setErrorMsg("");
             }else {
                 outputVO.setResult("0");
-                outputVO.setGrouplist(grouplist);
+                List <GroupResultVO> groupResultVOList = new ArrayList<GroupResultVO>();
+                for (EMGroup emGroup : grouplist) {
+                    GroupResultVO vo = convertEMGroup2VO(emGroup);
+                    groupResultVOList.add(vo);
+                }
+                outputVO.setGrouplist(groupResultVOList);
             }
             String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
                     + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
@@ -1924,7 +1929,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             List<EMGroup> groupList = EMClient.getInstance().groupManager().getJoinedGroupsFromServer();
             outputVO.setResult("0");
-            outputVO.setGrouplist(groupList);
+            List <GroupResultVO> groupResultVOList = new ArrayList<GroupResultVO>();
+            for (EMGroup emGroup : groupList) {
+                GroupResultVO vo = convertEMGroup2VO(emGroup);
+                groupResultVOList.add(vo);
+            }
+            outputVO.setGrouplist(groupResultVOList);
             String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
                     + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
             evaluateRootWindowScript(js);
