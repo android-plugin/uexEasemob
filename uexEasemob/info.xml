@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
     <plugin uexName="uexEasemob" version="4.0.0" build="26">
-        <info>26.支持function传入</info>
+        <info>26.4.0插件</info>
         <build>25.修复获取群组信息时数据返回异常的问题</build>
         <build>24.创建群组时，Android支持initialWelcomeMessage参数</build>
         <build>23:升级环信官方SDK到3.1.2, 同时添加客服功能</build>
