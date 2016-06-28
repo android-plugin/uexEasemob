@@ -43,7 +43,9 @@
     
     //[7.1]
     function registerRemoteNotification(){
-        uexEasemob.registerRemoteNotification('');
+        uexEasemob.registerRemoteNotification('',function(data){
+                                              alert("callback:"+JSON.stringify(data));
+                                              });
     }
     
     //[7.3]
@@ -53,14 +55,18 @@
         var noDisturbingStyle = document.getElementById("updatePushOptionsnoDisturbingStyle").value;
         var noDisturbingStartH = document.getElementById("updatePushOptionsnoDisturbingStartH").value;
         var noDisturbingEndH = document.getElementById("updatePushOptionsnoDisturbingEndH").value;
-        uexEasemob.updatePushOptions('{"nickname":"'+nickname+'","displayStyle":"'+displayStyle+'","noDisturbingStyle":"'+noDisturbingStyle+'","noDisturbingStartH":"'+noDisturbingStartH+'","noDisturbingEndH":"'+noDisturbingEndH+'"}');
+        uexEasemob.updatePushOptions('{"nickname":"'+nickname+'","displayStyle":"'+displayStyle+'","noDisturbingStyle":"'+noDisturbingStyle+'","noDisturbingStartH":"'+noDisturbingStartH+'","noDisturbingEndH":"'+noDisturbingEndH+'"}',function(data){
+                                     alert("callback:"+JSON.stringify(data));
+                                     });
     }
     
     //[7.5]
     function ignoreGroupPushNotification(){
         var groupId = document.getElementById("ignoreGroupPushNotificationgroupId").value;
         var isIgnore = document.getElementById("ignoreGroupPushNotificationisIgnore").value;
-        uexEasemob.ignoreGroupPushNotification('{"groupId":"'+groupId+'","isIgnore":"'+isIgnore+'"}');
+        uexEasemob.ignoreGroupPushNotification('{"groupId":"'+groupId+'","isIgnore":"'+isIgnore+'"}',function(data){
+                                               alert("callback:"+JSON.stringify(data));
+                                               });
     }
        </script>
 </head>

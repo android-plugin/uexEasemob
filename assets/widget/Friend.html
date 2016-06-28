@@ -39,47 +39,51 @@
         }
     //[4.6]
     function getContactUserNames(){
-        uexEasemob.getContactUserNames('');
+        uexEasemob.getContactUserNames(function(data){
+                                       alert("callback:"+JSON.stringify(data));
+                                       });
     }
-    
+
     //[4.8]
     function addContact(){
         var toAddUsername = document.getElementById("addContacttoAddUsername").value;
         var reason = document.getElementById("addContactreason").value;
-        uexEasemob.addContact('{"toAddUsername":"'+toAddUsername+'","reason":"'+reason+'"}');3
+        uexEasemob.addContact('{"toAddUsername":"'+toAddUsername+'","reason":"'+reason+'"}');
 
     }
-    
+
     //[4.9]
     function deleteContact(){
         var username = document.getElementById("deleteContactusername").value;
         uexEasemob.deleteContact('{"username":"'+username+'"}');
     }
-    
+
     //[4.10]
     function acceptInvitation(){
         var username = document.getElementById("acceptInvitationusername").value;
         uexEasemob.acceptInvitation('{"username":"'+username+'"}');
     }
-    
+
     //[4.11]
     function refuseInvitation(){
         var username = document.getElementById("refuseInvitationusername").value;
         var reason = document.getElementById("refuseInvitationreason").value;
         uexEasemob.refuseInvitation('{"username":"'+username+'","reason":"'+reason+'"}');
     }
-    
+
     //[4.12]
     function getBlackListUsernames(){
-        uexEasemob.getBlackListUsernames('');
+        uexEasemob.getBlackListUsernames(function(data){
+                                         alert("callback:"+JSON.stringify(data));
+                                         });
     }
-    
+
     //[4.14]
     function addUserToBlackList(){
         var username = document.getElementById("addUserToBlackListusername").value;
         uexEasemob.addUserToBlackList('{"username":"'+username+'"}');
     }
-    
+
     //[4.15]
     function deleteUserFromBlackList(){
         var username = document.getElementById("deleteUserFromBlackListusername").value;
@@ -106,48 +110,48 @@
      </div>
      <!--header结束--><!--content开始-->
      <div id="content" class="ub-f1 tx-l t-bla" style="">
-         
+
      <div class="conbor">
         <div class="consj" id="topDiv">
             <div id='globalPostArea'>全局广播显示区域</div><br><br>
-            
-            
+
+
              <div> </div><div>======Friend==========</div>
              <div> </div><span>getContactUserNames</span>
              <input class='btn' type='button' value='调用接口' onclick='getContactUserNames()'></input>
-             
+
              <div> </div><span>addContact</span>
              <div>toAddUsername:</div><input class="textbox" type="text" id="addContacttoAddUsername" value="mikuser2"></input>
              <div>reason:</div><input class="textbox" type="text" id="addContactreason" value=""></input>
              <input class='btn' type='button' value='调用接口' onclick='addContact()'></input>
-             
+
              <div> </div><span>deleteContact</span>
              <div>username:</div><input class="textbox" type="text" id="deleteContactusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='deleteContact()'></input>
-             
+
              <div> </div><span>acceptInvitation</span>
              <div>username:</div><input class="textbox" type="text" id="acceptInvitationusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='acceptInvitation()'></input>
-             
+
              <div> </div><span>refuseInvitation</span>
              <div>username:</div><input class="textbox" type="text" id="refuseInvitationusername" value="mikuser2"></input>
              <div>reason:</div><input class="textbox" type="text" id="refuseInvitationreason" value=""></input>
              <input class='btn' type='button' value='调用接口' onclick='refuseInvitation()'></input>
-             
+
              <div> </div><span>getBlackListUsernames</span>
              <input class='btn' type='button' value='调用接口' onclick='getBlackListUsernames()'></input>
-             
+
              <div> </div><span>addUserToBlackList</span>
              <div>username:</div><input class="textbox" type="text" id="addUserToBlackListusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='addUserToBlackList()'></input>
-             
+
              <div> </div><span>deleteUserFromBlackList</span>
              <div>username:</div><input class="textbox" type="text" id="deleteUserFromBlackListusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='deleteUserFromBlackList()'></input>
         <div>======回调记录==========</div>
         <div id='TestCallBack'>原本内容</div>
         <div id='TestData'>原本内容</div>
-        
+
     </div>
     </div>
 </body>

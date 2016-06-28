@@ -49,7 +49,9 @@
         var apnsCertName = document.getElementById("initEasemobapnsCertName").value;
         var isAutoLoginEnabled = document.getElementById("initEasemobisAutoLoginEnabled").value;
         var isAutoAcceptGroupInvitation = document.getElementById("isAutoAcceptGroupInvitation").value;
-        uexEasemob.initEasemob('{"appKey":"'+appKey+'","apnsCertName":"'+apnsCertName+'","isAutoLoginEnabled":"'+isAutoLoginEnabled+'","isAutoAcceptGroupInvitation":"'+isAutoAcceptGroupInvitation+'"}');
+        uexEasemob.initEasemob('{"appKey":"'+appKey+'","apnsCertName":"'+apnsCertName+'","isAutoLoginEnabled":"'+isAutoLoginEnabled+'","isAutoAcceptGroupInvitation":"'+isAutoAcceptGroupInvitation+'"}',function(data){
+                               alert("callback:"+data);
+                               });
         
     }
     
@@ -57,19 +59,25 @@
     function login(){
         var username = document.getElementById("loginusername").value;
         var password = document.getElementById("loginpassword").value;
-        uexEasemob.login('{"username":"'+username+'","password":"'+password+'"}');
+        uexEasemob.login('{"username":"'+username+'","password":"'+password+'"}',function(data){
+                         alert("callback:"+JSON.stringify(data));
+                         });
     }
     
     //[1.4]
     function logout(){
-        uexEasemob.logout('');
+        uexEasemob.logout('',function(data){
+                          alert("callback:"+JSON.stringify(data));
+                          });
     }
     
     //[1.5]
     function registerUser(){
         var username = document.getElementById("registerUserusername").value;
         var password = document.getElementById("registerUserpassword").value;
-        uexEasemob.registerUser('{"username":"'+username+'","password":"'+password+'"}');
+        uexEasemob.registerUser('{"username":"'+username+'","password":"'+password+'"}',function(data){
+                                alert("callback:"+JSON.stringify(data));
+                                });
     }
     
     //[1.7]
@@ -80,7 +88,9 @@
     
     //[1.8]
     function getLoginInfo(){
-        uexEasemob.getLoginInfo('');
+        uexEasemob.getLoginInfo('',function(data){
+                                alert("callback:"+JSON.stringify(data));
+                                });
     }	
 
 

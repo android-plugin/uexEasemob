@@ -42,10 +42,20 @@
     
     //[2.5]
     function sendText(){
-        var username = document.getElementById("sendTextusername").value;
-        var chatType = document.getElementById("sendTextchatType").value;
-        var content = document.getElementById("sendTextcontent").value;
-        uexEasemob.sendText('{"username":"'+username+'","chatType":"'+chatType+'","content":"'+content+'","ext":"ss"}');
+        //var username = document.getElementById("sendTextusername").value;
+        //var chatType = document.getElementById("sendTextchatType").value;
+        //var content = document.getElementById("sendTextcontent").value;
+        //uexEasemob.sendText('{"username":"'+username+'","chatType":"'+chatType+'","content":"'+content+'","ext":"ss"}');
+        var params={
+            username:document.getElementById("sendTextusername").value,
+            chatType:document.getElementById("sendTextchatType").value,
+            content:document.getElementById("sendTextcontent").value,
+            extObj:{
+                ext1:"ext1",
+                ext2:"ext2"
+            }
+        }
+        uexEasemob.sendText(JSON.stringify(params));
     }
     
     //[2.6]
@@ -109,7 +119,9 @@
     //[2.12]
     function getMessageById(){
         var msgId = document.getElementById("getMessageByIdmsgId").value;
-        uexEasemob.getMessageById('{"msgId":"'+msgId+'"}');
+        uexEasemob.getMessageById('{"msgId":"'+msgId+'"}',function(data){
+                                  alert("callback:"+JSON.stringify(data));
+                                  });
     }
     
     //[2.14]

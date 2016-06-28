@@ -37,63 +37,71 @@
             uexWindow.subscribeChannelNotification("1", "easemobDemoGlobalPost");
            uexWindow.easemobDemoGlobalPost=globalPost;
         }
-    
 
-    
+
+
     //[3.1]
     function getConversationByName(){
         var username = document.getElementById("getConversationByNameusername").value;
         var chatType = document.getElementById("getConversationByNamechatType").value;
-        uexEasemob.getConversationByName('{"username":"'+username+'","chatType":"'+chatType+'"}');
+        uexEasemob.getConversationByName('{"username":"'+username+'","chatType":"'+chatType+'"}',function(data){
+                                         alert("callback:"+JSON.stringify(data));
+                                         });
     }
-    
+
     //[3.3]
     function getMessageHistory(){
         var username = document.getElementById("getMessageHistoryusername").value;
         var chatType = document.getElementById("getMessageHistorychatType").value;
         var startMsgId = document.getElementById("getMessageHistorystartMsgId").value;
         var pagesize = document.getElementById("getMessageHistorypagesize").value;
-        uexEasemob.getMessageHistory('{"username":"'+username+'","chatType":"'+chatType+'","startMsgId":"'+startMsgId+'","pagesize":"'+pagesize+'"}');
+        uexEasemob.getMessageHistory('{"username":"'+username+'","chatType":"'+chatType+'","startMsgId":"'+startMsgId+'","pagesize":"'+pagesize+'"}',function(data){
+                                     alert("callback:"+JSON.stringify(data));
+                                     });
     }
-    
+
     //[3.5]
     function getUnreadMsgCount(){
         var username = document.getElementById("getUnreadMsgCountusername").value;
         var chatType = document.getElementById("getUnreadMsgCountchatType").value;
-        uexEasemob.getUnreadMsgCount('{"username":"'+username+'","chatType":"'+chatType+'"}');
+        uexEasemob.getUnreadMsgCount('{"username":"'+username+'","chatType":"'+chatType+'"}',function(data){
+                                     alert("callback:"+JSON.stringify(data));
+                                     });
     }
-    
+
     //[3.7]
     function resetUnreadMsgCount(){
         var username = document.getElementById("resetUnreadMsgCountusername").value;
         var chatType = document.getElementById("resetUnreadMsgCountchatType").value;
         uexEasemob.resetUnreadMsgCount('{"username":"'+username+'","chatType":"'+chatType+'"}');
     }
-    
+
     //[3.8]
     function resetAllUnreadMsgCount(){
         uexEasemob.resetAllUnreadMsgCount('');
     }
-    
+
     //[3.9]
     function getMsgCount(){
         var username = document.getElementById("getMsgCountusername").value;
-        uexEasemob.getMsgCount('{"username":"'+username+'"}');
+        uexEasemob.getMsgCount('{"username":"'+username+'"}',function(data){
+                               alert("callback:"+JSON.stringify(data));
+                               });
     }
-    
+
     //[3.11]
     function clearConversation(){
         var username = document.getElementById("clearConversationusername").value;
         uexEasemob.clearConversation('{"username":"'+username+'"}');
     }
-    
+
     //[3.12]
     function deleteConversation(){
         var username = document.getElementById("deleteConversationusername").value;
         var chatType = document.getElementById("deleteConversationchatType").value;
         uexEasemob.deleteConversation('{"username":"'+username+'","chatType":"'+chatType+'"}');
     }
-    
+
     //[3.13]
     function removeMessage(){
         var username = document.getElementById("removeMessageusername").value;
@@ -101,23 +109,29 @@
         var chatType = document.getElementById("removeMessagechatType").value;
         uexEasemob.removeMessage('{"username":"'+username+'","msgId":"'+msgId+'","chatType":"'+chatType+'"}');
     }
-    
+
     //[3.14]
     function deleteAllConversation(){
         uexEasemob.deleteAllConversation('');
     }
-    
+
     //[3.15]
     function getChatterInfo(){
-        uexEasemob.getChatterInfo('');
+        uexEasemob.getChatterInfo(function(data){
+                                  alert("callback:"+JSON.stringify(data));
+                                  });
     }
 
     //[3.17]
     function getTotalUnreadMsgCount(){
-        uexEasemob.getTotalUnreadMsgCount();
+        uexEasemob.getTotalUnreadMsgCount(function(data){
+                                          alert("callback:"+JSON.stringify(data));
+                                          });
     }
     function getRecentChatters(){
-        uexEasemob.getRecentChatters();
+        uexEasemob.getRecentChatters(function(data){
+                                     alert("callback:"+JSON.stringify(data));
+                                     });
     }
 
        </script>
@@ -136,68 +150,68 @@
      </div>
      <!--header结束--><!--content开始-->
      <div id="content" class="ub-f1 tx-l t-bla" style="">
-         
+
      <div class="conbor">
         <div class="consj" id="topDiv">
             <div id='globalPostArea'>全局广播显示区域</div><br><br>
-            
-            
+
+
              <div> </div><div>======Conversation==========</div>
              <div> </div><span>getConversationByName</span>
              <div>username:</div><input class="textbox" type="text" id="getConversationByNameusername" value="mikuser2"></input>
              <div>chatType:</div><input class="textbox" type="text" id="getConversationByNamechatType" value="0"></input>
              <input class='btn' type='button' value='调用接口' onclick='getConversationByName()'></input>
-             
+
              <div> </div><span>getMessageHistory</span>
              <div>username:</div><input class="textbox" type="text" id="getMessageHistoryusername" value="mikuser2"></input>
              <div>chatType:</div><input class="textbox" type="text" id="getMessageHistorychatType" value="0"></input>
              <div>startMsgId:</div><input class="textbox" type="text" id="getMessageHistorystartMsgId" value=""></input>
              <div>pagesize:</div><input class="textbox" type="text" id="getMessageHistorypagesize" value=""></input>
              <input class='btn' type='button' value='调用接口' onclick='getMessageHistory()'></input>
-             
+
              <div> </div><span>getUnreadMsgCount</span>
              <div>username:</div><input class="textbox" type="text" id="getUnreadMsgCountusername" value="mikuser2"></input>
              <div>chatType:</div><input class="textbox" type="text" id="getUnreadMsgCountchatType" value="0"></input>
              <input class='btn' type='button' value='调用接口' onclick='getUnreadMsgCount()'></input>
-             
+
              <div> </div><span>resetUnreadMsgCount</span>
              <div>username:</div><input class="textbox" type="text" id="resetUnreadMsgCountusername" value="mikuser2"></input>
              <div>chatType:</div><input class="textbox" type="text" id="resetUnreadMsgCountchatType" value="0"></input>
              <input class='btn' type='button' value='调用接口' onclick='resetUnreadMsgCount()'></input>
-             
+
              <div> </div><span>resetAllUnreadMsgCount</span>
              <input class='btn' type='button' value='调用接口' onclick='resetAllUnreadMsgCount()'></input>
-             
+
              <div> </div><span> getMsgCount</span>
              <div>username:</div><input class="textbox" type="text" id="getMsgCountusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='getMsgCount()'></input>
-             
+
              <div> </div><span>clearConversation</span>
              <div>username:</div><input class="textbox" type="text" id="clearConversationusername" value="mikuser2"></input>
              <input class='btn' type='button' value='调用接口' onclick='clearConversation()'></input>
-             
+
              <div> </div><span>deleteConversation</span>
              <div>username:</div><input class="textbox" type="text" id="deleteConversationusername" value="mikuser2"></input>
              <div>chatType:</div><input class="textbox" type="text" id="deleteConversationchatType" value="0"></input>
              <input class='btn' type='button' value='调用接口' onclick='deleteConversation()'></input>
-             
+
              <div> </div><span>removeMessage</span>
              <div>username:</div><input class="textbox" type="text" id="removeMessageusername" value="mikuser2"></input>
              <div>msgId:</div><input class="textbox" type="text" id="removeMessagemsgId" value=""></input>
              <div>chatType:</div><input class="textbox" type="text" id="removeMessagechatType" value="0"></input>
              <input class='btn' type='button' value='调用接口' onclick='removeMessage()'></input>
-             
+
              <div> </div><span>deleteAllConversation</span>
              <input class='btn' type='button' value='调用接口' onclick='deleteAllConversation()'></input>
-             
+
              <div> </div><span>getChatterInfo</span>
              <input class='btn' type='button' value='调用接口' onclick='getChatterInfo()'></input>
              <div> </div><span>getTotalUnreadMsgCount</span>
              <input class='btn' type='button' value='调用接口' onclick='getTotalUnreadMsgCount()'></input>
-             
+
              <div> </div><span>getRecentChatters</span>
              <input class='btn' type='button' value='调用接口' onclick='getRecentChatters()'></input>
-        
+
         <div>======回调区域==========</div>
         <div id='TestCallBack'>原本内容</div>
         <div id='TestData'>原本内容</div>

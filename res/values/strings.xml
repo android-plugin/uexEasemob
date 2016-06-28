@@ -2,7 +2,7 @@
 <resources>
 
 <!-- common use通用字符串 -->
-    <string name="app_name">环信插件3.0</string>
+    <string name="app_name">环信插件4.0</string>
     <string name="back">返回</string>
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
@@ -36,7 +36,7 @@
 
     <string name="appkey">26cf1a0e-6d52-41aa-bb54-f4efe8a35d33</string>
     <string name="push">true</string>
-    
+
     <!-- update use -->
     <string name="update_host">http://192.168.1.82:8080/store/app/upgrade/</string>
 
