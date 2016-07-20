@@ -1,5 +1,6 @@
 package org.zywx.wbpalmstar.widgetone.uexEasemob;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -1926,25 +1927,33 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             evaluateRootWindowScript(js);
             return;
         }
-        try {
-            List<EMGroup> groupList = EMClient.getInstance().groupManager().getJoinedGroupsFromServer();
-            outputVO.setResult("0");
-            List <GroupResultVO> groupResultVOList = new ArrayList<GroupResultVO>();
-            for (EMGroup emGroup : groupList) {
-                GroupResultVO vo = convertEMGroup2VO(emGroup);
-                groupResultVOList.add(vo);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    List<EMGroup> groupList = EMClient.getInstance().groupManager().getJoinedGroupsFromServer();
+                    outputVO.setResult("0");
+                    List <GroupResultVO> groupResultVOList = new ArrayList<GroupResultVO>();
+                    for (EMGroup emGroup : groupList) {
+                        GroupResultVO vo = convertEMGroup2VO(emGroup);
+                        groupResultVOList.add(vo);
+                    }
+                    outputVO.setGrouplist(groupResultVOList);
+                    String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
+                            + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
+                    evaluateRootWindowScript(js);
+                } catch (HyphenateException e) {
+                    if (BDebug.DEBUG){
+                        e.printStackTrace();
+                    }
+                    outputVO.setResult("1");
+                    outputVO.setErrorMsg(e.getMessage());
+                    String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
+                            + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
+                    evaluateRootWindowScript(js);
+                }
             }
-            outputVO.setGrouplist(groupResultVOList);
-            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
-                    + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-            evaluateRootWindowScript(js);
-        } catch (HyphenateException e) {
-            outputVO.setResult("1");
-            outputVO.setErrorMsg(e.getMessage());
-            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
-                    + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-            evaluateRootWindowScript(js);
-        }
+        }).start();
     }
 
     public void getAllPublicGroupsFromServer(String[] params){
@@ -2687,13 +2696,18 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      *
      * @param script
      */
-    private void evaluateRootWindowScript(String script) {
-        if (debug){
-            //如果是调试中心
-            evaluateScript("appCanPlayerHome", 0, script);
-        }else{
-            evaluateScript("root", 0, script);
-        }
+    private void evaluateRootWindowScript(final String script) {
+        ((Activity)mContext).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (debug){
+                    //如果是调试中心
+                    evaluateScript("appCanPlayerHome", 0, script);
+                }else{
+                    evaluateScript("root", 0, script);
+                }
+            }
+        });
     }
 
     @Override
