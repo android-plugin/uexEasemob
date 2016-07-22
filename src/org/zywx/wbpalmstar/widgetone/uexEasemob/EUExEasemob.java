@@ -2021,20 +2021,30 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
-    private void getGroupMsg(GroupInfoVO infoVO) {
-        EMGroup group = null;
+    private void getGroupMsg(final GroupInfoVO infoVO) {
         if (Boolean.valueOf(infoVO.getLoadCache())){
-            group = EMClient.getInstance().groupManager().getGroup(infoVO.getGroupId());
+            EMGroup group = EMClient.getInstance().groupManager().getGroup(infoVO.getGroupId());
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
+                    + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(convertEMGroup2VO(group)) + "');}";
+            evaluateRootWindowScript(js);
         }else{
-            try {
-                group =EMClient.getInstance().groupManager().getGroupFromServer(infoVO.getGroupId());
-            } catch (HyphenateException e) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            EMGroup group = EMClient.getInstance().groupManager().getGroupFromServer(infoVO.getGroupId());
+                            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
+                                    + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(convertEMGroup2VO(group)) + "');}";
+                            evaluateRootWindowScript(js);
+                        } catch (HyphenateException e) {
+                            if (BDebug.DEBUG){
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }).start();
 
-            }
         }
-        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
-                + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(convertEMGroup2VO(group)) + "');}";
-        evaluateRootWindowScript(js);
     }
 
     public static GroupResultVO convertEMGroup2VO(EMGroup group){
