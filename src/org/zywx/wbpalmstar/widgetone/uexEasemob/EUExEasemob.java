@@ -1820,16 +1820,23 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
-    private void joinGroupMsg(GroupInfoVO inputVO) {
-        try {
-            if (TextUtils.isEmpty(inputVO.getReason())) {
-                EMClient.getInstance().groupManager().joinGroup(inputVO.getGroupId());//需异步处理
-            }else{
-                EMClient.getInstance().groupManager().applyJoinToGroup(inputVO.getGroupId(),inputVO.getReason());//需异步处理
+    private void joinGroupMsg(final GroupInfoVO inputVO) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (TextUtils.isEmpty(inputVO.getReason())) {
+                        EMClient.getInstance().groupManager().joinGroup(inputVO.getGroupId());//需异步处理
+                    }else{
+                        EMClient.getInstance().groupManager().applyJoinToGroup(inputVO.getGroupId(),inputVO.getReason());//需异步处理
+                    }
+                } catch (HyphenateException e) {
+                    if (BDebug.DEBUG){
+                        e.printStackTrace();
+                    }
+                }
             }
-        } catch (HyphenateException e) {
-
-        }
+        }).start();
     }
 
     public void exitFromGroup(String[] params){
