@@ -223,9 +223,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         String appKey= initVO.appKey;
         options.setAppKey(appKey);
-        if (!TextUtils.isDigitsOnly(initVO.miPushAppId)){
+        if (!TextUtils.isEmpty(initVO.miPushAppId)){
             options.setMipushConfig(initVO.miPushAppId,initVO.miPushAppKey);
             miPush=true;
+            BDebug.i("set miPush");
         }
 
         ListenersRegister register=new ListenersRegister();
