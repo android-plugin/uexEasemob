@@ -52,6 +52,7 @@ import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.CreateGroupInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.GroupInfoVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.HistoryInputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.ImportMsgInputVO;
+import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.InitVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.NicknameVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.NotifySettingVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.input.PageVO;
@@ -165,6 +166,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private static final String TEMP_PATH = "temp";
 
+    private boolean miPush=false;
+
     public EUExEasemob(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
         mGson =new Gson();
@@ -209,28 +212,28 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             return;
         }
         EMOptions options = new EMOptions();
-        try {
-            JSONObject jsonObject=new JSONObject(param[0]);
-            String isAutoLogin=jsonObject.optString("isAutoLoginEnabled");
-            if ("1".equals(isAutoLogin)){
-                options.setAutoLogin(true);
-            }else if ("2".equals(isAutoLogin)){
-                options.setAutoLogin(false);// 自动同意加群
-            }
-            if ("1".equals(jsonObject.optString("debug"))){
-                debug=true;
-            }
-            String isAutoAcceptGroupInvitation = jsonObject.optString("isAutoAcceptGroupInvitation", "1");
-            if ("2".equals(isAutoAcceptGroupInvitation)){
-                options.setAutoAcceptGroupInvitation(false);
-            } else {
-                options.setAutoAcceptGroupInvitation(true);
-            }
-            String appKey= jsonObject.optString("appKey");
-            options.setAppKey(appKey);
-        } catch (JSONException e) {
+        InitVO initVO= DataHelper.gson.fromJson(param[0],InitVO.class);
+        String isAutoLogin = initVO.isAutoLoginEnabled;
+        if ("1".equals(isAutoLogin)) {
+            options.setAutoLogin(true);
+        } else if ("2".equals(isAutoLogin)) {
+            options.setAutoLogin(false);// 自动同意加群
         }
-
+        if ("1".equals(initVO.debug)) {
+            debug = true;
+        }
+        String isAutoAcceptGroupInvitation = initVO.isAutoAcceptGroupInvitation;
+        if ("2".equals(isAutoAcceptGroupInvitation)) {
+            options.setAutoAcceptGroupInvitation(false);
+        } else {
+            options.setAutoAcceptGroupInvitation(true);
+        }
+        String appKey = initVO.appKey;
+        options.setAppKey(appKey);
+        if (!TextUtils.isDigitsOnly(initVO.miPushAppId)) {
+            options.setMipushConfig(initVO.miPushAppId, initVO.miPushAppKey);
+            miPush = true;
+        }
 
         ListenersRegister register=new ListenersRegister();
         register.registerListeners(mContext.getApplicationContext(), options, mGson);
@@ -319,7 +322,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void logout(String[] params){
-        int result = EMClient.getInstance().logout(false);
+        int result = 0;
+
+        if (!miPush) {
+            result=EMClient.getInstance().logout(false);
+        } else {
+            EMClient.getInstance().logout(true, null);
+        }
         Log.i(TAG, "logout result:" + result);
         if (null != params && params.length == 1) {
             String funcId = params[0];
