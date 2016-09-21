@@ -91,5 +91,7 @@
         <method name="getChatterInfo"/>
         <method name="getTotalUnreadMsgCount"/>
         <method name="getRecentChatters"/>
+        <method name="registerCallback"/>
+        <method name="unRegisterCallback"/>
     </plugin>
 </uexplugins>
