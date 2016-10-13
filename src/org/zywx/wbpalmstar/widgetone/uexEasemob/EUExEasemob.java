@@ -1415,6 +1415,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         if (!TextUtils.isEmpty(settingVO.getShowNotificationInBackgroud())) {
             // 已不支持, 环信SDK将其放入了UI框架中
+            ListenersRegister.hxsdkHelper.hxModel.setSettingMsgNotification(!"0".equals(settingVO.getShowNotificationInBackgroud()));
             //chatOptions.setShowNotificationInBackgroud(!"0".equals(settingVO.getShowNotificationInBackgroud())); //默认为true
         }
         if (!TextUtils.isEmpty(settingVO.getAcceptInvitationAlways())) {

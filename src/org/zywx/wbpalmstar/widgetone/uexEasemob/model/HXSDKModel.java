@@ -21,7 +21,7 @@ package org.zywx.wbpalmstar.widgetone.uexEasemob.model;
  */
 public abstract class HXSDKModel {
     public abstract void setSettingMsgNotification(boolean paramBoolean);
-    
+
     // 震动和声音总开关，来消息时，是否允许此开关打开
     // the vibrate and sound notification are allowed or not?
     public abstract boolean getSettingMsgNotification();

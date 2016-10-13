@@ -130,8 +130,11 @@ public class HXNotifier {
         
         // 判断app是否在后台
         if (!EasyUtils.isAppRunningForeground(appContext)) {
-            EMLog.d(TAG, "app is running in backgroud");
-            sendNotification(message, false);
+            HXSDKModel model = HXSDKHelper.getInstance().getModel();
+            if(model.getSettingMsgNotification()) {
+                EMLog.d(TAG, "app is running in backgroud");
+                sendNotification(message, false);
+            }
         } else {
             sendNotification(message, true);
 
@@ -146,8 +149,8 @@ public class HXNotifier {
         }
         // 判断app是否在后台
         if (!EasyUtils.isAppRunningForeground(appContext)) {
-            EMLog.d(TAG, "app is running in backgroud");
-            sendNotification(messages, false);
+                EMLog.d(TAG, "app is running in backgroud");
+                sendNotification(messages, false);
         } else {
             sendNotification(messages, true);
         }
