@@ -28,6 +28,8 @@ import com.hyphenate.chat.EMVoiceMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.hyphenate.util.NetUtils;
 
+import org.zywx.wbpalmstar.base.BDebug;
+import org.zywx.wbpalmstar.engine.DataHelper;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.model.HXSDKModel;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallReceiveOutputVO;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallStateOutputVO;
@@ -51,8 +53,6 @@ public class ListenersRegister {
 
     private ListenersCallback callback;
 
-    private Gson mGson;
-
     public static HXSDKHelper hxsdkHelper=new HXSDKHelper() {
         @Override
         protected HXSDKModel createModel() {
@@ -60,9 +60,8 @@ public class ListenersRegister {
         }
     };
 
-    public void registerListeners(Context context, EMOptions options, Gson gson){
+    public void registerListeners(Context context, EMOptions options){
         mContext=context;
-        mGson=gson;
         hxsdkHelper.onInit(context, options);
         EMClient.getInstance().chatManager().addMessageListener(new EMMessageListener() {
             @Override
@@ -294,7 +293,7 @@ public class ListenersRegister {
 
     private void callbackNewMessage(EMMessage message){
         if (callback!=null) {
-            callback.onNewMessage(mGson.toJson(convertEMMessage(message)));
+            callback.onNewMessage(DataHelper.gson.toJson(convertEMMessage(message)));
         }
     }
 
@@ -332,7 +331,9 @@ public class ListenersRegister {
             JsonObject gsonObject = (JsonObject) jsonParser.parse(message.getJSONObjectAttribute("extObj").toString());
             resultVO.setExtObj(gsonObject);
         } catch (HyphenateException e) {
-            e.printStackTrace();
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
         return resultVO;
     }

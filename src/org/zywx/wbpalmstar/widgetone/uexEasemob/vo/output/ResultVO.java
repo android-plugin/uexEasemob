@@ -9,15 +9,15 @@ public class ResultVO implements Serializable {
 
     private static final long serialVersionUID = -6850390450328468940L;
 
-    private String result;
+    private int result;
 
     private String msg;
 
-    public String getResult() {
+    public int getResult() {
         return result;
     }
 
-    public void setResult(String result) {
+    public void setResult(int result) {
         this.result = result;
     }
 

@@ -2,8 +2,7 @@
 <uexplugins>
     <plugin
         className="org.zywx.wbpalmstar.widgetone.uexEasemob.EUExEasemob"
-        uexName="uexEasemob"
-        global="true">
+        uexName="uexEasemob">
         <method name="initEasemob" />
         <method name="login"/>
         <method name="logout" />
@@ -92,5 +91,7 @@
         <method name="getChatterInfo"/>
         <method name="getTotalUnreadMsgCount"/>
         <method name="getRecentChatters"/>
+        <method name="registerCallback"/>
+        <method name="unRegisterCallback"/>
     </plugin>
 </uexplugins>

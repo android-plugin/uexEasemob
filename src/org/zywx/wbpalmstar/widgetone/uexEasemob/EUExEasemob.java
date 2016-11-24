@@ -156,8 +156,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private static final int MSG_GET_RECENT_CHATTERS=61;
 
-    private Gson mGson;
-
     private List<String> tempContacts=new ArrayList<String>();
 
     private boolean debug=false;//用于同步调试
@@ -168,14 +166,37 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private boolean miPush=false;
 
+    private static List<EBrowserView> callbackBrowserViews;//需要回调的EBrowserView
+
     public EUExEasemob(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
-        mGson =new Gson();
+        if ("root".equals(eBrowserView.getWindowName())){
+            registerCallback(null);
+        }
     }
 
     @Override
     protected boolean clean() {
         return false;
+    }
+
+    public void registerCallback(String[] params){
+        if (callbackBrowserViews==null){
+            callbackBrowserViews=new ArrayList<EBrowserView>();
+        }
+        if (!callbackBrowserViews.contains(mBrwView)){
+            callbackBrowserViews.add(mBrwView);
+        }
+    }
+
+    public void unRegisterCallback(String[] params){
+        if (callbackBrowserViews!=null&&callbackBrowserViews.contains(mBrwView)){
+            callbackBrowserViews.remove(mBrwView);
+        }
+        if (params!=null&&params.length>0&&"-1".equals(params[0])){
+            callbackBrowserViews.clear();
+            callbackBrowserViews=null;
+        }
     }
 
     public void initEasemob(String[] param){
@@ -189,7 +210,14 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void initEasemobMsg(String[] param){
+        String funcId = null;
+        if(null != param && param.length == 2) {
+            funcId = param[1];
+        }
         if (mHasInit){
+            if (null != funcId) {
+                callbackToJs(Integer.parseInt(funcId), false, "EaseMobSDK has already been initialized!");
+            }
             return;
         }
         mHasInit =true;
@@ -206,32 +234,34 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         EMOptions options = new EMOptions();
         InitVO initVO= DataHelper.gson.fromJson(param[0],InitVO.class);
-        String isAutoLogin=initVO.isAutoLoginEnabled;
-        if ("1".equals(isAutoLogin)){
+        String isAutoLogin = initVO.isAutoLoginEnabled;
+        if ("1".equals(isAutoLogin)) {
             options.setAutoLogin(true);
-        }else if ("2".equals(isAutoLogin)){
+        } else if ("2".equals(isAutoLogin)) {
             options.setAutoLogin(false);// 自动同意加群
         }
-        if ("1".equals(initVO.debug)){
-            debug=true;
+        if ("1".equals(initVO.debug)) {
+            debug = true;
         }
-        String isAutoAcceptGroupInvitation =initVO.isAutoAcceptGroupInvitation;
-        if ("2".equals(isAutoAcceptGroupInvitation)){
+        String isAutoAcceptGroupInvitation = initVO.isAutoAcceptGroupInvitation;
+        if ("2".equals(isAutoAcceptGroupInvitation)) {
             options.setAutoAcceptGroupInvitation(false);
         } else {
             options.setAutoAcceptGroupInvitation(true);
         }
-        String appKey= initVO.appKey;
+        String appKey = initVO.appKey;
         options.setAppKey(appKey);
-        if (!TextUtils.isEmpty(initVO.miPushAppId)){
-            options.setMipushConfig(initVO.miPushAppId,initVO.miPushAppKey);
-            miPush=true;
-            BDebug.i("set miPush");
+        if (!TextUtils.isEmpty(initVO.miPushAppId)) {
+            options.setMipushConfig(initVO.miPushAppId, initVO.miPushAppKey);
+            miPush = true;
         }
 
         ListenersRegister register=new ListenersRegister();
-        register.registerListeners(mContext.getApplicationContext(), options, mGson);
+        register.registerListeners(mContext.getApplicationContext(), options);
         register.setCallback(this);
+        if (null != funcId) {
+            callbackToJs(Integer.parseInt(funcId), false, "EaseMobSDK initialized successfully!");
+        }
     }
 
     private String getAppName(int pID) {
@@ -263,42 +293,45 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        UserInputVO inputVO=mGson.fromJson(params[0], new TypeToken<UserInputVO>() {
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
+        }
+        UserInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<UserInputVO>() {
         }.getType());
         if (TextUtils.isEmpty(inputVO.getUsername())||TextUtils.isEmpty(inputVO.getPassword())){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_LOGIN;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA, inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
-    }
-
-    public void loginMsg(UserInputVO inputVO){
+        final String callbackId = funcId;
         EMClient.getInstance().login(inputVO.getUsername(), inputVO.getPassword(), new EMCallBack() {
             @Override
             public void onSuccess() {
                 EMClient.getInstance().groupManager().loadAllGroups();
                 EMClient.getInstance().chatManager().loadAllConversations();
                 ResultVO resultVO = new ResultVO();
-                resultVO.setResult("1");
+                resultVO.setResult(1);
                 resultVO.setMsg("");
+                if(null != callbackId) {
+                    callbackToJs(Integer.parseInt(callbackId), false, DataHelper.gson.toJsonTree(resultVO));
+                    return;
+                }
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_LOGIN + "){"
-                        + JSConst.CALLBACK_LOGIN + "('" + mGson.toJson(resultVO) + "');}";
+                        + JSConst.CALLBACK_LOGIN + "('" + DataHelper.gson.toJson(resultVO) + "');}";
                 evaluateRootWindowScript(js);
             }
 
             @Override
             public void onError(int i, String s) {
                 ResultVO resultVO = new ResultVO();
-                resultVO.setResult("2");
+                resultVO.setResult(2);
                 resultVO.setMsg(s);
+                if(null != callbackId) {
+                    callbackToJs(Integer.parseInt(callbackId), false, DataHelper.gson.toJsonTree(resultVO));
+                    return;
+                }
                 String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_LOGIN + "){"
-                        + JSConst.CALLBACK_LOGIN + "('" + mGson.toJson(resultVO) + "');}";
+                        + JSConst.CALLBACK_LOGIN + "('" + DataHelper.gson.toJson(resultVO) + "');}";
                 evaluateRootWindowScript(js);
             }
 
@@ -310,50 +343,60 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void logout(String[] params){
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_LOGOUT;
-        mHandler.sendMessage(msg);
+        int result = 0;
+
+        if (!miPush) {
+            result=EMClient.getInstance().logout(false);
+        } else {
+            EMClient.getInstance().logout(true, null);
+        }
+        Log.i(TAG, "logout result:" + result);
+        if (null != params && params.length == 1) {
+            String funcId = params[0];
+            try {
+                JSONObject jsonObject = new JSONObject();
+                if (result == 0) { //退出成功
+                    jsonObject.put("result", 1);
+                    jsonObject.put("message", "logout success");
+                    callbackToJs(Integer.parseInt(funcId), false, jsonObject);
+                } else {
+                    jsonObject.put("result", 2);
+                    jsonObject.put("message", "logout fail");
+                    callbackToJs(Integer.parseInt(funcId), false, jsonObject);
+                }
+            } catch (JSONException e ) {
+
+            }
+        }
+
     }
 
-    private void logoutMsg() {
-        if (!miPush) {
-            EMClient.getInstance().logout(false);
-        }else{
-            EMClient.getInstance().logout(true,null);
-        }
-    }
 
     public void registerUser(String[] params){
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
             return;
         }
-        UserInputVO inputVO=mGson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
+        final UserInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
         if (TextUtils.isEmpty(inputVO.getUsername())||TextUtils.isEmpty(inputVO.getPassword())){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_REGISTER_User;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
-    }
-
-    public void registerUserMsg(final UserInputVO inputVO){
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
+        }
+        final String callbackId = funcId;
         new Thread(new Runnable() {
             public void run() {
                 ResultVO resultVO=new ResultVO();
                 try {
                     // 调用sdk注册方法
                     EMClient.getInstance().createAccount(inputVO.getUsername(), inputVO.getPassword());
-                    resultVO.setResult("1");
+                    resultVO.setResult(1);
                 } catch (final HyphenateException e) {
                     //注册失败
-                    resultVO.setResult("2");
+                    resultVO.setResult(2);
                     int errorCode = e.getErrorCode();
                     if (errorCode == EMError.NETWORK_ERROR) {
                         resultVO.setMsg("网络异常，请检查网络！");
@@ -365,14 +408,17 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                         resultVO.setMsg("注册失败:" + e.getMessage());
                     }
                 }finally {
-                    String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_REGISTER + "){"
-                            + JSConst.CALLBACK_REGISTER + "('" + mGson.toJson(resultVO) + "');}";
-                    evaluateRootWindowScript(js);
+                    if (null != callbackId) {
+                        callbackToJs(Integer.parseInt(callbackId), false, DataHelper.gson.toJsonTree(resultVO));
+                    } else {
+                        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_REGISTER + "){"
+                                + JSConst.CALLBACK_REGISTER + "('" + DataHelper.gson.toJson(resultVO) + "');}";
+                        evaluateRootWindowScript(js);
+                    }
                 }
             }
         }).start();
     }
-
 
     public void onNewMessage(String result){
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_NEW_MESSAGE + "){"
@@ -382,13 +428,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     public void onAckMessage(MessageVO messageVO){
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_ACK_MESSAGE + "){"
-                + JSConst.ON_ACK_MESSAGE + "('" + mGson.toJson(messageVO) + "');}";
+                + JSConst.ON_ACK_MESSAGE + "('" + DataHelper.gson.toJson(messageVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     public void onDeliveryMessage(MessageVO messageVO){
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_DELIVERY_MESSAGE + "){"
-                + JSConst.ON_DELIVERY_MESSAGE + "('" + mGson.toJson(messageVO) + "');}";
+                + JSConst.ON_DELIVERY_MESSAGE + "('" + DataHelper.gson.toJson(messageVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
@@ -402,7 +448,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         List<String> usernameList = new ArrayList<String>();
         usernameList.add(username);
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_ADDED + "){"
-                + JSConst.ON_CONTACT_ADDED + "('" + mGson.toJson(usernameList) + "');}";
+                + JSConst.ON_CONTACT_ADDED + "('" + DataHelper.gson.toJson(usernameList) + "');}";
         evaluateRootWindowScript(js);
     }
 
@@ -414,28 +460,28 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         List<String> usernameList = new ArrayList<String>();
         usernameList.add(username);
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_DELETED + "){"
-                + JSConst.ON_CONTACT_DELETED + "('" + mGson.toJson(usernameList) + "');}";
+                + JSConst.ON_CONTACT_DELETED + "('" + DataHelper.gson.toJson(usernameList) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onContactInvited(GroupOptVO optVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_INVITED + "){"
-                + JSConst.ON_CONTACT_INVITED + "('" + mGson.toJson(optVO) + "');}";
+                + JSConst.ON_CONTACT_INVITED + "('" + DataHelper.gson.toJson(optVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onContactAgreed(GroupOptVO optVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_AGREED + "){"
-                + JSConst.ON_CONTACT_AGREED + "('" + mGson.toJson(optVO) + "');}";
+                + JSConst.ON_CONTACT_AGREED + "('" + DataHelper.gson.toJson(optVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onContactRefused(GroupOptVO optVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CONTACT_REFUSED + "){"
-                + JSConst.ON_CONTACT_REFUSED + "('" + mGson.toJson(optVO) + "');}";
+                + JSConst.ON_CONTACT_REFUSED + "('" + DataHelper.gson.toJson(optVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
@@ -462,84 +508,84 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     @Override
     public void onInvitationAccpted(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_INVITATION_ACCPTED + "){"
-                + JSConst.ON_INVITATION_ACCPTED + "('" + mGson.toJson(groupOptVO) + "');}";
+                + JSConst.ON_INVITATION_ACCPTED + "('" + DataHelper.gson.toJson(groupOptVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onInvitationDeclined(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_INVITATION_DECLINED + "){"
-                + JSConst.ON_INVITATION_DECLINED + "('" + mGson.toJson(groupOptVO) + "');}";
+                + JSConst.ON_INVITATION_DECLINED + "('" + DataHelper.gson.toJson(groupOptVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onUserRemoved(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_USER_REMOVED + "){"
-                + JSConst.ON_USER_REMOVED + "('" + mGson.toJson(groupOptVO) + "');}";
+                + JSConst.ON_USER_REMOVED + "('" + DataHelper.gson.toJson(groupOptVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onGroupDestroy(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_GROUP_DESTROY + "){"
-                + JSConst.ON_GROUP_DESTROY + "('" + mGson.toJson(groupOptVO) + "');}";
+                + JSConst.ON_GROUP_DESTROY + "('" + DataHelper.gson.toJson(groupOptVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onApplicationReceived(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_APPLICATION_RECEIVED + "){"
-                + JSConst.ON_APPLICATION_RECEIVED + "('" + mGson.toJson(groupOptVO) + "');}";
+                + JSConst.ON_APPLICATION_RECEIVED + "('" + DataHelper.gson.toJson(groupOptVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onApplicationAccept(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_APPLICATION_ACCEPT + "){"
-                + JSConst.ON_APPLICATION_ACCEPT + "('" + mGson.toJson(groupOptVO) + "');}";
+                + JSConst.ON_APPLICATION_ACCEPT + "('" + DataHelper.gson.toJson(groupOptVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onInvitationReceived(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_INVITATION_RECEIVED + "){"
-                + JSConst.ON_INVITATION_RECEIVED + "('" + mGson.toJson(groupOptVO) + "');}";
+                + JSConst.ON_INVITATION_RECEIVED + "('" + DataHelper.gson.toJson(groupOptVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onApplicationDeclined(GroupOptVO groupOptVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_APPLICATION_DECLINED + "){"
-                + JSConst.ON_APPLICATION_DECLINED + "('" + mGson.toJson(groupOptVO) + "');}";
+                + JSConst.ON_APPLICATION_DECLINED + "('" + DataHelper.gson.toJson(groupOptVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onCallReceive(CallReceiveOutputVO outputVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CALLRECEIVE + "){"
-                + JSConst.ON_CALLRECEIVE + "('" + mGson.toJson(outputVO) + "');}";
+                + JSConst.ON_CALLRECEIVE + "('" + DataHelper.gson.toJson(outputVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onCallStateChanged(CallStateOutputVO outputVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CALLSTATECHANGED + "){"
-                + JSConst.ON_CALLSTATECHANGED + "('" + mGson.toJson(outputVO) + "');}";
+                + JSConst.ON_CALLSTATECHANGED + "('" + DataHelper.gson.toJson(outputVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onCmdMessageReceive(CmdMsgOutputVO outputVO) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CMDMESSAGERECEIVE + "){"
-                + JSConst.ON_CMDMESSAGERECEIVE + "('" + mGson.toJson(outputVO) + "');}";
+                + JSConst.ON_CMDMESSAGERECEIVE + "('" + DataHelper.gson.toJson(outputVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
     @Override
     public void onDidJoinedGroup(Map<String, String> data) {
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_CMDMESSAGERECEIVE + "){"
-                + JSConst.ON_DID_JOINED_GROUP + "('" + mGson.toJson(data) + "');}";
+                + JSConst.ON_DID_JOINED_GROUP + "('" + DataHelper.gson.toJson(data) + "');}";
         evaluateRootWindowScript(js);
     }
 
@@ -548,25 +594,23 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        MessageVO inputVO=mGson.fromJson(params[0],new TypeToken<MessageVO>(){}.getType());
+        MessageVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<MessageVO>(){}.getType());
         if (TextUtils.isEmpty(inputVO.getMsgId())){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GETMESSAGEBYID;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
-    }
-
-    public void getMessageByIdMsg(MessageVO messageVO){
-        EMMessage message=EMClient.getInstance().chatManager().getMessage(messageVO.getMsgId());
-        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETMESSAGEBYID + "){"
-                + JSConst.CALLBACK_GETMESSAGEBYID + "('" + mGson.toJson(ListenersRegister.convertEMMessage(message)) + "');}";
-        evaluateRootWindowScript(js);
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
+        }
+        EMMessage message=EMClient.getInstance().chatManager().getMessage(inputVO.getMsgId());
+        if (null != funcId) {
+            callbackToJs(Integer.parseInt(funcId), false, DataHelper.gson.toJsonTree(ListenersRegister.convertEMMessage(message)));
+        } else {
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETMESSAGEBYID + "){"
+                    + JSConst.CALLBACK_GETMESSAGEBYID + "('" + DataHelper.gson.toJson(ListenersRegister.convertEMMessage(message)) + "');}";
+            evaluateRootWindowScript(js);
+        }
     }
 
     public void getConversationByName(String[] params){
@@ -574,19 +618,39 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        MessageVO inputVO=mGson.fromJson(params[0], new TypeToken<MessageVO>() {
+        MessageVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<MessageVO>() {
         }.getType());
         if (TextUtils.isEmpty(inputVO.getUsername())){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GET_CONVERSATION_BY_NAME;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
+        }
+        EMConversation conversation= EMClient.getInstance().chatManager().getConversation(inputVO.getUsername());
+        ConversationResultVO resultVO= new ConversationResultVO();
+        if (conversation != null) {
+            resultVO.setIsGroup(conversation.isGroup() ? "1" : "0");
+            resultVO.setChatType(getChatTypeValue(conversation.getType()));
+            resultVO.setChatType(conversation.getType().toString());
+            resultVO.setChatter(conversation.getUserName());
+            List<EMMessage> emMessages=conversation.getAllMessages();
+            List<MsgResultVO> msgResultVOs=new ArrayList<MsgResultVO>();
+            if (emMessages!=null){
+                for (EMMessage emMessage : emMessages) {
+                    msgResultVOs.add(ListenersRegister.convertEMMessage(emMessage));
+                }
+            }
+            resultVO.setMessages(msgResultVOs);
+        }
+        if(null != funcId) {
+            callbackToJs(Integer.parseInt(funcId), false, DataHelper.gson.toJsonTree(resultVO));
+        } else {
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETCONVERSATIONBYNAME + "){"
+                    + JSConst.CALLBACK_GETCONVERSATIONBYNAME + "('" + DataHelper.gson.toJson(resultVO) + "');}";
+            evaluateRootWindowScript(js);
+        }
     }
 
     public static String getChatTypeValue(EMConversation.EMConversationType type){
@@ -613,34 +677,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         return chatType;
     }
 
-    public void getConversationByNameMSG(MessageVO messageVO){
-        EMConversation conversation= EMClient.getInstance().chatManager().getConversation(messageVO.getUsername());
-        ConversationResultVO resultVO= new ConversationResultVO();
-        if (conversation != null) {
-            resultVO.setIsGroup(conversation.isGroup() ? "1" : "0");
-            resultVO.setChatType(getChatTypeValue(conversation.getType()));
-            resultVO.setChatType(conversation.getType().toString());
-            resultVO.setChatter(conversation.getUserName());
-            List<EMMessage> emMessages=conversation.getAllMessages();
-            List<MsgResultVO> msgResultVOs=new ArrayList<MsgResultVO>();
-            if (emMessages!=null){
-                for (EMMessage emMessage : emMessages) {
-                    msgResultVOs.add(ListenersRegister.convertEMMessage(emMessage));
-                }
-            }
-            resultVO.setMessages(msgResultVOs);
-        }
-        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETCONVERSATIONBYNAME + "){"
-                + JSConst.CALLBACK_GETCONVERSATIONBYNAME + "('" + mGson.toJson(resultVO) + "');}";
-        evaluateRootWindowScript(js);
-    }
 
     public void sendText(String[] params){
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
             return;
         }
-        SendInputVO inputVO=mGson.fromJson(params[0], new TypeToken<SendInputVO>() {
+        SendInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<SendInputVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -705,7 +748,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        SendInputVO inputVO=mGson.fromJson(params[0], new TypeToken<SendInputVO>() {
+        SendInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<SendInputVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -811,7 +854,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        SendInputVO inputVO=mGson.fromJson(params[0], new TypeToken<SendInputVO>() {
+        SendInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<SendInputVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -873,7 +916,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        SendInputVO inputVO=mGson.fromJson(params[0], new TypeToken<SendInputVO>() {
+        SendInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<SendInputVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -933,7 +976,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        SendInputVO inputVO=mGson.fromJson(params[0], new TypeToken<SendInputVO>() {
+        SendInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<SendInputVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -996,7 +1039,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        SendInputVO inputVO=mGson.fromJson(params[0], new TypeToken<SendInputVO>() {
+        SendInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<SendInputVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -1098,22 +1141,17 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        HistoryInputVO inputVO=mGson.fromJson(params[0], new TypeToken<HistoryInputVO>() {
+        HistoryInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<HistoryInputVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GET_MESSAGE_HISTORY;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA, inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
-    }
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
+        }
 
-    private void getMessageHistoryMsg(HistoryInputVO inputVO) {
         EMConversation conversation = EMClient.getInstance().chatManager().getConversation(inputVO.getUsername());
         //获取此会话的所有消息
         List<EMMessage> messages = null;
@@ -1137,9 +1175,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         MessageHistoryVO historyVO=new MessageHistoryVO();
         historyVO.messages=resultVOs;
-        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "){"
-                + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "('" + mGson.toJson(historyVO) + "');}";
-        evaluateRootWindowScript(js);
+        if (null != funcId) {
+            callbackToJs(Integer.parseInt(funcId),false, DataHelper.gson.toJsonTree(historyVO));
+        } else {
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "){"
+                    + JSConst.CALLBACK_GET_MESSAGE_HISTORY + "('" + DataHelper.gson.toJson(historyVO) + "');}";
+            evaluateRootWindowScript(js);
+        }
     }
 
     public void getUnreadMsgCount(String[] params){
@@ -1147,22 +1189,16 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        HistoryInputVO inputVO=mGson.fromJson(params[0], new TypeToken<HistoryInputVO>() {
+        HistoryInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<HistoryInputVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GET_UNREAD_MSG_COUNT;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
-    }
-
-    private void getUnreadMsgCountMsg(HistoryInputVO inputVO) {
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
+        }
         EMConversation conversation = EMClient.getInstance().chatManager().getConversation(inputVO.getUsername());
         int result = 0;
         if (conversation != null ) {
@@ -1174,9 +1210,18 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } catch (JSONException e) {
 
         }
-        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_UNREAD_MSG_COUNT + "){"
-                + JSConst.CALLBACK_GET_UNREAD_MSG_COUNT + "('" + jsonResult.toString() + "');}";
-        evaluateRootWindowScript(js);
+        if (null != funcId) {
+            callbackToJs(Integer.parseInt(funcId), false, jsonResult);
+        } else {
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_UNREAD_MSG_COUNT + "){"
+                    + JSConst.CALLBACK_GET_UNREAD_MSG_COUNT + "('" + jsonResult.toString() + "');}";
+            evaluateRootWindowScript(js);
+        }
+
+    }
+
+    private void getUnreadMsgCountMsg(HistoryInputVO inputVO) {
+
     }
 
     public void resetUnreadMsgCount(String[] params){
@@ -1184,7 +1229,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        HistoryInputVO inputVO=mGson.fromJson(params[0], new TypeToken<HistoryInputVO>() {
+        HistoryInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<HistoryInputVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -1215,7 +1260,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        MessageVO inputVO=mGson.fromJson(params[0], new TypeToken<MessageVO>() {
+        MessageVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<MessageVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -1232,6 +1277,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private void sendHasReadResponseForMessageMsg(MessageVO messageVO){
         EMMessage emMessage=EMClient.getInstance().chatManager().getMessage(messageVO.getMsgId());
+        if (emMessage==null){
+            return;
+        }
         try {
             EMClient.getInstance().chatManager().ackMessageRead(emMessage.getFrom(),emMessage.getMsgId());
         } catch (HyphenateException e) {
@@ -1254,21 +1302,15 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        HistoryInputVO inputVO=mGson.fromJson(params[0],new TypeToken<HistoryInputVO>(){}.getType());
+        HistoryInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<HistoryInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GET_MSG_COUNT;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
-    }
-
-    private void getMsgCountMsg(HistoryInputVO inputVO) {
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
+        }
         EMConversation conversation = EMClient.getInstance().chatManager().getConversation(inputVO.getUsername());
         int msgCount=conversation.getAllMessages().size();
         JSONObject jsonResult=new JSONObject();
@@ -1277,9 +1319,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } catch (JSONException e) {
 
         }
-        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_MSG_COUNT+ "){"
-                + JSConst.CALLBACK_GET_MSG_COUNT + "('" + jsonResult.toString() + "');}";
-        evaluateRootWindowScript(js);
+        if (null != funcId) {
+            callbackToJs(Integer.parseInt(funcId), false, jsonResult);
+        } else {
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_MSG_COUNT + "){"
+                    + JSConst.CALLBACK_GET_MSG_COUNT + "('" + jsonResult.toString() + "');}";
+            evaluateRootWindowScript(js);
+        }
     }
 
     public void clearConversation(String[] params){
@@ -1287,7 +1333,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        HistoryInputVO inputVO=mGson.fromJson(params[0],new TypeToken<HistoryInputVO>(){}.getType());
+        HistoryInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<HistoryInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1314,7 +1360,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        HistoryInputVO inputVO=mGson.fromJson(params[0],new TypeToken<HistoryInputVO>(){}.getType());
+        HistoryInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<HistoryInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1338,7 +1384,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        HistoryInputVO inputVO=mGson.fromJson(params[0],new TypeToken<HistoryInputVO>(){}.getType());
+        HistoryInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<HistoryInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1355,7 +1401,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     private void removeMessageMsg(HistoryInputVO inputVO) {
         //删除当前会话的某条聊天记录
         EMConversation conversation = EMClient.getInstance().chatManager().getConversation(inputVO.getUsername());
-        conversation.removeMessage(inputVO.getMsgId());
+        if (conversation!=null) {
+            conversation.removeMessage(inputVO.getMsgId());
+        }
     }
 
     public void deleteAllConversation(String[] params){
@@ -1378,7 +1426,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        NotifySettingVO inputVO=mGson.fromJson(params[0], new TypeToken<NotifySettingVO>() {
+        NotifySettingVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<NotifySettingVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -1415,7 +1463,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         if (!TextUtils.isEmpty(settingVO.getShowNotificationInBackgroud())) {
             // 已不支持, 环信SDK将其放入了UI框架中
-            ListenersRegister.hxsdkHelper.hxModel.setSettingMsgNotification(!"0".equals(settingVO.getShowNotificationInBackgroud()));
             //chatOptions.setShowNotificationInBackgroud(!"0".equals(settingVO.getShowNotificationInBackgroud())); //默认为true
         }
         if (!TextUtils.isEmpty(settingVO.getAcceptInvitationAlways())) {
@@ -1424,13 +1471,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void getContactUserNames(String[] params){
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GET_CONTACT_USER_NAMES;
-        mHandler.sendMessage(msg);
-    }
-
-    private void getContactUserNamesMsg() {
+        String funcId = null;
+        if (null != params && params.length == 1) {
+            funcId = params[0];
+        }
         List<String> usernames = new ArrayList<String>();
         if (tempContacts!=null){
             usernames.addAll(tempContacts);
@@ -1446,17 +1490,22 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
         } catch (HyphenateException e) {
         }
-        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_CONTACT_USERNAMES+ "){"
-                + JSConst.CALLBACK_GET_CONTACT_USERNAMES + "('" + mGson.toJson(usernames) + "');}";
-        evaluateRootWindowScript(js);
+        if (null != funcId) {
+            callbackToJs(Integer.parseInt(funcId), false, DataHelper.gson.toJsonTree(usernames));
+        } else {
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_CONTACT_USERNAMES + "){"
+                    + JSConst.CALLBACK_GET_CONTACT_USERNAMES + "('" + DataHelper.gson.toJson(usernames) + "');}";
+            evaluateRootWindowScript(js);
+        }
     }
+
 
     public void addContact(String[] params){
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
             return;
         }
-        AddContactInputVO inputVO=mGson.fromJson(params[0],new TypeToken<AddContactInputVO>(){}.getType());
+        AddContactInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<AddContactInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1484,7 +1533,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        UserInputVO inputVO=mGson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
+        UserInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1515,7 +1564,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        UserInputVO inputVO=mGson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
+        UserInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1546,7 +1595,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        UserInputVO inputVO=mGson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
+        UserInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1569,18 +1618,19 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void getBlackListUsernames(String[] params){
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GET_BLACKLIST_USERNAMES;
-        mHandler.sendMessage(msg);
-    }
-
-    private void getBlackListUsernamesMsg() {
+        String funcId = null;
+        if (params != null && params.length == 1) {
+            funcId = params[0];
+        }
         //获取黑名单用户的usernames
         List<String> usernames=EMClient.getInstance().contactManager().getBlackListUsernames();
-        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_BLACKLIST_USERNAMES+ "){"
-                + JSConst.CALLBACK_GET_BLACKLIST_USERNAMES + "('" + mGson.toJson(usernames) + "');}";
-        evaluateRootWindowScript(js);
+        if (funcId != null) {
+            callbackToJs(Integer.parseInt(funcId), false, DataHelper.gson.toJsonTree(usernames));
+        } else {
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_BLACKLIST_USERNAMES + "){"
+                    + JSConst.CALLBACK_GET_BLACKLIST_USERNAMES + "('" + DataHelper.gson.toJson(usernames) + "');}";
+            evaluateRootWindowScript(js);
+        }
     }
 
     public void addUserToBlackList(String[] params){
@@ -1588,7 +1638,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        UserInputVO inputVO=mGson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
+        UserInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1617,7 +1667,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        UserInputVO inputVO=mGson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
+        UserInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1646,7 +1696,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        CreateGroupInputVO inputVO=mGson.fromJson(params[0],new TypeToken<CreateGroupInputVO>(){}.getType());
+        CreateGroupInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<CreateGroupInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1687,7 +1737,11 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 } else {
                     options.style = EMGroupManager.EMGroupStyle.EMGroupStylePrivateOnlyOwnerInvite;
                 }
-                EMGroup emGroup = EMClient.getInstance().groupManager().createGroup(inputVO.getGroupName(), inputVO.getDesc(), inputVO.getMembers(), null, options);
+                String[] members={};
+                if (inputVO.getMembers()!=null){
+                    members=inputVO.getMembers();
+                }
+                EMGroup emGroup = EMClient.getInstance().groupManager().createGroup(inputVO.getGroupName(), inputVO.getDesc(), members, null, options);
                 resultVO.setGroup(convertEMGroup2VO(emGroup));
                 resultVO.setIsSuccess(true);
             } catch (HyphenateException e) {
@@ -1696,7 +1750,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_GROUP_CREATED + "){"
-                + JSConst.ON_GROUP_CREATED + "('" + mGson.toJson(resultVO) + "');}";
+                + JSConst.ON_GROUP_CREATED + "('" + DataHelper.gson.toJson(resultVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
@@ -1705,7 +1759,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        CreateGroupInputVO inputVO=mGson.fromJson(params[0],new TypeToken<CreateGroupInputVO>(){}.getType());
+        CreateGroupInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<CreateGroupInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1736,7 +1790,11 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
         }else{
             try {
-                EMGroup emGroup = EMClient.getInstance().groupManager().createGroup(inputVO.getGroupName(), inputVO.getDesc(), inputVO.getMembers(), null, options);
+                String[] members={};
+                if (inputVO.getMembers()!=null){
+                    members=inputVO.getMembers();
+                }
+                EMGroup emGroup = EMClient.getInstance().groupManager().createGroup(inputVO.getGroupName(), inputVO.getDesc(), members, null, options);
                 resultVO.setIsSuccess(true);
                 resultVO.setGroup(convertEMGroup2VO(emGroup));
             } catch (HyphenateException e) {
@@ -1745,7 +1803,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
         }
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_GROUP_CREATED + "){"
-                + JSConst.ON_GROUP_CREATED + "('" + mGson.toJson(resultVO) + "');}";
+                + JSConst.ON_GROUP_CREATED + "('" + DataHelper.gson.toJson(resultVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
@@ -1754,7 +1812,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1788,7 +1846,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1816,7 +1874,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1830,23 +1888,16 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
-    private void joinGroupMsg(final GroupInfoVO inputVO) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (TextUtils.isEmpty(inputVO.getReason())) {
-                        EMClient.getInstance().groupManager().joinGroup(inputVO.getGroupId());//需异步处理
-                    }else{
-                        EMClient.getInstance().groupManager().applyJoinToGroup(inputVO.getGroupId(),inputVO.getReason());//需异步处理
-                    }
-                } catch (HyphenateException e) {
-                    if (BDebug.DEBUG){
-                        e.printStackTrace();
-                    }
-                }
+    private void joinGroupMsg(GroupInfoVO inputVO) {
+        try {
+            if (TextUtils.isEmpty(inputVO.getReason())) {
+                EMClient.getInstance().groupManager().joinGroup(inputVO.getGroupId());//需异步处理
+            }else{
+                EMClient.getInstance().groupManager().applyJoinToGroup(inputVO.getGroupId(),inputVO.getReason());//需异步处理
             }
-        }).start();
+        } catch (HyphenateException e) {
+
+        }
     }
 
     public void exitFromGroup(String[] params){
@@ -1854,7 +1905,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1881,7 +1932,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -1903,29 +1954,32 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
     }
 
-    public void getGroupsFromServer(String[] params){
+    public void getGroupsFromServer(final String[] params){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                getGroupsFromServerOnThread(params);
+            }
+        }).start();
+    }
+
+    public void getGroupsFromServerOnThread(String[] params){
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GETGROUPSFROMSERVER;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
-    }
-
-    private void getGroupsFromServerMsg(GroupInfoVO infoVO) {
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
+        }
         final GroupsOutputVO outputVO=new GroupsOutputVO();
         List<EMGroup> grouplist = null;
-        if (Boolean.valueOf(infoVO.getLoadCache())){
+        if (Boolean.valueOf(inputVO.getLoadCache())){
             grouplist = EMClient.getInstance().groupManager().getAllGroups();
             if (grouplist==null){
                 outputVO.setResult("1");
@@ -1939,38 +1993,36 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 }
                 outputVO.setGrouplist(groupResultVOList);
             }
-            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
-                    + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-            evaluateRootWindowScript(js);
+            if(null != funcId) {
+                callbackToJs(Integer.parseInt(funcId), false, DataHelper.gson.toJsonTree(outputVO));
+            } else {
+                String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
+                        + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + DataHelper.gson.toJson(outputVO) + "');}";
+                evaluateRootWindowScript(js);
+            }
             return;
         }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    List<EMGroup> groupList = EMClient.getInstance().groupManager().getJoinedGroupsFromServer();
-                    outputVO.setResult("0");
-                    List <GroupResultVO> groupResultVOList = new ArrayList<GroupResultVO>();
-                    for (EMGroup emGroup : groupList) {
-                        GroupResultVO vo = convertEMGroup2VO(emGroup);
-                        groupResultVOList.add(vo);
-                    }
-                    outputVO.setGrouplist(groupResultVOList);
-                    String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
-                            + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-                    evaluateRootWindowScript(js);
-                } catch (HyphenateException e) {
-                    if (BDebug.DEBUG){
-                        e.printStackTrace();
-                    }
-                    outputVO.setResult("1");
-                    outputVO.setErrorMsg(e.getMessage());
-                    String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
-                            + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-                    evaluateRootWindowScript(js);
-                }
+        try {
+            List<EMGroup> groupList = EMClient.getInstance().groupManager().getJoinedGroupsFromServer();
+            outputVO.setResult("0");
+            List <GroupResultVO> groupResultVOList = new ArrayList<GroupResultVO>();
+            for (EMGroup emGroup : groupList) {
+                GroupResultVO vo = convertEMGroup2VO(emGroup);
+                groupResultVOList.add(vo);
             }
-        }).start();
+            outputVO.setGrouplist(groupResultVOList);
+        } catch (HyphenateException e) {
+            outputVO.setResult("1");
+            outputVO.setErrorMsg(e.getMessage());
+        }
+
+        if (null != funcId) {
+            callbackToJs(Integer.parseInt(funcId), false, DataHelper.gson.toJsonTree(outputVO));
+        } else {
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUPSFROMSERVER + "){"
+                    + JSConst.CALLBACK_GETGROUPSFROMSERVER + "('" + DataHelper.gson.toJson(outputVO) + "');}";
+            evaluateRootWindowScript(js);
+        }
     }
 
     public void getAllPublicGroupsFromServer(String[] params){
@@ -1978,21 +2030,16 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        PageVO inputVO=mGson.fromJson(params[0],PageVO.class);
+        final PageVO inputVO=DataHelper.gson.fromJson(params[0],PageVO.class);
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GETALLPUBLICGROUPSFROMSERVER;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
-    }
-
-    private void getAllPublicGroupsFromServerMsg(final PageVO pageVO) {
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
+        }
+        final String callbackId = funcId;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -2000,10 +2047,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 try {
                     String cursor = null;
                     if(!TextUtils.isEmpty(cursor)){
-                        cursor = pageVO.getCursor();
+                        cursor = inputVO.getCursor();
                     }
                     final EMCursorResult<EMGroupInfo> result= EMClient.getInstance().groupManager()
-                            .getPublicGroupsFromServer(Integer.parseInt(pageVO.getPageSize())
+                            .getPublicGroupsFromServer(Integer.parseInt(inputVO.getPageSize())
                                     , cursor);
                     outputVO.setCursor(result.getCursor());
                     outputVO.setGrouplist(result.getData());
@@ -2011,9 +2058,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 } catch (HyphenateException e) {
                     outputVO.setResult("1");
                 }finally {
-                    String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "){"
-                            + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "('" + mGson.toJson(outputVO) + "');}";
-                    evaluateRootWindowScript(js);
+                    if (null != callbackId) {
+                        callbackToJs(Integer.parseInt(callbackId), false, DataHelper.gson.toJsonTree(outputVO));
+                    } else {
+                        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "){"
+                                + JSConst.CALLBACK_GETALLPUBLICGROUPSFROMSERVER + "('" + DataHelper.gson.toJson(outputVO) + "');}";
+                        evaluateRootWindowScript(js);
+                    }
                 }
             }
         }).start();
@@ -2024,45 +2075,35 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GETGROUP;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
-    }
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
+        }
 
-    private void getGroupMsg(final GroupInfoVO infoVO) {
-        if (Boolean.valueOf(infoVO.getLoadCache())){
-            EMGroup group = EMClient.getInstance().groupManager().getGroup(infoVO.getGroupId());
-            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
-                    + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(convertEMGroup2VO(group)) + "');}";
-            evaluateRootWindowScript(js);
+        EMGroup group = null;
+        if (Boolean.valueOf(inputVO.getLoadCache())){
+            group = EMClient.getInstance().groupManager().getGroup(inputVO.getGroupId());
         }else{
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            EMGroup group = EMClient.getInstance().groupManager().getGroupFromServer(infoVO.getGroupId());
-                            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
-                                    + JSConst.CALLBACK_GETGROUP + "('" + mGson.toJson(convertEMGroup2VO(group)) + "');}";
-                            evaluateRootWindowScript(js);
-                        } catch (HyphenateException e) {
-                            if (BDebug.DEBUG){
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }).start();
+            try {
+                group =EMClient.getInstance().groupManager().getGroupFromServer(inputVO.getGroupId());
+            } catch (HyphenateException e) {
 
+            }
+        }
+        if (null != funcId) {
+            callbackToJs(Integer.parseInt(funcId), false, DataHelper.gson.toJsonTree(convertEMGroup2VO(group)));
+        } else {
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETGROUP + "){"
+                    + JSConst.CALLBACK_GETGROUP + "('" + DataHelper.gson.toJson(convertEMGroup2VO(group)) + "');}";
+            evaluateRootWindowScript(js);
         }
     }
+
 
     public static GroupResultVO convertEMGroup2VO(EMGroup group){
         GroupResultVO resultVO=new GroupResultVO();
@@ -2087,7 +2128,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -2119,7 +2160,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -2147,7 +2188,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -2177,7 +2218,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -2201,7 +2242,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -2228,7 +2269,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        GroupInfoVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -2255,30 +2296,41 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        GroupInfoVO inputVO=mGson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
+        final GroupInfoVO inputVO = DataHelper.gson.fromJson(params[0],new TypeToken<GroupInfoVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
         }
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GETBLOCKEDUSERS;
-        Bundle bd = new Bundle();
-        bd.putSerializable(BUNDLE_DATA,inputVO);
-        msg.setData(bd);
-        mHandler.sendMessage(msg);
-    }
-
-    private void getBlockedUsersMsg(GroupInfoVO infoVO) {
-        try {
-            List<String> ususernames=EMClient.getInstance().groupManager().getBlockedUsers(infoVO.getGroupId());
-            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETBLOCKEDUSERS + "){"
-                    + JSConst.CALLBACK_GETBLOCKEDUSERS + "('" + mGson.toJson(ususernames) + "');}";
-            evaluateRootWindowScript(js);
-        } catch (HyphenateException e) {
-
+        String funcId = null;
+        if (params.length == 2) {
+            funcId = params[1];
         }
+        final String callbackId = funcId;
+        new Thread(new Runnable() {
 
+            public void run() {
+                try {
+                    final List<String> usernames = EMClient.getInstance().groupManager().getBlockedUsers(inputVO.getGroupId());
+                    ((Activity)mContext).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (callbackId != null) {
+                                callbackToJs(Integer.parseInt(callbackId), false, DataHelper.gson.toJsonTree(usernames));
+                            } else {
+                                String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GETBLOCKEDUSERS + "){"
+                                        + JSConst.CALLBACK_GETBLOCKEDUSERS + "('" + DataHelper.gson.toJson(usernames) + "');}";
+                                evaluateRootWindowScript(js);
+                            }
+                            System.out.println(new Gson().toJson(usernames));
+                        }
+                    });
+                } catch (HyphenateException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     public void importMessage(String[] params){
@@ -2286,7 +2338,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        ImportMsgInputVO inputVO=mGson.fromJson(params[0],new TypeToken<ImportMsgInputVO>(){}.getType());
+        ImportMsgInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<ImportMsgInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -2332,7 +2384,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        UserInputVO inputVO=mGson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
+        UserInputVO inputVO=DataHelper.gson.fromJson(params[0],new TypeToken<UserInputVO>(){}.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
             return;
@@ -2403,7 +2455,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        CmdMsgInputVO inputVO=mGson.fromJson(params[0], new TypeToken<CmdMsgInputVO>() {
+        CmdMsgInputVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<CmdMsgInputVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -2453,7 +2505,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             errorCallback(0, 0, "error params!");
             return;
         }
-        NicknameVO inputVO=mGson.fromJson(params[0], new TypeToken<NicknameVO>() {
+        NicknameVO inputVO=DataHelper.gson.fromJson(params[0], new TypeToken<NicknameVO>() {
         }.getType());
         if (inputVO==null){
             errorCallback(0, 0, "error params!");
@@ -2468,36 +2520,41 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
-    private void updateCurrentUserNickMsg(NicknameVO infoVO) {
-        EMClient.getInstance().updateCurrentUserNick(infoVO.getNickname());
+    private void updateCurrentUserNickMsg(final NicknameVO infoVO) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                EMClient.getInstance().updateCurrentUserNick(infoVO.getNickname());
+            }
+        }).start();
     }
 
     public void getChatterInfo(String[] params){
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GET_CHATTER_INFO;
-        mHandler.sendMessage(msg);
-    }
-
-    public void getChatterInfoMsg(){
+        String funcId = null;
+        if (null != params && params.length == 1) {
+            funcId = params[0];
+        }
         List<String> usernames = new ArrayList<String>();
         if (tempContacts!=null){
             usernames.addAll(tempContacts);
         }
+        final String callbackId = funcId;
+        final List<String> usernameList = usernames;
+
         try {
             List<String> tempList = EMClient.getInstance().contactManager().getAllContactsFromServer();
             if (tempList!=null){
                 for (String username:tempList) {
-                    if (!usernames.contains(username)) {
-                        usernames.add(username);
+                    if (!usernameList.contains(username)) {
+                        usernameList.add(username);
                     }
                 }
             }
         } catch (HyphenateException e) {
         }
         final List<ChatterInfoVO> chatterInfoVOs=new ArrayList<ChatterInfoVO>();
-        if (usernames.size() > 0){
-            for (String username:usernames){
+        if (usernameList.size() > 0){
+            for (String username:usernameList){
                 ChatterInfoVO infoVO=new ChatterInfoVO();
                 EMConversation conversation = EMClient.getInstance().chatManager().getConversation(username);
                 infoVO.setChatter(username);
@@ -2529,26 +2586,24 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 infoVO.setChatter(emGroup.getGroupId());
                 chatterInfoVOs.add(infoVO);
             }
-            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_CHATTER_INFO + "){"
-                    + JSConst.CALLBACK_GET_CHATTER_INFO + "('" + mGson.toJson(chatterInfoVOs) + "');}";
-            evaluateRootWindowScript(js);
 
         } catch (HyphenateException e) {
+        }
+        if (null != callbackId) {
+            callbackToJs(Integer.parseInt(callbackId), false, DataHelper.gson.toJsonTree(chatterInfoVOs));
+        } else {
             String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_CHATTER_INFO + "){"
-                    + JSConst.CALLBACK_GET_CHATTER_INFO + "('" + mGson.toJson(chatterInfoVOs) + "');}";
+                    + JSConst.CALLBACK_GET_CHATTER_INFO + "('" + DataHelper.gson.toJson(chatterInfoVOs) + "');}";
             evaluateRootWindowScript(js);
         }
     }
 
 
     public void getRecentChatters(String[] params){
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GET_RECENT_CHATTERS;
-        mHandler.sendMessage(msg);
-    }
-
-    public void getRecentChattersMsg(){
+        String funcId = null;
+        if (null != params && params.length == 1) {
+            funcId = params[0];
+        }
         List<EMConversation> conversations=HXHelper.loadConversationsWithRecentChat();
         List<ChatterInfoVO> chatterInfoVOs=new ArrayList<ChatterInfoVO>();
         if (conversations!=null){
@@ -2570,21 +2625,23 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 }
                 infoVO.setUnreadMsgCount(String.valueOf(conversation.getUnreadMsgCount()));
                 chatterInfoVOs.add(infoVO);
-             }
-            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_RECENT_CHATTERS + "){"
-                    + JSConst.CALLBACK_GET_RECENT_CHATTERS + "('" + mGson.toJson(chatterInfoVOs) + "');}";
-            evaluateRootWindowScript(js);
+            }
+            if (null != funcId) {
+                callbackToJs(Integer.parseInt(funcId), false, DataHelper.gson.toJsonTree(chatterInfoVOs));
+            } else {
+                String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_RECENT_CHATTERS + "){"
+                        + JSConst.CALLBACK_GET_RECENT_CHATTERS + "('" + DataHelper.gson.toJson(chatterInfoVOs) + "');}";
+                evaluateRootWindowScript(js);
+            }
         }
     }
 
-    public void getTotalUnreadMsgCount(String[] params){
-        Message msg = new Message();
-        msg.obj = this;
-        msg.what = MSG_GET_TOTAL_UNREAD_MSG_COUNT;
-        mHandler.sendMessage(msg);
-    }
 
-    public void getTotalUnreadMsgCountMsg(){
+    public void getTotalUnreadMsgCount(String[] params){
+        String funcId = null;
+        if (null != params && params.length == 1) {
+            funcId = params[0];
+        }
         int unreadMsgCountTotal = 0;
         int chatroomUnreadMsgCount = 0;
         unreadMsgCountTotal = EMClient.getInstance().chatManager().getUnreadMsgsCount();
@@ -2596,11 +2653,16 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
         }
         int totalCount=unreadMsgCountTotal - chatroomUnreadMsgCount;
-        HashMap<String,String> params=new HashMap<String, String>();
-        params.put("count", String.valueOf(totalCount));
-        String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_TOTAL_UNREAD_MSG_COUNT + "){"
-                + JSConst.CALLBACK_GET_TOTAL_UNREAD_MSG_COUNT + "('" + mGson.toJson(params) + "');}";
-        evaluateRootWindowScript(js);
+
+        HashMap<String,String> resulMap = new HashMap<String, String>();
+        resulMap.put("count", String.valueOf(totalCount));
+        if (funcId != null) {
+            callbackToJs(Integer.parseInt(funcId), false, DataHelper.gson.toJsonTree(resulMap));
+        } else {
+            String js = SCRIPT_HEADER + "if(" + JSConst.CALLBACK_GET_TOTAL_UNREAD_MSG_COUNT + "){"
+                    + JSConst.CALLBACK_GET_TOTAL_UNREAD_MSG_COUNT + "('" + DataHelper.gson.toJson(resulMap) + "');}";
+            evaluateRootWindowScript(js);
+        }
     }
 
     /**
@@ -2609,7 +2671,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      */
     public void acceptJoinApplication(String params[]) {
         if (params.length < 0) {
-            Log.i(TAG, "acceptJoinApplication: invalid params");
+            BDebug.i(TAG, "acceptJoinApplication: invalid params");
             return;
         }
         try {
@@ -2617,14 +2679,14 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             String groupId = jsonObject.optString("groupId","");
             String username = jsonObject.optString("username", "");
             if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
-                Log.i(TAG, "acceptJoinApplication: invalid params");
+                BDebug.i(TAG, "acceptJoinApplication: invalid params");
                 return;
             }
             EMClient.getInstance().groupManager().acceptApplication(username, groupId);
         } catch (JSONException e) {
-            Log.i(TAG, "[acceptJoinApplication]" + e.getMessage());
+            BDebug.i(TAG, "[acceptJoinApplication]" + e.getMessage());
         } catch (HyphenateException e) {
-            Log.i(TAG, "[acceptJoinApplication]" + e.getMessage());
+            BDebug.i(TAG, "[acceptJoinApplication]" + e.getMessage());
         }
     }
 
@@ -2634,7 +2696,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      */
     public void declineJoinApplication(String params[]) {
         if (params.length < 0) {
-            Log.i(TAG, "acceptJoinApplication: invalid params");
+            BDebug.i(TAG, "acceptJoinApplication: invalid params");
             return;
         }
         try {
@@ -2643,14 +2705,14 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             String username = jsonObject.optString("username", "");
             String reason = jsonObject.optString("reason", "");
             if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
-                Log.i(TAG, "declineJoinApplication: invalid params");
+                BDebug.i(TAG, "declineJoinApplication: invalid params");
                 return;
             }
             EMClient.getInstance().groupManager().declineApplication(username, groupId, reason);
         } catch (JSONException e) {
-            Log.i(TAG, "[declineJoinApplication]" + e.getMessage());
+            BDebug.i(TAG, "[declineJoinApplication]" + e.getMessage());
         } catch (HyphenateException e) {
-            Log.i(TAG, "[declineJoinApplication]" + e.getMessage());
+            BDebug.i(TAG, "[declineJoinApplication]" + e.getMessage());
         }
     }
 
@@ -2660,7 +2722,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      */
     public void acceptInvitationFromGroup(String params[]) {
         if (params.length < 0) {
-            Log.i(TAG, "acceptJoinApplication: invalid params");
+            BDebug.i(TAG, "acceptJoinApplication: invalid params");
             return;
         }
         try {
@@ -2668,14 +2730,14 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             String groupId = jsonObject.optString("groupId","");
             String username = jsonObject.optString("username", ""); //inviter
             if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
-                Log.i(TAG, "acceptInvitationFromGroup: invalid params");
+                BDebug.i(TAG, "acceptInvitationFromGroup: invalid params");
                 return;
             }
             EMClient.getInstance().groupManager().acceptInvitation(groupId, username);
         } catch (JSONException e) {
-            Log.i(TAG, "[acceptInvitationFromGroup]" + e.getMessage());
+            BDebug.i(TAG, "[acceptInvitationFromGroup]" + e.getMessage());
         } catch (HyphenateException e) {
-            Log.i(TAG, "[acceptInvitationFromGroup]" + e.getMessage());
+            BDebug.i(TAG, "[acceptInvitationFromGroup]" + e.getMessage());
         }
     }
 
@@ -2685,7 +2747,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      */
     public void declineInvitationFromGroup(String params[]) {
         if (params.length < 0) {
-            Log.i(TAG, "acceptJoinApplication: invalid params");
+            BDebug.i(TAG, "acceptJoinApplication: invalid params");
             return;
         }
         try {
@@ -2694,14 +2756,14 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             String username = jsonObject.optString("username", ""); //inviter
             String reason = jsonObject.optString("reason", "");
             if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
-                Log.i(TAG, "declineInvitationFromGroup: invalid params");
+                BDebug.i(TAG, "declineInvitationFromGroup: invalid params");
                 return;
             }
             EMClient.getInstance().groupManager().declineInvitation(groupId, username, reason);
         } catch (JSONException e) {
-            Log.i(TAG, "[declineInvitationFromGroup]" + e.getMessage());
+            BDebug.i(TAG, "[declineInvitationFromGroup]" + e.getMessage());
         } catch (HyphenateException e) {
-            Log.i(TAG, "[declineInvitationFromGroup]" + e.getMessage());
+            BDebug.i(TAG, "[declineInvitationFromGroup]" + e.getMessage());
         }
     }
 
@@ -2714,7 +2776,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         resultVO.setErrorStr(errorInfo);
         resultVO.setMessage(ListenersRegister.convertEMMessage(emMessage));
         String js = SCRIPT_HEADER + "if(" + JSConst.ON_MESSAGE_SENT + "){"
-                + JSConst.ON_MESSAGE_SENT + "('" + mGson.toJson(resultVO) + "');}";
+                + JSConst.ON_MESSAGE_SENT + "('" + DataHelper.gson.toJson(resultVO) + "');}";
         evaluateRootWindowScript(js);
     }
 
@@ -2723,18 +2785,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      *
      * @param script
      */
-    private void evaluateRootWindowScript(final String script) {
-        ((Activity)mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (debug){
-                    //如果是调试中心
-                    evaluateScript("appCanPlayerHome", 0, script);
-                }else{
-                    evaluateScript("root", 0, script);
+    private void evaluateRootWindowScript(String script) {
+            if (callbackBrowserViews!=null){
+                for (EBrowserView eBrowserView:callbackBrowserViews){
+                    eBrowserView.addUriTask(script);
                 }
             }
-        });
     }
 
     @Override
@@ -2744,21 +2800,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         Bundle bundle=message.getData();
         switch (message.what) {
-            case MSG_LOGIN:
-                loginMsg((UserInputVO)bundle.getSerializable(BUNDLE_DATA));
-                break;
-            case MSG_LOGOUT:
-                logoutMsg();
-                break;
-            case MSG_REGISTER_User:
-                registerUserMsg((UserInputVO) bundle.getSerializable(BUNDLE_DATA));
-                break;
-            case MSG_GETMESSAGEBYID:
-                getMessageByIdMsg((MessageVO) bundle.getSerializable(BUNDLE_DATA));
-                break;
-            case MSG_GET_CONVERSATION_BY_NAME:
-                getConversationByNameMSG((MessageVO) bundle.getSerializable(BUNDLE_DATA));
-                break;
             case MSG_SEND_TEXT:
                 sendTextMsg((SendInputVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
@@ -2774,9 +2815,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             case MSG_SEND_FILE:
                 sendFileMsg((SendInputVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
-            case MSG_GET_MESSAGE_HISTORY:
-                getMessageHistoryMsg((HistoryInputVO) bundle.getSerializable(BUNDLE_DATA));
-                break;
             case MSG_GET_UNREAD_MSG_COUNT:
                 getUnreadMsgCountMsg((HistoryInputVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
@@ -2785,9 +2823,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 break;
             case MSG_RESET_ALL_UNREAD_MSG_COUNT:
                 resetAllUnreadMsgCountMsg();
-                break;
-            case MSG_GET_MSG_COUNT:
-                getMsgCountMsg((HistoryInputVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
             case MSG_CLEAR_CONVERSATION:
                 clearConversationMsg((HistoryInputVO) bundle.getSerializable(BUNDLE_DATA));
@@ -2804,9 +2839,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             case MSG_SET_NOTIFY_BY_SOUND_AND_VIBRATE:
                 setNotifyBySoundAndVibrateMsg((NotifySettingVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
-            case MSG_GET_CONTACT_USER_NAMES:
-                getContactUserNamesMsg();
-                break;
             case MSG_ADD_CONTACT:
                 addContactMsg((AddContactInputVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
@@ -2818,9 +2850,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 break;
             case MSG_REFUSE_INVITATION:
                 refuseInvitationMsg((UserInputVO) bundle.getSerializable(BUNDLE_DATA));
-                break;
-            case MSG_GET_BLACKLIST_USERNAMES:
-                getBlackListUsernamesMsg();
                 break;
             case MSG_ADD_USER_TO_BLACKLIST:
                 addUserToBlackListMsg((UserInputVO) bundle.getSerializable(BUNDLE_DATA));
@@ -2849,15 +2878,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             case MSG_EXITANDDELETEGROUP:
                 exitAndDeleteGroupMsg((GroupInfoVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
-            case MSG_GETGROUPSFROMSERVER:
-                getGroupsFromServerMsg((GroupInfoVO) bundle.getSerializable(BUNDLE_DATA));
-                break;
-            case MSG_GETALLPUBLICGROUPSFROMSERVER:
-                getAllPublicGroupsFromServerMsg((PageVO) bundle.getSerializable(BUNDLE_DATA));
-                break;
-            case MSG_GETGROUP:
-                getGroupMsg((GroupInfoVO) bundle.getSerializable(BUNDLE_DATA));
-                break;
             case MSG_BLOCKGROUPMESSAGE:
                 blockGroupMessageMsg((GroupInfoVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
@@ -2875,9 +2895,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 break;
             case MSG_UNBLOCKUSER:
                 unblockUserMsg((GroupInfoVO) bundle.getSerializable(BUNDLE_DATA));
-                break;
-            case MSG_GETBLOCKEDUSERS:
-                getBlockedUsersMsg((GroupInfoVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
             case MSG_IMPORTMESSAGE:
                 importMessageMsg((ImportMsgInputVO) bundle.getSerializable(BUNDLE_DATA));
@@ -2900,9 +2917,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             case MSG_UPDATECURRENTUSERNICK:
                 updateCurrentUserNickMsg((NicknameVO) bundle.getSerializable(BUNDLE_DATA));
                 break;
-            case MSG_GET_CHATTER_INFO:
-                getChatterInfoMsg();
-                break;
             case MSG_INIT:
                 initEasemobMsg(bundle.getStringArray(BUNDLE_DATA));
                 break;
@@ -2911,12 +2925,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 break;
             case MSG_SEND_HAS_READ_RESPONSE_FOR_MESSAGE:
                 sendHasReadResponseForMessageMsg((MessageVO) bundle.getSerializable(BUNDLE_DATA));
-                break;
-            case MSG_GET_TOTAL_UNREAD_MSG_COUNT:
-                getTotalUnreadMsgCountMsg();
-                break;
-            case MSG_GET_RECENT_CHATTERS:
-                getRecentChattersMsg();
                 break;
             default:
                 super.onHandleMessage(message);
