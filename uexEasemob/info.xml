@@ -1,31 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
-    <plugin uexName="uexEasemob" version="4.0.0" build="26">
-        <info>26.4.0插件</info>
-        <build>25.修复获取群组信息时数据返回异常的问题</build>
-        <build>24.创建群组时，Android支持initialWelcomeMessage参数</build>
-        <build>23:升级环信官方SDK到3.1.2, 同时添加客服功能</build>
-        <build>22:init只执行一次</build>
-        <build>21:修改getRecentChatters</build>
-        <build>20:修复setNotifyBySoundAndVibrate无效的问题</build>
-        <build>19:纠正拼写错误</build>
-        <build>18:修改cbGetMessageHistory与文档不一致的问题</build>
-        <build>17:支持initEasemob配置key</build>
-        <build>16:修复退出再登陆，聊天记录只有一条的问题</build>
-        <build>15:去掉特殊字符</build>
-        <build>14:修复CMD消息json不能解析的问题</build>
-        <build>13:修复重新登陆后消息记录remoteUrl为空的问题</build>
-        <build>12:发送附件支持wgt,wgts协议</build>
-        <build>11:添加创建群回调onGroupCreated</build>
-        <build>10:添加getRecentChatters接口</build>
-        <build>9:支持离线消息</build>
-        <build>8:getGroup添加groupName,groupDescription字段</build>
-        <build>7:getChatterInfo增加返回新加好友的聊天记录</build>
-        <build>6:添加getTotalUnreadMsgCount接口</build>
-        <build>5:升级环信SDK</build>
-        <build>4:发送语音添加length参数</build>
-        <build>3:添加sendHasReadResponseForMessage等接口</build>
-        <build>2:添加getChatterInfo接口</build>
-        <build>0:环信插件</build>
+    <plugin uexName="uexEasemob" version="4.0.0" build="0">
+        <info>0.4.0插件</info>
     </plugin>
 </uexplugins>
