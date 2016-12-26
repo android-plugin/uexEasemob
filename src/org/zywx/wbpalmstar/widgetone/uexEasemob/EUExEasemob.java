@@ -357,11 +357,11 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 JSONObject jsonObject = new JSONObject();
                 if (result == 0) { //退出成功
                     jsonObject.put("result", 1);
-                    jsonObject.put("message", "logout success");
+                    jsonObject.put("msg", "logout success");
                     callbackToJs(Integer.parseInt(funcId), false, jsonObject);
                 } else {
                     jsonObject.put("result", 2);
-                    jsonObject.put("message", "logout fail");
+                    jsonObject.put("msg", "logout fail");
                     callbackToJs(Integer.parseInt(funcId), false, jsonObject);
                 }
             } catch (JSONException e ) {
