@@ -407,6 +407,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                     } else {
                         resultVO.setMsg("注册失败:" + e.getMessage());
                     }
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
                 }finally {
                     if (null != callbackId) {
                         callbackToJs(Integer.parseInt(callbackId), false, DataHelper.gson.toJsonTree(resultVO));
@@ -1283,6 +1286,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMClient.getInstance().chatManager().ackMessageRead(emMessage.getFrom(),emMessage.getMsgId());
         } catch (HyphenateException e) {
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1470,7 +1476,16 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
     }
 
-    public void getContactUserNames(String[] params){
+    public void getContactUserNames(final String[] params){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                getContactUserNamesOnThread(params);
+            }
+        }).start();
+    }
+
+    private void getContactUserNamesOnThread(String[] params){
         String funcId = null;
         if (null != params && params.length == 1) {
             funcId = params[0];
@@ -1489,6 +1504,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 }
             }
         } catch (HyphenateException e) {
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
         if (null != funcId) {
             callbackToJs(Integer.parseInt(funcId), false, DataHelper.gson.toJsonTree(usernames));
@@ -1519,13 +1537,20 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
-    private void addContactMsg(AddContactInputVO inputVO) {
-        //参数为要添加的好友的username和添加理由
-        try {
-            EMClient.getInstance().contactManager().addContact(inputVO.getToAddUsername(), inputVO.getReason());//需异步处理
-        } catch (HyphenateException e) {
-
-        }
+    private void addContactMsg(final AddContactInputVO inputVO) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //参数为要添加的好友的username和添加理由
+                try {
+                    EMClient.getInstance().contactManager().addContact(inputVO.getToAddUsername(), inputVO.getReason());//需异步处理
+                } catch (HyphenateException e) {
+                    if(BDebug.DEBUG){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     public void deleteContact(String[] params){
@@ -1547,12 +1572,20 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
-    private void deleteContactMsg(UserInputVO inputVO) {
-        try {
-            EMClient.getInstance().contactManager().deleteContact(inputVO.getUsername());//需异步处理
-        } catch (HyphenateException e) {
+    private void deleteContactMsg(final UserInputVO inputVO) {
 
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    EMClient.getInstance().contactManager().deleteContact(inputVO.getUsername());//需异步处理
+                } catch (HyphenateException e) {
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     /**
@@ -1581,8 +1614,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     private void acceptInvitationMsg(UserInputVO inputVO) {
         try {
             EMClient.getInstance().contactManager().acceptInvitation(inputVO.getUsername());//需异步处理
-             } catch (HyphenateException e) {
-
+        } catch (HyphenateException e) {
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1613,7 +1648,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMClient.getInstance().contactManager().declineInvitation(inputVO.getUsername());//需异步处理
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1658,7 +1695,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMClient.getInstance().contactManager().addUserToBlackList(inputVO.getUsername(),true);//需异步处理
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1687,7 +1726,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMClient.getInstance().contactManager().removeUserFromBlackList(inputVO.getUsername());//需异步处理
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1837,7 +1878,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 EMClient.getInstance().groupManager().inviteUser(inputVO.getGroupId(), inputVO.getNewmembers(), null);//需异步处理
             }
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1865,7 +1908,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             //把username从群聊里删除
             EMClient.getInstance().groupManager().removeUserFromGroup(inputVO.getGroupId(), inputVO.getUsername());//需异步处理
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1896,7 +1941,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 EMClient.getInstance().groupManager().applyJoinToGroup(inputVO.getGroupId(),inputVO.getReason());//需异步处理
             }
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1923,7 +1970,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMClient.getInstance().groupManager().leaveGroup(inputVO.getGroupId());
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1950,7 +1999,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMClient.getInstance().groupManager().destroyGroup(inputVO.getGroupId());
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -2014,6 +2065,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } catch (HyphenateException e) {
             outputVO.setResult("1");
             outputVO.setErrorMsg(e.getMessage());
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
 
         if (null != funcId) {
@@ -2057,6 +2111,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                     outputVO.setResult("0");
                 } catch (HyphenateException e) {
                     outputVO.setResult("1");
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
                 }finally {
                     if (null != callbackId) {
                         callbackToJs(Integer.parseInt(callbackId), false, DataHelper.gson.toJsonTree(outputVO));
@@ -2092,7 +2149,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             try {
                 group =EMClient.getInstance().groupManager().getGroupFromServer(inputVO.getGroupId());
             } catch (HyphenateException e) {
-
+                if (BDebug.DEBUG) {
+                    e.printStackTrace();
+                }
             }
         }
         if (null != funcId) {
@@ -2179,7 +2238,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMClient.getInstance().groupManager().unblockGroupMessage(infoVO.getGroupId());//需异步处理
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -2208,7 +2269,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMClient.getInstance().groupManager().changeGroupName(infoVO.getGroupId(), infoVO.getChangedGroupName());//需异步处理
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -2260,7 +2323,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMClient.getInstance().groupManager().blockUser(infoVO.getGroupId(), infoVO.getUsername());//需异步处理    }
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -2287,7 +2352,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         try {
             EMClient.getInstance().groupManager().unblockUser(infoVO.getGroupId(), infoVO.getUsername());
         } catch (HyphenateException e) {
-
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -2325,9 +2392,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                         }
                     });
                 } catch (HyphenateException e) {
-                    e.printStackTrace();
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }).start();
@@ -2551,6 +2622,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 }
             }
         } catch (HyphenateException e) {
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
         final List<ChatterInfoVO> chatterInfoVOs=new ArrayList<ChatterInfoVO>();
         if (usernameList.size() > 0){
@@ -2588,6 +2662,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
 
         } catch (HyphenateException e) {
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
         if (null != callbackId) {
             callbackToJs(Integer.parseInt(callbackId), false, DataHelper.gson.toJsonTree(chatterInfoVOs));
@@ -2684,9 +2761,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
             EMClient.getInstance().groupManager().acceptApplication(username, groupId);
         } catch (JSONException e) {
-            BDebug.i(TAG, "[acceptJoinApplication]" + e.getMessage());
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         } catch (HyphenateException e) {
-            BDebug.i(TAG, "[acceptJoinApplication]" + e.getMessage());
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -2710,9 +2791,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
             EMClient.getInstance().groupManager().declineApplication(username, groupId, reason);
         } catch (JSONException e) {
-            BDebug.i(TAG, "[declineJoinApplication]" + e.getMessage());
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         } catch (HyphenateException e) {
-            BDebug.i(TAG, "[declineJoinApplication]" + e.getMessage());
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -2735,9 +2820,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
             EMClient.getInstance().groupManager().acceptInvitation(groupId, username);
         } catch (JSONException e) {
-            BDebug.i(TAG, "[acceptInvitationFromGroup]" + e.getMessage());
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         } catch (HyphenateException e) {
-            BDebug.i(TAG, "[acceptInvitationFromGroup]" + e.getMessage());
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -2761,9 +2850,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
             EMClient.getInstance().groupManager().declineInvitation(groupId, username, reason);
         } catch (JSONException e) {
-            BDebug.i(TAG, "[declineInvitationFromGroup]" + e.getMessage());
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         } catch (HyphenateException e) {
-            BDebug.i(TAG, "[declineInvitationFromGroup]" + e.getMessage());
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 
