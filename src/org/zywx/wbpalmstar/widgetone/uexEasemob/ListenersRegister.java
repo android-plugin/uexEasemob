@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.text.TextUtils;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.hyphenate.EMConnectionListener;
@@ -28,7 +27,6 @@ import com.hyphenate.chat.EMVoiceMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.hyphenate.util.NetUtils;
 
-import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.engine.DataHelper;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.model.HXSDKModel;
 import org.zywx.wbpalmstar.widgetone.uexEasemob.vo.output.CallReceiveOutputVO;
@@ -331,9 +329,7 @@ public class ListenersRegister {
             JsonObject gsonObject = (JsonObject) jsonParser.parse(message.getJSONObjectAttribute("extObj").toString());
             resultVO.setExtObj(gsonObject);
         } catch (HyphenateException e) {
-            if (BDebug.DEBUG) {
-                e.printStackTrace();
-            }
+
         }
         return resultVO;
     }

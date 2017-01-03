@@ -82,6 +82,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by ylt on 15/3/13.
@@ -168,6 +170,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private static List<EBrowserView> callbackBrowserViews;//需要回调的EBrowserView
 
+    ExecutorService mExecutorService;
+
     public EUExEasemob(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
         if ("root".equals(eBrowserView.getWindowName())){
@@ -177,6 +181,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     @Override
     protected boolean clean() {
+        if (mExecutorService!=null){
+            mExecutorService.shutdownNow();
+            mExecutorService=null;
+        }
         return false;
     }
 
@@ -200,6 +208,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void initEasemob(String[] param){
+        initExecutorService();
         Message msg = new Message();
         msg.obj = this;
         msg.what = MSG_INIT;
@@ -211,7 +220,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     public void initEasemobMsg(String[] param){
         String funcId = null;
-        if(null != param && param.length == 2) {
+        if(null != param && param.length > 1) {
             funcId = param[1];
         }
         if (mHasInit){
@@ -288,7 +297,16 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         return processName;
     }
 
-    public void login(String[] params){
+    public void login(final String[] params){
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                loginOnThread(params);
+            }
+        });
+    }
+
+    private void loginOnThread(String[] params){
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
             return;
@@ -1080,7 +1098,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             message.setAttribute("ext", sendInputVO.getExt());
         }
         File videoFile = new File(getRealPath(sendInputVO.getFilePath()));
-        EMVideoMessageBody body = new EMVideoMessageBody(videoFile.getAbsolutePath(), getThumbPath(sendInputVO.getFilePath()),Integer.valueOf(sendInputVO.getLength()),videoFile.length());
+        EMVideoMessageBody body = new EMVideoMessageBody(videoFile.getAbsolutePath(), getThumbPath(sendInputVO
+                .getFilePath()),Double.valueOf(sendInputVO.getLength()).intValue(),videoFile.length());
         message.addBody(body);
         message.setMessageStatusCallback(new EMCallBack() {
             @Override
@@ -1159,14 +1178,14 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         //获取此会话的所有消息
         List<EMMessage> messages = null;
         if (conversation != null) {
-            if (String.valueOf("0").equals(inputVO.getPagesize()) || TextUtils.isEmpty(inputVO.getPagesize())) {
+            if (inputVO.pagesize==0) {
                 messages = conversation.getAllMessages();
             } else {
                 if ("1".equals(inputVO.getChatType())) {
                     //是群聊
-                    messages = conversation.loadMoreMsgFromDB(inputVO.getStartMsgId(), Integer.parseInt(inputVO.getPagesize()));
+                    messages = conversation.loadMoreMsgFromDB(inputVO.getStartMsgId(), inputVO.pagesize);
                 } else {
-                    messages = conversation.loadMoreMsgFromDB(inputVO.getStartMsgId(), Integer.parseInt(inputVO.getPagesize()));
+                    messages = conversation.loadMoreMsgFromDB(inputVO.getStartMsgId(), inputVO.pagesize);
                 }
             }
         }
@@ -1278,13 +1297,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
-    private void sendHasReadResponseForMessageMsg(MessageVO messageVO){
-        EMMessage emMessage=EMClient.getInstance().chatManager().getMessage(messageVO.getMsgId());
-        if (emMessage==null){
+    private void sendHasReadResponseForMessageMsg(final MessageVO messageVO){
+        EMMessage emMessage = EMClient.getInstance().chatManager().getMessage(messageVO.getMsgId());
+        if (emMessage == null) {
             return;
         }
         try {
-            EMClient.getInstance().chatManager().ackMessageRead(emMessage.getFrom(),emMessage.getMsgId());
+            EMClient.getInstance().chatManager().ackMessageRead(emMessage.getFrom(), emMessage.getMsgId());
         } catch (HyphenateException e) {
             if (BDebug.DEBUG) {
                 e.printStackTrace();
@@ -1477,12 +1496,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void getContactUserNames(final String[] params){
-        new Thread(new Runnable() {
+        mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
                 getContactUserNamesOnThread(params);
             }
-        }).start();
+        });
     }
 
     private void getContactUserNamesOnThread(String[] params){
@@ -1538,19 +1557,15 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     private void addContactMsg(final AddContactInputVO inputVO) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //参数为要添加的好友的username和添加理由
-                try {
-                    EMClient.getInstance().contactManager().addContact(inputVO.getToAddUsername(), inputVO.getReason());//需异步处理
-                } catch (HyphenateException e) {
-                    if(BDebug.DEBUG){
-                        e.printStackTrace();
-                    }
-                }
+
+        //参数为要添加的好友的username和添加理由
+        try {
+            EMClient.getInstance().contactManager().addContact(inputVO.getToAddUsername(), inputVO.getReason());//需异步处理
+        } catch (HyphenateException e) {
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
             }
-        }).start();
+        }
     }
 
     public void deleteContact(String[] params){
@@ -1573,19 +1588,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     private void deleteContactMsg(final UserInputVO inputVO) {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    EMClient.getInstance().contactManager().deleteContact(inputVO.getUsername());//需异步处理
-                } catch (HyphenateException e) {
-                    if (BDebug.DEBUG) {
-                        e.printStackTrace();
-                    }
-                }
+        try {
+            EMClient.getInstance().contactManager().deleteContact(inputVO.getUsername());//需异步处理
+        } catch (HyphenateException e) {
+            if (BDebug.DEBUG) {
+                e.printStackTrace();
             }
-        }).start();
+        }
     }
 
     /**
@@ -1611,7 +1620,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
-    private void acceptInvitationMsg(UserInputVO inputVO) {
+    private void acceptInvitationMsg(final UserInputVO inputVO) {
         try {
             EMClient.getInstance().contactManager().acceptInvitation(inputVO.getUsername());//需异步处理
         } catch (HyphenateException e) {
@@ -1644,7 +1653,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
-    private void refuseInvitationMsg(UserInputVO inputVO) {
+    private void refuseInvitationMsg(final UserInputVO inputVO) {
         try {
             EMClient.getInstance().contactManager().declineInvitation(inputVO.getUsername());//需异步处理
         } catch (HyphenateException e) {
@@ -1693,7 +1702,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         //第二个参数如果为true，则把用户加入到黑名单后双方发消息时对方都收不到；false,则
 //我能给黑名单的中用户发消息，但是对方发给我时我是收不到的
         try {
-            EMClient.getInstance().contactManager().addUserToBlackList(inputVO.getUsername(),true);//需异步处理
+            EMClient.getInstance().contactManager().addUserToBlackList(inputVO.getUsername(), true);//需异步处理
         } catch (HyphenateException e) {
             if (BDebug.DEBUG) {
                 e.printStackTrace();
@@ -1720,7 +1729,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
-    private void deleteUserFromBlackListMsg(UserInputVO inputVO) {
+    private void deleteUserFromBlackListMsg(final UserInputVO inputVO) {
         //第二个参数如果为true，则把用户加入到黑名单后双方发消息时对方都收不到；false,则
 //我能给黑名单的中用户发消息，但是对方发给我时我是收不到的
         try {
@@ -1730,6 +1739,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                 e.printStackTrace();
             }
         }
+
     }
 
     public void createPrivateGroup(String[] params){
@@ -1769,6 +1779,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             } catch (HyphenateException e) {
                 resultVO.setIsSuccess(false);
                 resultVO.setErrorStr(String.valueOf(e.getErrorCode()));
+                if (BDebug.DEBUG){
+                    e.printStackTrace();
+                }
             }
         } else {
             try {
@@ -2104,7 +2117,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
                         cursor = inputVO.getCursor();
                     }
                     final EMCursorResult<EMGroupInfo> result= EMClient.getInstance().groupManager()
-                            .getPublicGroupsFromServer(Integer.parseInt(inputVO.getPageSize())
+                            .getPublicGroupsFromServer(inputVO.pageSize
                                     , cursor);
                     outputVO.setCursor(result.getCursor());
                     outputVO.setGrouplist(result.getData());
@@ -2127,7 +2140,16 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }).start();
     }
 
-    public void getGroup(String[] params){
+    public void getGroup(final String[] params){
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                getGroupOnThread(params);
+            }
+        });
+    }
+
+    private void getGroupOnThread(String[] params){
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
             return;
@@ -2162,7 +2184,6 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             evaluateRootWindowScript(js);
         }
     }
-
 
     public static GroupResultVO convertEMGroup2VO(EMGroup group){
         GroupResultVO resultVO=new GroupResultVO();
@@ -2600,7 +2621,16 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }).start();
     }
 
-    public void getChatterInfo(String[] params){
+    public void getChatterInfo(final String[] params){
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                getChatterInfoOnThread(params);
+            }
+        });
+    }
+
+    private void getChatterInfoOnThread(String[] params){
         String funcId = null;
         if (null != params && params.length == 1) {
             funcId = params[0];
@@ -2746,118 +2776,136 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      * 接受申请者的入群申请
      * @param params
      */
-    public void acceptJoinApplication(String params[]) {
-        if (params.length < 0) {
-            BDebug.i(TAG, "acceptJoinApplication: invalid params");
-            return;
-        }
-        try {
-            JSONObject jsonObject = new JSONObject(params[0]);
-            String groupId = jsonObject.optString("groupId","");
-            String username = jsonObject.optString("username", "");
-            if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
-                BDebug.i(TAG, "acceptJoinApplication: invalid params");
-                return;
+    public void acceptJoinApplication(final String params[]) {
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject jsonObject = new JSONObject(params[0]);
+                    String groupId = jsonObject.optString("groupId","");
+                    String username = jsonObject.optString("username", "");
+                    if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
+                        BDebug.i(TAG, "acceptJoinApplication: invalid params");
+                        return;
+                    }
+                    EMClient.getInstance().groupManager().acceptApplication(username, groupId);
+                } catch (JSONException e) {
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
+                } catch (HyphenateException e) {
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
+                }
             }
-            EMClient.getInstance().groupManager().acceptApplication(username, groupId);
-        } catch (JSONException e) {
-            if (BDebug.DEBUG) {
-                e.printStackTrace();
-            }
-        } catch (HyphenateException e) {
-            if (BDebug.DEBUG) {
-                e.printStackTrace();
-            }
-        }
+        });
     }
 
     /**
      * 拒绝申请者的入群申请
      * @param params
      */
-    public void declineJoinApplication(String params[]) {
-        if (params.length < 0) {
-            BDebug.i(TAG, "acceptJoinApplication: invalid params");
-            return;
-        }
-        try {
-            JSONObject jsonObject = new JSONObject(params[0]);
-            String groupId = jsonObject.optString("groupId","");
-            String username = jsonObject.optString("username", "");
-            String reason = jsonObject.optString("reason", "");
-            if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
-                BDebug.i(TAG, "declineJoinApplication: invalid params");
-                return;
+    public void declineJoinApplication(final String params[]) {
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (params.length < 0) {
+                    BDebug.i(TAG, "acceptJoinApplication: invalid params");
+                    return;
+                }
+                try {
+                    JSONObject jsonObject = new JSONObject(params[0]);
+                    String groupId = jsonObject.optString("groupId","");
+                    String username = jsonObject.optString("username", "");
+                    String reason = jsonObject.optString("reason", "");
+                    if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
+                        BDebug.i(TAG, "declineJoinApplication: invalid params");
+                        return;
+                    }
+                    EMClient.getInstance().groupManager().declineApplication(username, groupId, reason);
+                } catch (JSONException e) {
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
+                } catch (HyphenateException e) {
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
+                }
             }
-            EMClient.getInstance().groupManager().declineApplication(username, groupId, reason);
-        } catch (JSONException e) {
-            if (BDebug.DEBUG) {
-                e.printStackTrace();
-            }
-        } catch (HyphenateException e) {
-            if (BDebug.DEBUG) {
-                e.printStackTrace();
-            }
-        }
+        });
+
     }
 
     /**
      * 接收入群邀请
      * @param params
      */
-    public void acceptInvitationFromGroup(String params[]) {
-        if (params.length < 0) {
-            BDebug.i(TAG, "acceptJoinApplication: invalid params");
-            return;
-        }
-        try {
-            JSONObject jsonObject = new JSONObject(params[0]);
-            String groupId = jsonObject.optString("groupId","");
-            String username = jsonObject.optString("username", ""); //inviter
-            if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
-                BDebug.i(TAG, "acceptInvitationFromGroup: invalid params");
-                return;
+    public void acceptInvitationFromGroup(final String params[]) {
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (params.length < 0) {
+                    BDebug.i(TAG, "acceptJoinApplication: invalid params");
+                    return;
+                }
+                try {
+                    JSONObject jsonObject = new JSONObject(params[0]);
+                    String groupId = jsonObject.optString("groupId","");
+                    String username = jsonObject.optString("username", ""); //inviter
+                    if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
+                        BDebug.i(TAG, "acceptInvitationFromGroup: invalid params");
+                        return;
+                    }
+                    EMClient.getInstance().groupManager().acceptInvitation(groupId, username);
+                } catch (JSONException e) {
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
+                } catch (HyphenateException e) {
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
+                }
             }
-            EMClient.getInstance().groupManager().acceptInvitation(groupId, username);
-        } catch (JSONException e) {
-            if (BDebug.DEBUG) {
-                e.printStackTrace();
-            }
-        } catch (HyphenateException e) {
-            if (BDebug.DEBUG) {
-                e.printStackTrace();
-            }
-        }
+        });
+
     }
 
     /**
      * 拒绝入群邀请
      * @param params
      */
-    public void declineInvitationFromGroup(String params[]) {
-        if (params.length < 0) {
-            BDebug.i(TAG, "acceptJoinApplication: invalid params");
-            return;
-        }
-        try {
-            JSONObject jsonObject = new JSONObject(params[0]);
-            String groupId = jsonObject.optString("groupId","");
-            String username = jsonObject.optString("username", ""); //inviter
-            String reason = jsonObject.optString("reason", "");
-            if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
-                BDebug.i(TAG, "declineInvitationFromGroup: invalid params");
-                return;
+    public void declineInvitationFromGroup(final String params[]) {
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (params.length < 0) {
+                    BDebug.i(TAG, "acceptJoinApplication: invalid params");
+                    return;
+                }
+                try {
+                    JSONObject jsonObject = new JSONObject(params[0]);
+                    String groupId = jsonObject.optString("groupId","");
+                    String username = jsonObject.optString("username", ""); //inviter
+                    String reason = jsonObject.optString("reason", "");
+                    if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(username)) {
+                        BDebug.i(TAG, "declineInvitationFromGroup: invalid params");
+                        return;
+                    }
+                    EMClient.getInstance().groupManager().declineInvitation(groupId, username, reason);
+                } catch (JSONException e) {
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
+                } catch (HyphenateException e) {
+                    if (BDebug.DEBUG) {
+                        e.printStackTrace();
+                    }
+                }
             }
-            EMClient.getInstance().groupManager().declineInvitation(groupId, username, reason);
-        } catch (JSONException e) {
-            if (BDebug.DEBUG) {
-                e.printStackTrace();
-            }
-        } catch (HyphenateException e) {
-            if (BDebug.DEBUG) {
-                e.printStackTrace();
-            }
-        }
+        });
     }
 
 
@@ -2886,8 +2934,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             }
     }
 
-    @Override
-    public void onHandleMessage(Message message) {
+    private void handleMessageOnThread(Message message){
         if(message == null){
             return;
         }
@@ -3022,6 +3069,28 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             default:
                 super.onHandleMessage(message);
         }
+    }
+
+
+    private void initExecutorService(){
+        if (mExecutorService==null){
+            mExecutorService=Executors.newSingleThreadExecutor();
+        }
+    }
+
+    @Override
+    public void onHandleMessage( Message message) {
+        final Message finalMessage=new Message();
+        finalMessage.copyFrom(message);
+        if (mExecutorService==null){
+            BDebug.sendUDPLog("环信插件没有调init接口");
+        }
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                handleMessageOnThread(finalMessage);
+            }
+        });
      }
 
 
