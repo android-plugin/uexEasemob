@@ -25,7 +25,6 @@ import android.os.Build;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 
-import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.util.EMLog;
 import com.hyphenate.util.EasyUtils;
@@ -124,10 +123,6 @@ public class HXNotifier {
      * @param message
      */
     public synchronized void onNewMsg(EMMessage message) {
-        if(EMClient.getInstance().chatManager().isSlientMessage(message)){
-            return;
-        }
-        
         // 判断app是否在后台
         if (!EasyUtils.isAppRunningForeground(appContext)) {
             HXSDKModel model = HXSDKHelper.getInstance().getModel();
@@ -144,9 +139,6 @@ public class HXNotifier {
     }
     
     public synchronized void onNewMesg(List<EMMessage> messages) {
-        if(EMClient.getInstance().chatManager().isSlientMessage(messages.get(messages.size()-1))){
-            return;
-        }
         // 判断app是否在后台
         if (!EasyUtils.isAppRunningForeground(appContext)) {
                 EMLog.d(TAG, "app is running in backgroud");
@@ -289,12 +281,7 @@ public class HXNotifier {
      * 手机震动和声音提示
      */
     public void viberateAndPlayTone(EMMessage message) {
-        if(message != null){
-            if(EMClient.getInstance().chatManager().isSlientMessage(message)){
-                return;
-            } 
-        }
-        
+
         HXSDKModel model = HXSDKHelper.getInstance().getModel();
         if(!model.getSettingMsgNotification()){
             return;

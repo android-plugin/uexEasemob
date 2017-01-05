@@ -80,7 +80,7 @@ public class ListenersRegister {
             }
 
             @Override
-            public void onMessageReadAckReceived(List<EMMessage> list) {
+            public void onMessageRead(List<EMMessage> list) {
                 for (EMMessage message : list) {
                     MessageVO messageVO = new MessageVO();
                     messageVO.setMsgId(message.getMsgId());
@@ -92,7 +92,7 @@ public class ListenersRegister {
             }
 
             @Override
-            public void onMessageDeliveryAckReceived(List<EMMessage> list) {
+            public void onMessageDelivered(List<EMMessage> list) {
                 for (EMMessage message : list) {
                     MessageVO messageVO = new MessageVO();
                     messageVO.setMsgId(message.getMsgId());
@@ -143,7 +143,7 @@ public class ListenersRegister {
                     case ACCEPTED: // 电话接通成功
                         outputVO.setState("3");
                         break;
-                    case DISCONNNECTED: // 电话断了
+                    case DISCONNECTED: // 电话断了
                         outputVO.setState("4");
                         break;
 
@@ -197,8 +197,49 @@ public class ListenersRegister {
         }
 
         @Override
-        public void onInvitationAccpted(String groupId, String inviter,
-                                        String reason) {
+        public void onRequestToJoinReceived(String groupId, String groupName,String applyer, String reason) {
+            // 用户申请加入群聊，收到加群申请
+            GroupOptVO groupOptVO=new GroupOptVO();
+            groupOptVO.setGroupId(groupId);
+            groupOptVO.setGroupName(groupName);
+            groupOptVO.setApplyer(applyer);
+            groupOptVO.setReason(reason);
+            callback.onApplicationReceived(groupOptVO);
+        }
+
+        @Override
+        public void onRequestToJoinAccepted(String groupId, String groupName,String accepter) {
+            // 加群申请被同意
+            EMMessage msg = EMMessage.createReceiveMessage(EMMessage.Type.TXT);
+            msg.setChatType(EMMessage.ChatType.GroupChat);
+            msg.setFrom(accepter);
+            msg.setTo(groupId);
+            msg.setMsgId(UUID.randomUUID().toString());
+            msg.addBody(new EMTextMessageBody(accepter + "同意了你的群聊申请"));
+            // 保存同意消息
+            EMClient.getInstance().chatManager().saveMessage(msg);
+            // 提醒新消息
+            //EMNotifier.getInstance(mContext).notifyOnNewMsg();
+            GroupOptVO groupOptVO=new GroupOptVO();
+            groupOptVO.setGroupId(groupId);
+            groupOptVO.setGroupName(groupName);
+            groupOptVO.setAccepter(accepter);
+            callback.onApplicationAccept(groupOptVO);
+        }
+
+        @Override
+        public void onRequestToJoinDeclined(String groupId, String groupName,String decliner, String reason) {
+            // 加群申请被拒绝
+            GroupOptVO groupOptVO=new GroupOptVO();
+            groupOptVO.setGroupId(groupId);
+            groupOptVO.setGroupName(groupName);
+            groupOptVO.setDecliner(decliner);
+            callback.onApplicationDeclined(groupOptVO);
+        }
+
+        @Override
+        public void onInvitationAccepted(String groupId, String inviter,
+                                         String reason) {
             //群聊邀请被接受
             GroupOptVO groupOptVO=new GroupOptVO();
             groupOptVO.setGroupId(groupId);
@@ -228,54 +269,13 @@ public class ListenersRegister {
         }
 
         @Override
-        public void onGroupDestroy(String groupId, String groupName) {
-            //群聊被创建者解散
+        public void onGroupDestroyed(String groupId, String groupName) {
+    //群聊被创建者解散
             // 提示用户群被解散
             GroupOptVO groupOptVO=new GroupOptVO();
             groupOptVO.setGroupId(groupId);
             groupOptVO.setGroupName(groupName);
             callback.onGroupDestroy(groupOptVO);
-        }
-
-        @Override
-        public void onApplicationReceived(String groupId, String groupName,String applyer, String reason) {
-            // 用户申请加入群聊，收到加群申请
-            GroupOptVO groupOptVO=new GroupOptVO();
-            groupOptVO.setGroupId(groupId);
-            groupOptVO.setGroupName(groupName);
-            groupOptVO.setApplyer(applyer);
-            groupOptVO.setReason(reason);
-            callback.onApplicationReceived(groupOptVO);
-        }
-
-        @Override
-        public void onApplicationAccept(String groupId, String groupName,String accepter) {
-            // 加群申请被同意
-            EMMessage msg = EMMessage.createReceiveMessage(EMMessage.Type.TXT);
-            msg.setChatType(EMMessage.ChatType.GroupChat);
-            msg.setFrom(accepter);
-            msg.setTo(groupId);
-            msg.setMsgId(UUID.randomUUID().toString());
-            msg.addBody(new EMTextMessageBody(accepter + "同意了你的群聊申请"));
-            // 保存同意消息
-            EMClient.getInstance().chatManager().saveMessage(msg);
-            // 提醒新消息
-            //EMNotifier.getInstance(mContext).notifyOnNewMsg();
-            GroupOptVO groupOptVO=new GroupOptVO();
-            groupOptVO.setGroupId(groupId);
-            groupOptVO.setGroupName(groupName);
-            groupOptVO.setAccepter(accepter);
-            callback.onApplicationAccept(groupOptVO);
-        }
-
-        @Override
-        public void onApplicationDeclined(String groupId, String groupName,String decliner, String reason) {
-            // 加群申请被拒绝
-            GroupOptVO groupOptVO=new GroupOptVO();
-            groupOptVO.setGroupId(groupId);
-            groupOptVO.setGroupName(groupName);
-            groupOptVO.setDecliner(decliner);
-            callback.onApplicationDeclined(groupOptVO);
         }
 
         @Override
@@ -461,7 +461,7 @@ public class ListenersRegister {
         }
 
         @Override
-        public void onContactAgreed(String username) {
+        public void onFriendRequestAccepted(String username) {
             //同意好友请求
             GroupOptVO optVO=new GroupOptVO();
             optVO.setUsername(username);
@@ -469,8 +469,8 @@ public class ListenersRegister {
         }
 
         @Override
-        public void onContactRefused(String username) {
-            // 拒绝好友请求
+        public void onFriendRequestDeclined(String username) {
+// 拒绝好友请求
             GroupOptVO optVO=new GroupOptVO();
             optVO.setUsername(username);
             callback.onContactRefused(optVO);

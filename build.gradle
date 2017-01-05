@@ -15,6 +15,7 @@ apply plugin: 'com.android.application'
 dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
     compile 'org.appcan:engine:+:systemRelease@aar'
+    compile files('libs/hyphenatechat_3.2.3.jar')
 }
 
 

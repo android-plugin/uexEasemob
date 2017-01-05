@@ -655,7 +655,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             resultVO.setIsGroup(conversation.isGroup() ? "1" : "0");
             resultVO.setChatType(getChatTypeValue(conversation.getType()));
             resultVO.setChatType(conversation.getType().toString());
-            resultVO.setChatter(conversation.getUserName());
+            resultVO.setChatter(inputVO.getUsername());
             List<EMMessage> emMessages=conversation.getAllMessages();
             List<MsgResultVO> msgResultVOs=new ArrayList<MsgResultVO>();
             if (emMessages!=null){
@@ -742,7 +742,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             message.setAttribute("ext", sendInputVO.getExt());
         }
         //设置接收人
-        message.setReceipt(sendInputVO.getUsername());
+        message.setTo(sendInputVO.getUsername());
         //把消息加入到此会话对象中
         //发送消息
         message.setMessageStatusCallback(new EMCallBack() {
@@ -806,7 +806,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }
-        message.setReceipt(sendInputVO.getUsername());
+        message.setTo(sendInputVO.getUsername());
         message.setMessageStatusCallback(new EMCallBack() {
             @Override
             public void onSuccess() {
@@ -912,7 +912,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }
-        message.setReceipt(sendInputVO.getUsername());
+        message.setTo(sendInputVO.getUsername());
         message.setMessageStatusCallback(new EMCallBack() {
             @Override
             public void onSuccess() {
@@ -972,7 +972,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }
-        message.setReceipt(sendInputVO.getUsername());
+        message.setTo(sendInputVO.getUsername());
         message.setMessageStatusCallback(new EMCallBack() {
             @Override
             public void onSuccess() {
@@ -1027,7 +1027,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         //设置接收人的username
-        message.setReceipt(sendInputVO.getUsername());
+        message.setTo(sendInputVO.getUsername());
         if (sendInputVO.getExtObj() != null) {
             message.setAttribute("extObj", sendInputVO.getExtObj());
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
@@ -1090,7 +1090,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         //设置接收人的username
-        message.setReceipt(sendInputVO.getUsername());
+        message.setTo(sendInputVO.getUsername());
         // add message body
         if (sendInputVO.getExtObj() != null) {
             message.setAttribute("extObj", (JSONObject)sendInputVO.getExtObj());
@@ -2571,7 +2571,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         String action=inputVO.getAction();//action可以自定义，在广播接收时可以收到
         EMCmdMessageBody cmdBody=new EMCmdMessageBody(action);
-        cmdMsg.setReceipt(inputVO.getToUsername());
+        cmdMsg.setTo(inputVO.getToUsername());
         cmdMsg.addBody(cmdBody);
         cmdMsg.setMessageStatusCallback(new EMCallBack() {
             @Override
@@ -2717,10 +2717,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             for (EMConversation conversation:conversations){
                 ChatterInfoVO infoVO=new ChatterInfoVO();
                 infoVO.setChatType(getChatTypeValue(conversation.getType()));
-                infoVO.setChatter(conversation.getUserName());
+                infoVO.setChatter(conversation.getLastMessage().getUserName());
                 infoVO.setIsGroup("0");
                 if (conversation.getType()== EMConversation.EMConversationType.GroupChat) {
-                    EMGroup emGroup=EMClient.getInstance().groupManager().getGroup(conversation.getUserName());
+                    EMGroup emGroup=EMClient.getInstance().groupManager().getGroup(conversation.getLastMessage().getUserName());
                     if (emGroup!=null) {
                         infoVO.setGroupName(emGroup.getGroupName());
                         infoVO.setChatter(emGroup.getGroupId());
