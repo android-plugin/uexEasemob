@@ -298,6 +298,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void login(final String[] params){
+        initExecutorService();
         mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -799,7 +800,8 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         //设置消息body
-        EMVoiceMessageBody body = new EMVoiceMessageBody(new File(getRealPath(sendInputVO.getFilePath())), Integer.valueOf(sendInputVO.getLength()));
+        EMVoiceMessageBody body = new EMVoiceMessageBody(new File(getRealPath(sendInputVO.getFilePath())),
+                sendInputVO.length);
         message.addBody(body);
         if (sendInputVO.getExtObj() != null) {
             message.setAttribute("extObj", sendInputVO.getExtObj());
@@ -1099,7 +1101,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         }
         File videoFile = new File(getRealPath(sendInputVO.getFilePath()));
         EMVideoMessageBody body = new EMVideoMessageBody(videoFile.getAbsolutePath(), getThumbPath(sendInputVO
-                .getFilePath()),Double.valueOf(sendInputVO.getLength()).intValue(),videoFile.length());
+                .getFilePath()),Double.valueOf(sendInputVO.length).intValue(),videoFile.length());
         message.addBody(body);
         message.setMessageStatusCallback(new EMCallBack() {
             @Override
@@ -1496,6 +1498,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void getContactUserNames(final String[] params){
+        initExecutorService();
         mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -2141,6 +2144,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void getGroup(final String[] params){
+        initExecutorService();
         mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -2622,6 +2626,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     }
 
     public void getChatterInfo(final String[] params){
+        initExecutorService();
         mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -2777,6 +2782,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      * @param params
      */
     public void acceptJoinApplication(final String params[]) {
+        initExecutorService();
         mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -2807,6 +2813,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      * @param params
      */
     public void declineJoinApplication(final String params[]) {
+        initExecutorService();
         mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -2843,6 +2850,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      * @param params
      */
     public void acceptInvitationFromGroup(final String params[]) {
+        initExecutorService();
         mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -2878,6 +2886,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
      * @param params
      */
     public void declineInvitationFromGroup(final String params[]) {
+        initExecutorService();
         mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -3082,9 +3091,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     public void onHandleMessage( Message message) {
         final Message finalMessage=new Message();
         finalMessage.copyFrom(message);
-        if (mExecutorService==null){
-            BDebug.sendUDPLog("环信插件没有调init接口");
-        }
+        initExecutorService();
         mExecutorService.execute(new Runnable() {
             @Override
             public void run() {

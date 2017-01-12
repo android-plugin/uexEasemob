@@ -18,7 +18,7 @@ public class SendInputVO implements Serializable {
     private String locationAddress;
     private String latitude;
     private String longitude;
-    private String length;
+    public int length;
     private String ext;
     private JSONObject extObj;
 
@@ -76,15 +76,6 @@ public class SendInputVO implements Serializable {
 
     public void setLongitude(String longitude) {
         this.longitude = longitude;
-    }
-
-
-    public String getLength() {
-        return length;
-    }
-
-    public void setLength(String length) {
-        this.length = length;
     }
 
     public String getExt() {
