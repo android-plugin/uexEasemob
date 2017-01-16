@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
-    <plugin uexName="uexEasemob" version="4.1.0" build="1">
-        <info>1.(依赖引擎4.1)更新SDK，修复若干bug</info>
+    <plugin uexName="uexEasemob" version="4.1.1" build="2">
+        <info>2.(依赖引擎4.1)修复跨页面调用接口出错的问题</info>
+        <build>1.(依赖引擎4.1)更新SDK，修复若干bug</build>
         <build>0.4.0插件</build>
     </plugin>
 </uexplugins>

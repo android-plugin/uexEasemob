@@ -172,10 +172,13 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     ExecutorService mExecutorService;
 
+    private static boolean isRootWindow=true;//引擎存在bug，不能获取root window的name，暂时这样处理
+
     public EUExEasemob(Context context, EBrowserView eBrowserView) {
         super(context, eBrowserView);
-        if ("root".equals(eBrowserView.getWindowName())){
+        if (isRootWindow){
             registerCallback(null);
+            isRootWindow=false;
         }
     }
 
