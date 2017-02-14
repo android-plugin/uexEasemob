@@ -20,4 +20,5 @@ public class InitVO implements Serializable {
 
     public String miPushAppKey;
 
+    public String huaweiPushAppId;
 }

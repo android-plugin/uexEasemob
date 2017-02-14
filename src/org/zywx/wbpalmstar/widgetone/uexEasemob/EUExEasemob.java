@@ -166,7 +166,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private static final String TEMP_PATH = "temp";
 
-    private boolean miPush=false;
+    private boolean mThirdPush =false;
 
     private static List<EBrowserView> callbackBrowserViews;//需要回调的EBrowserView
 
@@ -265,9 +265,12 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         options.setAppKey(appKey);
         if (!TextUtils.isEmpty(initVO.miPushAppId)) {
             options.setMipushConfig(initVO.miPushAppId, initVO.miPushAppKey);
-            miPush = true;
+            mThirdPush = true;
         }
-
+        if (!TextUtils.isEmpty(initVO.huaweiPushAppId)){
+            options.setHuaweiPushAppId(initVO.huaweiPushAppId);
+            mThirdPush =true;
+        }
         ListenersRegister register=new ListenersRegister();
         register.registerListeners(mContext.getApplicationContext(), options);
         register.setCallback(this);
@@ -367,7 +370,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
     public void logout(String[] params){
         int result = 0;
 
-        if (!miPush) {
+        if (!mThirdPush) {
             result=EMClient.getInstance().logout(false);
         } else {
             EMClient.getInstance().logout(true, null);
