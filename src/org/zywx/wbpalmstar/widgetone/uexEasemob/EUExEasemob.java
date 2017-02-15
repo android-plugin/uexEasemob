@@ -732,6 +732,31 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         mHandler.sendMessage(msg);
     }
 
+    /**
+     * 添加华为推送相关信息
+     * @param message
+     * @param sendInputVO
+     */
+    private void addHuaweiPushInfo(EMMessage message,SendInputVO sendInputVO){
+        //华为推送
+        if (sendInputVO.forceNotification) {
+            message.setAttribute("em_force_notification", true);
+        }
+        if (sendInputVO.ignoreNotification){
+            message.setAttribute("em_ignore_notification", true);
+        }
+        if (!TextUtils.isEmpty(sendInputVO.pushTitle)){
+            // 设置自定义扩展字段
+            try{
+                JSONObject extJson = new JSONObject();
+                extJson.put("em_push_title", sendInputVO.pushTitle);
+                message.setAttribute("em_apns_ext",extJson);
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void sendTextMsg(SendInputVO sendInputVO) {
         EMConversation conversation = EMClient.getInstance().chatManager().getConversation(sendInputVO.getUsername());
         //创建一条文本消息
@@ -748,6 +773,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }
+
+        addHuaweiPushInfo(message,sendInputVO);
+
         //设置接收人
         message.setTo(sendInputVO.getUsername());
         //把消息加入到此会话对象中
@@ -814,6 +842,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }
+
+        addHuaweiPushInfo(message,sendInputVO);
+
         message.setTo(sendInputVO.getUsername());
         message.setMessageStatusCallback(new EMCallBack() {
             @Override
@@ -920,6 +951,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }
+
+        addHuaweiPushInfo(message,sendInputVO);
+
+
         message.setTo(sendInputVO.getUsername());
         message.setMessageStatusCallback(new EMCallBack() {
             @Override
@@ -980,6 +1015,9 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }
+
+        addHuaweiPushInfo(message,sendInputVO);
+
         message.setTo(sendInputVO.getUsername());
         message.setMessageStatusCallback(new EMCallBack() {
             @Override
@@ -1041,6 +1079,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }
+
+        addHuaweiPushInfo(message,sendInputVO);
+
+
         // add message body
         EMNormalFileMessageBody body = new EMNormalFileMessageBody(new File(getRealPath(sendInputVO.getFilePath())));
         message.addBody(body);
@@ -1105,6 +1147,10 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         } else if (!TextUtils.isEmpty(sendInputVO.getExt())) {
             message.setAttribute("ext", sendInputVO.getExt());
         }
+
+        addHuaweiPushInfo(message,sendInputVO);
+
+
         File videoFile = new File(getRealPath(sendInputVO.getFilePath()));
         EMVideoMessageBody body = new EMVideoMessageBody(videoFile.getAbsolutePath(), getThumbPath(sendInputVO
                 .getFilePath()),Double.valueOf(sendInputVO.length).intValue(),videoFile.length());

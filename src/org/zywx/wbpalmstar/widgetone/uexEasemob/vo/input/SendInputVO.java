@@ -22,6 +22,12 @@ public class SendInputVO implements Serializable {
     private String ext;
     private JSONObject extObj;
 
+    public boolean ignoreNotification;
+
+    public boolean forceNotification;
+
+    public String pushTitle;
+
     public String getUsername() {
         return username;
     }
