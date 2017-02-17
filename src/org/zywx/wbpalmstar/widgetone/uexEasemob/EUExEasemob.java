@@ -166,7 +166,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private static final String TEMP_PATH = "temp";
 
-    private boolean mThirdPush =false;
+    private static boolean mThirdPush =false;
 
     private static List<EBrowserView> callbackBrowserViews;//需要回调的EBrowserView
 
