@@ -762,7 +762,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         //创建一条文本消息
         final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.TXT);
         //如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
+        if (sendInputVO.chatType==1) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         //设置消息body
@@ -830,7 +830,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         //创建一条文本消息
         final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VOICE);
         //如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
+        if (sendInputVO.chatType==1) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         //设置消息body
@@ -939,7 +939,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMConversation conversation = EMClient.getInstance().chatManager().getConversation(sendInputVO.getUsername());
         final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.IMAGE);
         //如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
+        if (sendInputVO.chatType==1) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         EMImageMessageBody body = new EMImageMessageBody(new File(getRealPath(sendInputVO.getFilePath())));
@@ -1005,7 +1005,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         EMConversation conversation = EMClient.getInstance().chatManager().getConversation(sendInputVO.getUsername());
         final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.LOCATION);
         //如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
+        if (sendInputVO.chatType==1) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         EMLocationMessageBody locBody = new EMLocationMessageBody(sendInputVO.getLocationAddress(), Double.valueOf(sendInputVO.getLatitude()), Double.valueOf(sendInputVO.getLongitude()));
@@ -1069,7 +1069,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         // 创建一个文件消息
         final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.FILE);
         // 如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
+        if (sendInputVO.chatType==1) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         //设置接收人的username
@@ -1136,7 +1136,7 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
         // 创建一个文件消息
         final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VIDEO);
         // 如果是群聊，设置chattype,默认是单聊
-        if (String.valueOf(1).equals(sendInputVO.getChatType())) {
+        if (sendInputVO.chatType==1) {
             message.setChatType(EMMessage.ChatType.GroupChat);
         }
         //设置接收人的username

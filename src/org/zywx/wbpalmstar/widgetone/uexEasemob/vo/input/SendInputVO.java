@@ -12,7 +12,7 @@ public class SendInputVO implements Serializable {
     private static final long serialVersionUID = -2513383976558730950L;
 
     private String username; //单聊时聊天人的userid或者群聊时groupid
-    private String chatType; //0-单聊，1-群聊，2-聊天室
+    public int chatType; //0-单聊，1-群聊，2-聊天室
     private String content;
     private String filePath;
     private String locationAddress;
@@ -34,14 +34,6 @@ public class SendInputVO implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getChatType() {
-        return chatType;
-    }
-
-    public void setChatType(String chatType) {
-        this.chatType = chatType;
     }
 
     public String getContent() {
