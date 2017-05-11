@@ -1884,7 +1884,11 @@ public class EUExEasemob extends EUExBase implements ListenersRegister.Listeners
 
     private void createPublicGroupMsg(CreateGroupInputVO inputVO) {
         EMGroupManager.EMGroupOptions options = new EMGroupManager.EMGroupOptions();
-        options.style = EMGroupManager.EMGroupStyle.EMGroupStylePublicJoinNeedApproval;
+        if(inputVO.getNeedApprovalRequired()){
+            options.style = EMGroupManager.EMGroupStyle.EMGroupStylePublicJoinNeedApproval;
+        }else{
+            options.style = EMGroupManager.EMGroupStyle.EMGroupStylePublicOpenJoin;
+        }
         GroupCreateResultVO resultVO = new GroupCreateResultVO();
         if (!TextUtils.isEmpty(inputVO.getMaxUsers())){
             //前一种方法创建的群聊默认最大群聊用户数为200，传入maxUsers后设置自定义的最大用户数，最大为2000

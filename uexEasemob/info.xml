@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
-    <plugin uexName="uexEasemob" version="4.1.5" build="5">
-        <info>5.(依赖引擎4.1)修复getRecentChatters</info>
+    <plugin uexName="uexEasemob" version="4.1.6" build="6">
+        <info>6.(依赖引擎4.1)修复创建公开群的问题</info>
+        <build>5.(依赖引擎4.1)修复getRecentChatters</build>
         <build>4.(依赖引擎4.1)兼容chatType传数字</build>
         <build>3.(依赖引擎4.1)支持华为推送</build>
         <build>2.(依赖引擎4.1)修复跨页面调用接口出错的问题</build>
